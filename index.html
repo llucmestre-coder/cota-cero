@@ -103,65 +103,16 @@
     <section class="plano seccio" aria-labelledby="plano-titol">
       <div class="wrap">
         <div class="plano-cap aparicio">
-          <h2 id="plano-titol">Así se dibuja tu reforma</h2>
-          <p class="intro">Elige la estancia y te contamos qué hacemos, cómo y en cuánto tiempo.</p>
+          <h2 id="plano-titol">Qué reformamos</h2>
+          <p class="intro">Cocina, baño o la casa entera: qué hacemos en cada caso y cuánto suele tardar.</p>
         </div>
         <div class="plano-in">
           <div class="plano-dibuix">
-            <svg class="plano-svg" viewBox="-40 -40 720 540" role="group" aria-label="Plano de una vivienda: cocina, baño y el resto de la casa">
-              <!-- Estances clicables (sota les parets) -->
-              <rect class="estancia" data-estancia="casa" x="20" y="20" width="600" height="420" tabindex="0" role="button" aria-label="Toda la casa"/>
-              <rect class="estancia" data-estancia="cocina" x="20" y="20" width="240" height="180" tabindex="0" role="button" aria-label="Cocina"/>
-              <rect class="estancia" data-estancia="bano" x="260" y="20" width="160" height="150" tabindex="0" role="button" aria-label="Baño"/>
-              <rect class="estancia-vora" data-estancia="casa" x="20" y="20" width="600" height="420"/>
-              <rect class="estancia-vora" data-estancia="cocina" x="20" y="20" width="240" height="180"/>
-              <rect class="estancia-vora" data-estancia="bano" x="260" y="20" width="160" height="150"/>
-
-              <!-- Parets exteriors -->
-              <path class="muro" d="M20 20 H620"/>
-              <path class="muro" d="M620 20 V440"/>
-              <path class="muro" d="M620 440 H20"/>
-              <path class="muro" d="M20 440 V20"/>
-              <!-- Envans -->
-              <path class="tabic" d="M260 20 V200"/>
-              <path class="tabic" d="M20 200 H140"/>
-              <path class="tabic" d="M260 170 H300 M345 170 H420"/>
-              <path class="tabic" d="M420 20 V120 M420 165 V290 M420 335 V440"/>
-              <path class="tabic" d="M420 240 H620"/>
-
-              <!-- Portes -->
-              <path class="porta" d="M300 170 A45 45 0 0 0 345 215"/>
-              <path class="porta" d="M420 120 A45 45 0 0 1 465 165"/>
-              <path class="porta" d="M420 290 A45 45 0 0 1 465 335"/>
-
-              <!-- Mobles -->
-              <path class="moble" d="M32 32 H248 V62 H62 V188 H32 Z"/>
-              <path class="moble" d="M120 110 H210 V150 H120 Z"/>
-              <path class="moble" d="M360 30 H410 V90 H360 Z M360 30 L410 90"/>
-              <path class="moble" d="M272 30 H322 V62 H272 Z"/>
-              <path class="moble" d="M285 125 a14 18 0 1 0 28 0 a14 18 0 1 0 -28 0"/>
-              <path class="moble" d="M60 370 H230 V420 H60 Z"/>
-              <path class="moble" d="M270 300 a45 45 0 1 0 90 0 a45 45 0 1 0 -90 0"/>
-              <path class="moble" d="M470 60 H590 V200 H470 Z M470 90 H590"/>
-              <path class="moble" d="M480 290 H580 V420 H480 Z M480 320 H580"/>
-
-              <!-- Cotes (en cm, sense separadors: valen igual als tres idiomes) -->
-              <path class="cota-l" d="M20 -14 H260 M20 -22 V-6 M260 -22 V-6"/>
-              <path class="cota-l" d="M260 -14 H420 M420 -22 V-6"/>
-              <path class="cota-l" d="M420 -14 H620 M620 -22 V-6"/>
-              <path class="cota-l" d="M-14 20 V440 M-22 20 H-6 M-22 440 H-6"/>
-              <text class="cota-t" x="126" y="-22">480</text>
-              <text class="cota-t" x="326" y="-22">320</text>
-              <text class="cota-t" x="506" y="-22">400</text>
-              <text class="cota-t" x="-26" y="236" transform="rotate(-90 -26 230)">840</text>
-
-              <!-- Noms -->
-              <text class="nom" x="150" y="96">Cocina</text>
-              <text class="nom" x="305" y="112">Baño</text>
-              <text class="nom" x="150" y="300">Salón</text>
-              <text class="nom" x="480" y="232">Dormitorio</text>
-              <text class="nom" x="480" y="276">Dormitorio</text>
-            </svg>
+            <div class="plano-fotos">
+              <img data-estancia="cocina" src="assets/img/gal-01.jpg" alt="Cocina reformada, blanca y de roble, abierta al comedor." width="1024" height="768" loading="lazy">
+              <img data-estancia="bano" src="assets/img/gal-06.jpg" alt="Baño reformado con suelo de terrazo y bañera exenta." width="768" height="1024" loading="lazy">
+              <img data-estancia="casa" src="assets/img/gal-03.jpg" alt="Salón de una vivienda reformada con parqué de roble." width="1024" height="768" loading="lazy">
+            </div>
           </div>
 
           <div class="plano-panells">
