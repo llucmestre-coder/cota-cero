@@ -69,37 +69,16 @@
   <main id="contingut">
 
     <!-- ═══ HERO ═══ -->
-    <section class="hero">
-      <div class="wrap hero-in">
-        <div>
-          <h1>Antes de tocar una pared, hacemos el plano</h1>
-          <p class="hero-sub">Precio cerrado, fecha firmada y un equipo que no cambia a mitad de obra.</p>
-          <div class="botons">
-            <a class="btn btn-principal" href="contacto.html">Pedir presupuesto</a>
-            <a class="btn btn-linia" href="tel:+34600000000">Llamar</a>
-          </div>
+    <section class="hero-foto" aria-labelledby="hero-titol">
+      <img class="hero-foto-img" src="assets/img/srv-integral.jpg" alt="" width="1280" height="720" fetchpriority="high">
+      <div class="wrap hero-foto-in">
+        <h1 id="hero-titol">Antes de tocar una pared, hacemos el plano</h1>
+        <p class="hero-sub">Precio cerrado, fecha firmada y un equipo que no cambia a mitad de obra.</p>
+        <div class="botons">
+          <a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a>
+          <a class="btn btn-linia" href="tel:+34600000000">Llamar</a>
         </div>
-        <!-- Racó d'una estança amb cota i el senyal de cota zero (la marca). -->
-        <svg class="hero-plano" viewBox="0 0 480 480" role="img" aria-label="Esquina de un plano de vivienda con sus medidas">
-          <path class="traza" d="M40 60 H440"/>
-          <path class="traza" d="M40 60 V440"/>
-          <path class="traza" d="M180 60 V250 H300"/>
-          <path class="traza" d="M360 250 H440"/>
-          <path class="traza-fina" d="M300 250 A60 60 0 0 1 360 310"/>
-          <path class="traza-fina" d="M300 250 V310"/>
-          <path class="traza-fina" d="M70 90 H150 V220 H70 Z"/>
-          <path class="traza-fina" d="M230 110 H400 V200 H230 Z M315 110 V200"/>
-          <path class="traza-fina" d="M40 20 H180 M40 12 V28 M180 12 V28"/>
-          <path class="traza-fina" d="M180 20 H440 M440 12 V28"/>
-          <text x="92" y="14">240</text>
-          <text x="292" y="14">420</text>
-          <path class="traza-fina" d="M470 60 V250 M462 60 H478 M462 250 H478"/>
-          <text x="440" y="160" transform="rotate(-90 452 155)">310</text>
-          <circle class="traza-fina" cx="250" cy="370" r="22"/>
-          <path class="punt" d="M250 348 A22 22 0 0 1 272 370 H250 Z M250 370 V392 A22 22 0 0 1 228 370 Z"/>
-          <path class="traza-fina" d="M210 370 H330"/>
-          <text x="282" y="362">±0</text>
-        </svg>
+        <p class="hero-nota">En 1 minuto y sin compromiso.</p>
       </div>
     </section>
 
@@ -210,7 +189,7 @@
     </section>
 
     <!-- ═══ POR QUÉ NOSOTROS: LA LLEGENDA ═══ -->
-    <section class="seccio" aria-labelledby="per-que-titol">
+    <section class="fosc-calid seccio" aria-labelledby="per-que-titol">
       <div class="wrap llegenda">
         <div class="llegenda-cap aparicio">
           <h2 id="per-que-titol">Lo que firmamos contigo</h2>
@@ -357,22 +336,37 @@
       </div>
     </section>
 
-    <!-- ═══ TESTIMONIOS (provisionals, per substituir per reals) ═══ -->
-    <section class="seccio" aria-labelledby="testimonis-titol" style="padding-top:0">
+    <!-- ═══ RESSENYES en format Google — D'EXEMPLE (ho diu l'etiqueta). Substituir per les reals del client (data/reviews.json). ═══ -->
+    <section class="ressenyes seccio" aria-labelledby="ressenyes-titol">
       <div class="wrap">
-        <h2 id="testimonis-titol" class="aparicio">Lo que cuentan después</h2>
-        <div class="testimonis">
-          <figure class="testimoni">
+        <div class="ressenyes-cap">
+          <div>
+            <h2 id="ressenyes-titol" class="aparicio">Lo que cuentan después</h2>
+            <p class="ressenyes-etiqueta">Reseñas de ejemplo</p>
+          </div>
+          <div class="ressenyes-nota">
+            <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+            <div>
+              <p><strong>5</strong><span class="estrelles" role="img" aria-label="5 de 5 estrellas">★★★★★</span></p>
+              <p>3 reseñas de ejemplo en Google</p>
+            </div>
+          </div>
+        </div>
+        <div class="ressenyes-llista">
+          <figure class="ressenya">
+            <div class="ressenya-cap"><span class="avatar" style="--c:#8E5B3A" aria-hidden="true">M</span><div><p class="ressenya-nom">Marta G.</p><p class="ressenya-data">Hace 2 meses</p></div><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg></div>
+            <p class="estrelles" role="img" aria-label="5 de 5 estrellas">★★★★★</p>
             <blockquote><p>Nos dieron el presupuesto cerrado antes de empezar y no cambió ni un euro en toda la obra. Recogían el escombro cada tarde, así que seguíamos viviendo cerca sin que fuera un caos. La entrega fue el día que decía el contrato.</p></blockquote>
-            <figcaption>Marta G.<span>Reforma integral</span></figcaption>
           </figure>
-          <figure class="testimoni">
+          <figure class="ressenya">
+            <div class="ressenya-cap"><span class="avatar" style="--c:#3F6B5E" aria-hidden="true">J</span><div><p class="ressenya-nom">Jordi P.</p><p class="ressenya-data">Hace 5 meses</p></div><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg></div>
+            <p class="estrelles" role="img" aria-label="5 de 5 estrellas">★★★★★</p>
             <blockquote><p>Pedimos que la cocina no nos quitara más de un mes porque cocinábamos con placa eléctrica en el salón. La acabaron en 24 días, justo dentro de lo que nos habían dicho. La isla quedó donde la dibujamos el primer día.</p></blockquote>
-            <figcaption>Jordi P.<span>Cocina</span></figcaption>
           </figure>
-          <figure class="testimoni">
+          <figure class="ressenya">
+            <div class="ressenya-cap"><span class="avatar" style="--c:#5B5FA8" aria-hidden="true">A</span><div><p class="ressenya-nom">Ana R.</p><p class="ressenya-data">Hace 1 año</p></div><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg></div>
+            <p class="estrelles" role="img" aria-label="5 de 5 estrellas">★★★★★</p>
             <blockquote><p>Al levantar el plato de ducha encontraron una fuga que no se veía. Nos avisaron antes de arreglarla y no nos cobraron de más por ello. El baño quedó listo una semana después de lo previsto, pero sabíamos por qué.</p></blockquote>
-            <figcaption>Ana R.<span>Baño</span></figcaption>
           </figure>
         </div>
       </div>
