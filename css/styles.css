@@ -548,6 +548,97 @@ fieldset.camp { border: 0; margin: 0; padding: 0; }
 .comparador img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .comparador-despres img { clip-path: none; }
 
+/* ── v3 (15/09/2026): hero amb foto, targetes equilibrades, ressenyes, més fosc càlid ── */
+
+/* Hero amb foto de fons i text centrat (home i pàgines de servei) */
+.hero-foto {
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: min(88svh, 54rem); display: grid; place-items: center;
+  padding-block: clamp(5rem, 4rem + 6vw, 8rem); text-align: center; color: var(--blanc);
+}
+.hero-foto.servei { min-height: min(64svh, 40rem); }
+.hero-foto-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.hero-foto::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(180deg, rgba(43,38,34,.62) 0%, rgba(43,38,34,.50) 45%, rgba(43,38,34,.72) 100%);
+}
+.hero-foto-in { max-width: 58rem; }
+.hero-foto h1 { max-width: 17ch; margin-inline: auto; color: var(--blanc); text-shadow: 0 2px 30px rgba(0,0,0,.25); }
+.hero-foto.servei h1 { font-size: var(--t-xl); max-width: 20ch; }
+.hero-foto .hero-sub { margin: 1.4rem auto 0; max-width: 38rem; color: #F1ECE5; }
+.hero-foto .botons { justify-content: center; }
+.hero-foto .btn-principal { background: var(--mel); color: var(--nit); }
+.hero-foto .btn-principal:hover { background: var(--blanc); }
+.hero-foto .btn-linia { border-color: rgba(255,255,255,.85); color: var(--blanc); }
+.hero-foto .btn-linia:hover { background: var(--blanc); color: var(--nit); }
+.hero-foto .hero-nota { margin-top: 1rem; font: 500 var(--t-s)/1.3 var(--f-titol); color: #E8E1D8; }
+.hero-foto .molla { color: #E8E1D8; margin-bottom: 1rem; }
+.hero-foto .molla a:hover { color: var(--blanc); }
+.hero-foto :focus-visible { outline-color: var(--mel); }
+
+/* «Qué incluye» + «Cómo lo hacemos»: dues targetes centrades, amb aire */
+.dues-col { max-width: 74rem; margin-inline: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.25rem, 3vw, 2.5rem); align-items: stretch; }
+.dues-col > div { background: var(--blanc); border-radius: 10px; padding: clamp(1.5rem, 1rem + 2.5vw, 3rem); }
+.dues-col h2 { font-size: var(--t-l); margin-bottom: 1.5rem; }
+.inclou li { padding: .85rem 0 .85rem 2.25rem; }
+.inclou li:last-child { border-bottom: 0; }
+/* Marca de llista informativa (no una casella): cercle ple amb tic */
+.inclou li::before {
+  top: 1.05rem; width: 1.3rem; height: 1.3rem; border: 0; border-radius: 50%;
+  background: var(--cinta-clar) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%232A4BD7' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / .8rem no-repeat;
+}
+.passos { gap: 2rem; }
+.passos li { grid-template-columns: 3rem minmax(0, 1fr); align-items: start; }
+.passos h3 { margin-top: .2rem; }
+.passos p { margin-top: .55rem; }
+@media (max-width: 860px) { .dues-col { grid-template-columns: 1fr; } }
+
+/* Variants sobre fosc càlid */
+.fosc-calid .dues-col > div { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.10); }
+.fosc-calid .inclou li { border-bottom-color: rgba(255,255,255,.12); }
+.fosc-calid .inclou li::before {
+  background-color: rgba(226,185,138,.20);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%23E2B98A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.fosc-calid .passos li::before { color: var(--mel); }
+.fosc-calid .passos p, .fosc-calid .llegenda-llista p { color: #D9D2C8; }
+.fosc-calid .llegenda-cap { border-top-color: var(--mel); }
+.fosc-calid .llegenda-llista svg * { stroke: #EFE9E1; }
+.fosc-calid .llegenda-llista svg .accent { stroke: var(--mel); }
+.fosc-calid .enllac { color: var(--mel); }
+
+/* Contacte: la targeta del costat també en fosc càlid */
+.despres { background: var(--nit); color: var(--guix); padding: clamp(1.5rem, 3vw, 2.25rem); border-radius: 10px; }
+.despres p { color: #D9D2C8; }
+.despres .btn-principal { background: var(--mel); color: var(--nit); margin-top: 1.25rem; }
+.despres .btn-principal:hover { background: var(--blanc); }
+.despres .cta-tel { color: var(--mel); }
+
+/* Ressenyes en format Google (només home; són d'exemple i ho diu l'etiqueta) */
+.ressenyes-cap { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1.5rem 3rem; }
+.ressenyes-etiqueta {
+  display: inline-block; margin-top: .75rem; padding: .3rem .6rem; border-radius: 4px;
+  background: var(--vegetal); font: 600 var(--t-xs)/1.2 var(--f-titol); color: var(--grafit);
+}
+.ressenyes-nota { display: flex; align-items: center; gap: .9rem; background: var(--blanc); border-radius: 10px; padding: .9rem 1.25rem; box-shadow: 0 1px 3px rgba(34,38,42,.12); }
+.ressenyes-nota svg { width: 2.25rem; height: 2.25rem; flex: none; }
+.ressenyes-nota strong { font: 700 1.6rem/1 var(--f-titol); margin-right: .35rem; }
+.ressenyes-nota p { font: 500 var(--t-s)/1.35 var(--f-titol); color: var(--cota); }
+.ressenyes-nota p:first-of-type { display: flex; align-items: center; color: var(--grafit); }
+.estrelles { color: #F4B400; letter-spacing: .08em; font-size: 1.05rem; line-height: 1; }
+.ressenyes-llista { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; margin-top: 2.5rem; }
+.ressenya { margin: 0; background: var(--blanc); border-radius: 10px; padding: 1.4rem 1.5rem 1.5rem; box-shadow: 0 1px 3px rgba(34,38,42,.12); display: flex; flex-direction: column; gap: .75rem; }
+.ressenya-cap { display: grid; grid-template-columns: 2.6rem minmax(0, 1fr) 1.25rem; gap: .75rem; align-items: center; }
+.ressenya-cap .avatar {
+  width: 2.6rem; height: 2.6rem; border-radius: 50%; display: grid; place-items: center;
+  background: var(--c, var(--roure)); color: var(--blanc); font: 600 1.1rem/1 var(--f-titol);
+}
+.ressenya-nom { font: 600 1rem/1.2 var(--f-titol); }
+.ressenya-data { font: 400 var(--t-xs)/1.3 var(--f-titol); color: var(--cota); }
+.ressenya-cap svg { width: 1.25rem; height: 1.25rem; }
+.ressenya blockquote { margin: 0; font: 400 1.0625rem/1.55 var(--f-cos); }
+@media (max-width: 960px) { .ressenyes-llista { grid-template-columns: 1fr; } }
+
 /* ── Legals ──────────────────────────────────────────────────────────── */
 .legal { max-width: 46rem; padding-block: 3rem var(--seccio); }
 .legal h1 { font-size: var(--t-xl); margin-bottom: 2rem; }
