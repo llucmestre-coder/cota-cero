@@ -30,7 +30,7 @@ async function sha256(text) {
 
 const te = (obj, clau) => Object.prototype.hasOwnProperty.call(obj, clau);
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   let dades;
   try { dades = await request.json(); } catch { return json({ ok: false, error: 'dades' }, 400); }
 
@@ -66,13 +66,53 @@ export async function onRequestPost({ request, env }) {
   const p = PREU[r.tipo];
   const factor = INCLOU[r.inclou] * ACABATS[r.acabats];
   const arrodoneix = (x) => Math.round(x / 100) * 100;
-  return json({
-    ok: true,
-    min: arrodoneix((p[0] + p[1] * m2) * factor),
-    max: arrodoneix((p[2] + p[3] * m2) * factor),
-    whatsapp: env.WHATSAPP,
-  });
+  const min = arrodoneix((p[0] + p[1] * m2) * factor);
+  const max = arrodoneix((p[2] + p[3] * m2) * factor);
+  const idioma = ['es', 'ca', 'en'].includes(dades.idioma) ? dades.idioma : 'es';
+
+  // Lead per al seguiment (D1). Si la base de dades falla, l'usuari veu igualment el preu.
+  try {
+    await env.LEADS.prepare(
+      'INSERT INTO leads (correu, idioma, tipo, m2, inclou, acabats, inici, minim, maxim) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(correu, idioma, r.tipo, m2, r.inclou, r.acabats, r.inici, min, max).run();
+  } catch (e) {
+    console.error('D1 leads:', e && e.message);
+  }
+
+  // Avís al negoci per correu (no bloqueja la resposta).
+  const euros = (n) => n.toLocaleString('es-ES', { useGrouping: 'always' }) + ' €';
+  const resum = [
+    'Nuevo contacto desde la calculadora de Cota Cero',
+    '',
+    'Correo: ' + correu,
+    'Obra: ' + NOMS.tipo[r.tipo] + ' · ' + m2 + ' m²',
+    'Distribución: ' + NOMS.inclou[r.inclou],
+    'Acabados: ' + NOMS.acabats[r.acabats],
+    'Empezar: ' + NOMS.inici[r.inici],
+    'Estimación mostrada: ' + euros(min) + ' – ' + euros(max),
+    'Idioma de la web: ' + idioma,
+  ].join('\n');
+  waitUntil(fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': env.BREVO_API_KEY, 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      sender: { name: 'Calculadora Cota Cero', email: env.BREVO_SENDER },
+      to: [{ email: env.BREVO_SENDER }],
+      replyTo: { email: correu },
+      subject: 'Nuevo presupuesto: ' + NOMS.tipo[r.tipo] + ' ' + m2 + ' m² · ' + euros(min) + '–' + euros(max),
+      textContent: resum,
+    }),
+  }).catch(() => {}));
+
+  return json({ ok: true, min, max, whatsapp: env.WHATSAPP });
 }
+
+const NOMS = {
+  tipo: { cocina: 'Cocina', bano: 'Baño', casa: 'Toda la casa' },
+  inclou: { mantener: 'mantener', mover: 'cambiar la distribución' },
+  acabats: { basicos: 'básicos', medios: 'medios', altos: 'altos' },
+  inici: { ya: 'lo antes posible', meses: 'en 1 a 3 meses', mirando: 'solo mirando precios' },
+};
 
 export function onRequest() {
   return json({ ok: false, error: 'metode' }, 405);

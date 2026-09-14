@@ -294,7 +294,7 @@
     if (verificant) return;
     verificant = true;
     error('codi', '');
-    envia('/api/verifica', { correu: estat.correu, codi: codi(), respostes: respostesPerEnviar() })
+    envia('/api/verifica', { correu: estat.correu, codi: codi(), respostes: respostesPerEnviar(), idioma: document.documentElement.lang || 'es' })
       .then(function (j) {
         if (j.ok && typeof j.min === 'number' && typeof j.max === 'number') {
           estat.resultat = { min: j.min, max: j.max, wa: String(j.whatsapp || '').replace(/\D/g, '') };

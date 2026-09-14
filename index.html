@@ -103,6 +103,23 @@
       </div>
     </section>
 
+    <!-- ═══ CRIDA A LA CALCULADORA (v2: el valor principal de la web) ═══ -->
+    <section class="calc-crida fosc-calid seccio" aria-labelledby="calc-crida-titol">
+      <div class="wrap calc-crida-in">
+        <div>
+          <h2 id="calc-crida-titol">Ponle un número a tu reforma</h2>
+          <p class="intro">Responde unas preguntas sobre tu cocina, tu baño o tu casa entera y te damos una horquilla de precio.</p>
+          <div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
+          <p class="nota">1 minuto, sin compromiso.</p>
+        </div>
+        <div class="calc-tipus">
+          <a href="presupuesto.html?tipo=cocina"><img src="assets/img/srv-cocina.jpg" alt="" width="1280" height="720" loading="lazy"><span>Cocina</span></a>
+          <a href="presupuesto.html?tipo=bano"><img src="assets/img/srv-bano.jpg" alt="" width="1280" height="720" loading="lazy"><span>Baño</span></a>
+          <a href="presupuesto.html?tipo=casa"><img src="assets/img/srv-integral.jpg" alt="" width="1280" height="720" loading="lazy"><span>Toda la casa</span></a>
+        </div>
+      </div>
+    </section>
+
     <!-- ═══ SIGNATURA: EL PLÀNOL ═══ -->
     <section class="plano seccio" aria-labelledby="plano-titol">
       <div class="wrap">
@@ -254,8 +271,9 @@
         <div class="projectes">
           <article class="projecte">
             <div class="comparador">
+              <!-- IMATGE PENDENT: ab-cocina-antes (quota diària de Workers AI) -->
               <div class="ph ph-ratllat"><p class="ph-etiqueta"><span>Foto: cocina antes de la reforma, tabique cerrado, 4:3</span></p></div>
-              <div class="ph comparador-despres"><p class="ph-etiqueta ph-dreta"><span>Foto: cocina terminada, isla y luz natural, 4:3</span></p></div>
+              <div class="ph comparador-despres"><img src="assets/img/ab-cocina-despues.jpg" alt="La misma cocina ya reformada, abierta y con isla." width="1024" height="640" loading="lazy"></div>
               <span class="etq etq-abans">Antes</span><span class="etq etq-despres">Después</span>
               <input class="comparador-rang" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después de la cocina en forma de L">
               <div class="comparador-nansa" aria-hidden="true"></div>
@@ -268,8 +286,8 @@
           </article>
           <article class="projecte">
             <div class="comparador">
-              <div class="ph ph-ratllat"><p class="ph-etiqueta"><span>Foto: baño antes, bañera y alicatado antiguo, 4:3</span></p></div>
-              <div class="ph comparador-despres"><p class="ph-etiqueta ph-dreta"><span>Foto: baño terminado, ducha a ras de suelo, 4:3</span></p></div>
+              <div class="ph ph-ratllat"><img src="assets/img/ab-bano-antes.jpg" alt="Baño antes de la reforma, con bañera y alicatado antiguo." width="1024" height="640" loading="lazy"></div>
+              <div class="ph comparador-despres"><img src="assets/img/ab-bano-despues.jpg" alt="El mismo baño con ducha a ras de suelo y azulejo nuevo." width="1024" height="640" loading="lazy"></div>
               <span class="etq etq-abans">Antes</span><span class="etq etq-despres">Después</span>
               <input class="comparador-rang" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después del baño sin bañera">
               <div class="comparador-nansa" aria-hidden="true"></div>
@@ -282,8 +300,9 @@
           </article>
           <article class="projecte">
             <div class="comparador">
+              <!-- IMATGE PENDENT: ab-piso-antes (quota diària de Workers AI) -->
               <div class="ph ph-ratllat"><p class="ph-etiqueta"><span>Foto: piso antes de la reforma, distribución original, 4:3</span></p></div>
-              <div class="ph comparador-despres"><p class="ph-etiqueta ph-dreta"><span>Foto: piso terminado, salón abierto, 4:3</span></p></div>
+              <div class="ph comparador-despres"><img src="assets/img/ab-piso-despues.jpg" alt="El mismo piso con la distribución abierta y el salón ampliado." width="1024" height="640" loading="lazy"></div>
               <span class="etq etq-abans">Antes</span><span class="etq etq-despres">Después</span>
               <input class="comparador-rang" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después del piso de los años 70">
               <div class="comparador-nansa" aria-hidden="true"></div>
@@ -294,6 +313,46 @@
               <p>Redistribuimos un piso con pasillos estrechos y habitaciones cerradas: ahora tiene un salón más grande y un baño más.</p>
             </div>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ GALERIA DE PROJECTES ACABATS (v2) ═══ -->
+    <section class="seccio" aria-labelledby="galeria-titol" style="background:var(--vegetal)">
+      <div class="wrap">
+        <h2 id="galeria-titol" class="aparicio">Proyectos acabados</h2>
+        <p class="intro">Algunas de las reformas que hemos hecho, tal como quedaron.</p>
+        <div class="galeria">
+          <figure><button type="button" data-visor><img src="assets/img/gal-01.jpg" alt="Cocina en L, blanca y de roble, abierta al comedor." width="1024" height="768" loading="lazy"></button><figcaption><strong>Cocina en L, blanca y roble</strong><span>Cocina</span></figcaption></figure>
+          <figure><button type="button" data-visor><img src="assets/img/gal-02.jpg" alt="Baño pequeño con alicatado verde en vertical y grifería en latón." width="768" height="1024" loading="lazy"></button><figcaption><strong>Baño en verde y latón</strong><span>Baño</span></figcaption></figure>
+          <figure><button type="button" data-visor><img src="assets/img/gal-03.jpg" alt="Salón con suelo de parqué de roble y librería a medida." width="1024" height="768" loading="lazy"></button><figcaption><strong>Salón con parqué de roble</strong><span>Reforma integral</span></figcaption></figure>
+          <figure><button type="button" data-visor><img src="assets/img/gal-04.jpg" alt="Dormitorio con armario empotrado de pared a pared." width="768" height="1024" loading="lazy"></button><figcaption><strong>Dormitorio con armario a medida</strong><span>Reforma integral</span></figcaption></figure>
+          <figure><button type="button" data-visor><img src="assets/img/gal-05.jpg" alt="Cocina estrecha en gris con estantes abiertos de roble." width="1024" height="768" loading="lazy"></button><figcaption><strong>Cocina estrecha en gris</strong><span>Cocina</span></figcaption></figure>
+          <figure><button type="button" data-visor><img src="assets/img/gal-07.jpg" alt="Pasillo con puertas y marcos nuevos." width="1024" height="768" loading="lazy"></button><figcaption><strong>Pasillo con puertas nuevas</strong><span>Reforma integral</span></figcaption></figure>
+          <figure><button type="button" data-visor><img src="assets/img/gal-06.jpg" alt="Baño con suelo de terrazo y bañera exenta." width="768" height="1024" loading="lazy"></button><figcaption><strong>Baño con terrazo</strong><span>Baño</span></figcaption></figure>
+          <figure><button type="button" data-visor><img src="assets/img/gal-08.jpg" alt="Detalle de encimera de cuarzo sobre muebles de cocina en roble." width="1024" height="768" loading="lazy"></button><figcaption><strong>Detalle en roble y cuarzo</strong><span>Cocina</span></figcaption></figure>
+        </div>
+      </div>
+    </section>
+    <dialog class="visor" data-visor-dialog aria-label="Foto ampliada">
+      <button class="visor-tanca" type="button" data-visor-tanca aria-label="Cerrar">×</button>
+      <img src="assets/img/gal-01.jpg" alt="" width="1024" height="768">
+      <p></p>
+    </dialog>
+
+    <!-- ═══ QUIÉNES SOMOS (v2: relat de marca) ═══ -->
+    <section class="nosaltres seccio" aria-labelledby="nosaltres-titol">
+      <div class="wrap nosaltres-in">
+        <div class="nosaltres-text">
+          <h2 id="nosaltres-titol" class="aparicio" style="margin-bottom:1.5rem">Quiénes somos</h2>
+          <p>Somos un equipo pequeño y hacemos un solo oficio: reformar casas. Empezamos con los pisos de familiares y amigos, y cuando se acabaron los conocidos siguió llegando gente por el boca a boca.</p>
+          <p>Sergi lleva las obras: es quien mide, quien planifica los oficios y quien te llama si algo cambia de fecha. Laura es arquitecta técnica y hace el plano antes de que se toque una sola pared, para que el presupuesto no cambie a mitad de camino. Entre los dos deciden qué se puede hacer con tu casa y qué no, antes de prometerlo.</p>
+          <p>Un día de obra con nosotros empieza con un aviso: sabes qué se va a hacer esa jornada y a qué hora llega cada oficio. Antes de empezar, protegemos suelos y muebles. Al final del día, recogemos: el escombro sale de casa, no se queda acumulado en un rincón hasta el viernes.</p>
+        </div>
+        <div class="nosaltres-fotos">
+          <figure><img class="foto" style="--ratio:16/10" src="assets/img/marca-equipo.jpg" alt="Un albañil colocando azulejos en una pared, visto de espaldas." width="1024" height="768" loading="lazy"><figcaption>Colocando el suelo, pieza a pieza.</figcaption></figure>
+          <figure><img class="foto" src="assets/img/marca-plano.jpg" alt="Una mano dibujando con lápiz sobre el plano de una vivienda." width="1024" height="768" loading="lazy"><figcaption>Primero, el plano.</figcaption></figure>
+          <figure><img class="foto" src="assets/img/marca-obra-limpia.jpg" alt="Obra en marcha con los suelos protegidos y sin escombro a la vista." width="1024" height="768" loading="lazy"><figcaption>Así queda la obra cada tarde.</figcaption></figure>
         </div>
       </div>
     </section>
@@ -320,12 +379,12 @@
     </section>
 
     <!-- ═══ CTA FINAL ═══ -->
-    <section class="cta-final fosc seccio" aria-labelledby="cta-titol">
+    <section class="cta-final fosc-calid seccio" aria-labelledby="cta-titol">
       <div class="wrap cta-final-in">
         <div>
-          <h2 id="cta-titol">Pide tu presupuesto, sin compromiso</h2>
-          <p class="intro">Te lo entregamos por escrito, con precio cerrado y fecha de entrega.</p>
-          <div class="botons"><a class="btn btn-principal" href="contacto.html">Pedir presupuesto</a></div>
+          <h2 id="cta-titol">Calcula tu presupuesto en un minuto</h2>
+          <p class="intro">Si te encaja, venimos a ver la vivienda y te lo cerramos por escrito, con fecha de entrega.</p>
+          <div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
         </div>
         <p>O llámanos:<br><a class="cta-tel" href="tel:+34600000000">600 000 000</a></p>
       </div>
@@ -355,7 +414,8 @@
           <h2>Contacto</h2>
           <ul>
             <li><a href="tel:+34600000000">600 000 000</a></li>
-            <li><a href="contacto.html">Pedir presupuesto</a></li>
+            <li><a href="presupuesto.html">Calcula tu presupuesto</a></li>
+            <li><a href="contacto.html">Escríbenos</a></li>
           </ul>
         </div>
       </div>
@@ -373,5 +433,6 @@
   </a>
 <script src="js/traduccions.js" defer></script>
 <script src="js/main.js" defer></script>
+<script src="js/galeria.js" defer></script>
 </body>
 </html>

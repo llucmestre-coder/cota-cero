@@ -8,3 +8,9 @@ compatibility_date = "2026-09-01"
 [[kv_namespaces]]
 binding = "CODIS"
 id = "994bf9fd07044d80969c39e4d4ee2237"
+
+# Contactes de la calculadora (seguiment). Esquema: schema.sql. Llista privada a /admin.
+[[d1_databases]]
+binding = "LEADS"
+database_name = "cota-cero-leads"
+database_id = "f7ea7cca-034c-4efc-8cff-7fdbdcc1e09f"

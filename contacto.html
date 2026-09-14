@@ -58,61 +58,38 @@
     <section class="contacte">
       <div class="wrap">
         <p class="molla"><a href="index.html">Inicio</a> / Contacto</p>
-        <h1>Pide tu presupuesto</h1>
-        <p class="intro">Cuéntanos qué quieres reformar y te contactamos con un presupuesto cerrado.</p>
+        <h1>Escríbenos</h1>
+        <p class="intro">Si prefieres no usar la calculadora, cuéntanos tu reforma por aquí y te contestamos nosotros. También puedes <a class="enllac" href="presupuesto.html">calcular un presupuesto orientativo en un minuto</a>.</p>
 
         <div class="contacte-in">
           <form class="form" id="form-presupuesto" action="https://formspree.io/f/mljeqnje" method="POST" novalidate>
             <input type="hidden" name="_subject" value="Nueva solicitud de presupuesto · Cota Cero (demo)">
 
-            <fieldset class="camp camp-ample">
-              <legend>Tipo de obra</legend>
-              <div class="tipus-obra">
-                <label><input type="radio" name="tipo" value="Reforma integral" checked><span>Reforma integral</span></label>
-                <label><input type="radio" name="tipo" value="Cocina"><span>Cocina</span></label>
-                <label><input type="radio" name="tipo" value="Baño"><span>Baño</span></label>
-                <label><input type="radio" name="tipo" value="Otra"><span>Otra</span></label>
-              </div>
-            </fieldset>
-
-            <div class="camp">
-              <label for="f-metros">m² aproximados <span class="opc">(opcional)</span></label>
-              <input id="f-metros" name="metros" type="number" inputmode="numeric" min="1" max="2000">
-            </div>
             <div class="camp">
               <label for="f-nombre">Nombre</label>
               <input id="f-nombre" name="nombre" type="text" autocomplete="name" required aria-describedby="e-nombre">
               <p class="camp-error" id="e-nombre" aria-live="polite"></p>
             </div>
             <div class="camp">
-              <label for="f-telefono">Teléfono</label>
-              <input id="f-telefono" name="telefono" type="tel" autocomplete="tel" required aria-describedby="e-telefono">
-              <p class="camp-error" id="e-telefono" aria-live="polite"></p>
-            </div>
-            <div class="camp">
-              <label for="f-email">Email <span class="opc">(opcional)</span></label>
-              <input id="f-email" name="email" type="email" autocomplete="email">
+              <label for="f-email">Correo</label>
+              <input id="f-email" name="email" type="email" autocomplete="email" required aria-describedby="e-email">
+              <p class="camp-error" id="e-email" aria-live="polite"></p>
             </div>
             <div class="camp camp-ample">
-              <label for="f-mensaje">Mensaje <span class="opc">(opcional)</span></label>
-              <textarea id="f-mensaje" name="mensaje"></textarea>
-            </div>
-            <div class="camp camp-ample">
-              <label class="privacitat"><input type="checkbox" name="privacidad" value="acepta" required aria-describedby="e-privacidad"><span>He leído y acepto la <a href="politica-privacidad.html">política de privacidad</a>.</span></label>
-              <p class="camp-error" id="e-privacidad" aria-live="polite"></p>
+              <label for="f-comentario">Comentario</label>
+              <textarea id="f-comentario" name="comentario" required aria-describedby="e-comentario"></textarea>
+              <p class="camp-error" id="e-comentario" aria-live="polite"></p>
             </div>
 
-            <button class="btn btn-principal" type="submit">Pedir presupuesto</button>
+            <button class="btn btn-principal" type="submit">Enviar</button>
             <p class="form-estat" role="status" tabindex="-1" hidden></p>
+            <p style="grid-column:1 / -1;margin-top:1rem;font-size:var(--t-xs)">Al enviar aceptas la <a href="politica-privacidad.html">política de privacidad</a>.</p>
           </form>
 
           <aside class="despres" aria-labelledby="despres-titol">
-            <h2 id="despres-titol">Qué pasa después</h2>
-            <ol>
-              <li>Revisamos tu solicitud y, si falta algún dato, te llamamos para completarlo.</li>
-              <li>Concretamos una visita para ver la vivienda, sin compromiso.</li>
-              <li>Te entregamos el presupuesto cerrado, por escrito, en los días siguientes a la visita.</li>
-            </ol>
+            <h2 id="despres-titol">¿Quieres saber cuánto costaría?</h2>
+            <p>Responde unas preguntas sobre tu cocina, tu baño o tu casa entera y te damos una horquilla de precio en un minuto, sin compromiso.</p>
+            <div class="botons" style="margin-top:1.25rem"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
             <p style="margin-top:1.5rem">¿Prefieres hablarlo?</p>
             <a class="cta-tel" href="tel:+34600000000">600 000 000</a>
           </aside>
@@ -143,7 +120,8 @@
           <h2>Contacto</h2>
           <ul>
             <li><a href="tel:+34600000000">600 000 000</a></li>
-            <li><a href="contacto.html">Pedir presupuesto</a></li>
+            <li><a href="presupuesto.html">Calcula tu presupuesto</a></li>
+            <li><a href="contacto.html">Escríbenos</a></li>
           </ul>
         </div>
       </div>

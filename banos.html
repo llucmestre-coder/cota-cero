@@ -29,6 +29,7 @@
         <a href="reformas-integrales.html">Reformas integrales</a>
         <a href="cocinas.html">Cocinas</a>
         <a href="banos.html" aria-current="page">Baños</a>
+        <a href="contacto.html">Contacto</a>
         <a class="nav-tel" href="tel:+34600000000">Llamar al 600 000 000</a>
       </nav>
       <!-- Desplegable d'idioma (plantilla: recursos-comuns/tria-idioma.html).
@@ -66,13 +67,11 @@
           <h1>Un baño nuevo, revisado desde las bajantes</h1>
           <p class="hero-sub">Cambiamos lo que se ve y lo que no: instalaciones, alicatado y sanitarios.</p>
           <div class="botons">
-            <a class="btn btn-principal" href="contacto.html">Pedir presupuesto</a>
+            <a class="btn btn-principal" href="presupuesto.html?tipo=bano">Calcula tu presupuesto</a>
             <a class="btn btn-linia" href="tel:+34600000000">Llamar</a>
           </div>
         </div>
-        <div class="ph" style="--ratio:16/9">
-          <p class="ph-etiqueta"><span>Foto: baño terminado, ducha a ras de suelo y mampara, 16:9</span></p>
-        </div>
+        <img class="foto" src="assets/img/srv-bano.jpg" alt="Baño reformado con plato de ducha a ras de suelo y alicatado nuevo." width="1280" height="720">
       </div>
     </section>
 
@@ -128,8 +127,8 @@
       <div class="wrap">
         <article class="projecte">
           <div class="comparador">
-            <div class="ph ph-ratllat"><p class="ph-etiqueta"><span>Foto: baño antes, bañera y alicatado antiguo, 4:3</span></p></div>
-            <div class="ph comparador-despres"><p class="ph-etiqueta ph-dreta"><span>Foto: baño terminado, ducha a ras de suelo, 4:3</span></p></div>
+            <div class="ph ph-ratllat"><img src="assets/img/ab-bano-antes.jpg" alt="Baño antes de la reforma, con bañera y alicatado antiguo." width="1024" height="640" loading="lazy"></div>
+            <div class="ph comparador-despres"><img src="assets/img/ab-bano-despues.jpg" alt="El mismo baño con ducha a ras de suelo y azulejo nuevo." width="1024" height="640" loading="lazy"></div>
             <span class="etq etq-abans">Antes</span><span class="etq etq-despres">Después</span>
             <input class="comparador-rang" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después del baño sin bañera">
             <div class="comparador-nansa" aria-hidden="true"></div>
@@ -183,24 +182,30 @@
         <h2 class="aparicio">También hacemos</h2>
         <div class="tambe">
           <a href="cocinas.html">
-            <h3>Cocinas</h3>
-            <p>Muebles, electrodomésticos e instalaciones nuevas, coordinados para no alargar la obra.</p>
+            <img src="assets/img/srv-cocina.jpg" alt="" width="1280" height="720" loading="lazy">
+            <div class="tambe-text">
+              <h3>Cocinas</h3>
+              <p>Muebles, electrodomésticos e instalaciones nuevas, coordinados para no alargar la obra.</p>
+            </div>
           </a>
           <a href="reformas-integrales.html">
-            <h3>Reformas integrales</h3>
-            <p>Distribución, instalaciones y acabados coordinados de principio a fin.</p>
+            <img src="assets/img/srv-integral.jpg" alt="" width="1280" height="720" loading="lazy">
+            <div class="tambe-text">
+              <h3>Reformas integrales</h3>
+              <p>Distribución, instalaciones y acabados coordinados de principio a fin.</p>
+            </div>
           </a>
         </div>
       </div>
     </section>
 
     <!-- ═══ CTA FINAL ═══ -->
-    <section class="cta-final fosc seccio" aria-labelledby="cta-titol">
+    <section class="cta-final fosc-calid seccio" aria-labelledby="cta-titol">
       <div class="wrap cta-final-in">
         <div>
           <h2 id="cta-titol">¿Reformamos tu baño?</h2>
           <p class="intro">Presupuesto cerrado, con la fontanería revisada desde el primer día.</p>
-          <div class="botons"><a class="btn btn-principal" href="contacto.html">Pedir presupuesto</a></div>
+          <div class="botons"><a class="btn btn-principal" href="presupuesto.html?tipo=bano">Calcula tu presupuesto</a></div>
         </div>
         <p>O llámanos:<br><a class="cta-tel" href="tel:+34600000000">600 000 000</a></p>
       </div>
@@ -230,7 +235,8 @@
           <h2>Contacto</h2>
           <ul>
             <li><a href="tel:+34600000000">600 000 000</a></li>
-            <li><a href="contacto.html">Pedir presupuesto</a></li>
+            <li><a href="presupuesto.html?tipo=bano">Calcula tu presupuesto</a></li>
+            <li><a href="contacto.html">Escríbenos</a></li>
           </ul>
         </div>
       </div>
