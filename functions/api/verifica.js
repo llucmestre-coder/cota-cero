@@ -104,8 +104,91 @@ export async function onRequestPost({ request, env, waitUntil }) {
     }),
   }).catch(() => {}));
 
+  // Resum per a l'usuari, en l'idioma de la web (demo: text senzill; un negoci real el treballarà més).
+  const t = RESUM[idioma];
+  const eurosIdioma = (n) => n.toLocaleString(t.locale, { useGrouping: 'always' }) + ' €';
+  const rang = eurosIdioma(min) + ' – ' + eurosIdioma(max);
+  const files = [
+    [t.obra, t.tipo[r.tipo]],
+    [t.mida, m2 + ' m²'],
+    [t.distribucio, t.inclou[r.inclou]],
+    [t.acabats, t.acabatsNoms[r.acabats]],
+    [t.inici, t.iniciNoms[r.inici]],
+  ];
+  const missatgeWa = encodeURIComponent(t.wa.replace('{resum}', files.map((f) => f[1]).join(' · ')).replace('{rang}', rang));
+  const enllacWa = 'https://wa.me/' + String(env.WHATSAPP || '').replace(/\D/g, '') + '?text=' + missatgeWa;
+  const html = `<div style="font-family:Arial,sans-serif;color:#22262A;max-width:520px;line-height:1.5">
+  <p style="font-size:16px">${t.hola}</p>
+  <p style="font-size:14px;color:#5F6661;margin:18px 0 4px">${t.estimacio}</p>
+  <p style="font-size:30px;font-weight:700;margin:0 0 6px">${rang}</p>
+  <p style="font-size:13px;color:#5F6661;margin:0 0 18px">${t.nota}</p>
+  <table style="border-collapse:collapse;width:100%;font-size:15px">${files.map((f) =>
+    `<tr><td style="padding:8px 0;border-bottom:1px solid #DADDD6;color:#5F6661">${f[0]}</td><td style="padding:8px 0;border-bottom:1px solid #DADDD6;text-align:right;font-weight:600">${f[1]}</td></tr>`).join('')}</table>
+  <p style="margin:24px 0"><a href="${enllacWa}" style="background:#1F8F4E;color:#fff;text-decoration:none;padding:12px 20px;border-radius:6px;font-weight:700;display:inline-block">${t.botoWa}</a></p>
+  <p style="font-size:14px">${t.seguent}</p>
+  <p style="font-size:14px;color:#5F6661">Cota Cero Reformas · 600 000 000</p></div>`;
+  waitUntil(fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'api-key': env.BREVO_API_KEY, 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      sender: { name: 'Cota Cero Reformas', email: env.BREVO_SENDER },
+      to: [{ email: correu }],
+      subject: t.assumpte + ' · ' + rang,
+      textContent: `${t.hola}\n\n${t.estimacio}: ${rang}\n${t.nota}\n\n${files.map((f) => f[0] + ': ' + f[1]).join('\n')}\n\n${t.botoWa}: ${enllacWa}\n\n${t.seguent}\n\nCota Cero Reformas · 600 000 000`,
+      htmlContent: html,
+    }),
+  }).catch(() => {}));
+
   return json({ ok: true, min, max, whatsapp: env.WHATSAPP });
 }
+
+const RESUM = {
+  es: {
+    locale: 'es-ES',
+    assumpte: 'Tu estimación de reforma',
+    hola: 'Hola, este es el resumen de la reforma que has calculado en nuestra web.',
+    estimacio: 'Estimación orientativa',
+    nota: 'IVA no incluido. El presupuesto cerrado lo hacemos después de ver la vivienda.',
+    obra: 'Obra', mida: 'Tamaño', distribucio: 'Distribución', acabats: 'Acabados', inici: 'Empezar',
+    tipo: { cocina: 'Cocina', bano: 'Baño', casa: 'Toda la casa' },
+    inclou: { mantener: 'Mantener la distribución', mover: 'Cambiar la distribución' },
+    acabatsNoms: { basicos: 'Básicos', medios: 'Medios', altos: 'Altos' },
+    iniciNoms: { ya: 'Lo antes posible', meses: 'En 1 a 3 meses', mirando: 'Solo estoy mirando precios' },
+    botoWa: 'Hablar por WhatsApp',
+    wa: 'Hola, me interesa una reforma. He usado la calculadora de la web: {resum}. Estimación: {rang}. ¿Podemos concretar una visita?',
+    seguent: 'Si quieres seguir adelante, responde a este correo o escríbenos por WhatsApp y concretamos una visita sin compromiso.',
+  },
+  ca: {
+    locale: 'ca-ES',
+    assumpte: 'La teva estimació de reforma',
+    hola: 'Hola, aquest és el resum de la reforma que has calculat a la nostra web.',
+    estimacio: 'Estimació orientativa',
+    nota: 'IVA no inclòs. El pressupost tancat el fem després de veure l\'habitatge.',
+    obra: 'Obra', mida: 'Mida', distribucio: 'Distribució', acabats: 'Acabats', inici: 'Començar',
+    tipo: { cocina: 'Cuina', bano: 'Bany', casa: 'Tota la casa' },
+    inclou: { mantener: 'Mantenir la distribució', mover: 'Canviar la distribució' },
+    acabatsNoms: { basicos: 'Bàsics', medios: 'Mitjans', altos: 'Alts' },
+    iniciNoms: { ya: 'Com més aviat millor', meses: 'D\'aquí a 1–3 mesos', mirando: 'Només miro preus' },
+    botoWa: 'Parlar per WhatsApp',
+    wa: 'Hola, m\'interessa una reforma. He fet servir la calculadora de la web: {resum}. Estimació: {rang}. Podem concretar una visita?',
+    seguent: 'Si vols tirar endavant, respon aquest correu o escriu-nos per WhatsApp i concretem una visita sense compromís.',
+  },
+  en: {
+    locale: 'en-GB',
+    assumpte: 'Your renovation estimate',
+    hola: 'Hi, here is the summary of the renovation you calculated on our website.',
+    estimacio: 'Rough estimate',
+    nota: 'VAT not included. We give you a fixed quote after seeing the property.',
+    obra: 'Work', mida: 'Size', distribucio: 'Layout', acabats: 'Finishes', inici: 'Start',
+    tipo: { cocina: 'Kitchen', bano: 'Bathroom', casa: 'Whole home' },
+    inclou: { mantener: 'Keep the layout', mover: 'Change the layout' },
+    acabatsNoms: { basicos: 'Basic', medios: 'Mid-range', altos: 'High-end' },
+    iniciNoms: { ya: 'As soon as possible', meses: 'In 1 to 3 months', mirando: 'Just checking prices' },
+    botoWa: 'Chat on WhatsApp',
+    wa: 'Hi, I\'m interested in a renovation. I used the calculator on your website: {resum}. Estimate: {rang}. Can we arrange a visit?',
+    seguent: 'If you want to go ahead, reply to this email or message us on WhatsApp and we\'ll arrange a visit with no obligation.',
+  },
+};
 
 const NOMS = {
   tipo: { cocina: 'Cocina', bano: 'Baño', casa: 'Toda la casa' },
