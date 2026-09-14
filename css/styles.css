@@ -292,7 +292,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* ── Proyectos + comparador ──────────────────────────────────────────── */
 .projectes { display: grid; gap: clamp(3rem, 6vw, 5.5rem); margin-top: 3.5rem; }
-.projecte { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: end; }
+.projecte { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: start; }
+.projecte > div:not(.comparador) { padding-top: .5rem; }
 .projecte:nth-child(even) { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); }
 .projecte:nth-child(even) .comparador { order: 2; }
 .projecte-tipus { font: 500 var(--t-s)/1.3 var(--f-titol); color: var(--cota); margin-bottom: 0.5rem; }
@@ -638,6 +639,21 @@ fieldset.camp { border: 0; margin: 0; padding: 0; }
 .ressenya-cap svg { width: 1.25rem; height: 1.25rem; }
 .ressenya blockquote { margin: 0; font: 400 1.0625rem/1.55 var(--f-cos); }
 @media (max-width: 960px) { .ressenyes-llista { grid-template-columns: 1fr; } }
+
+/* «Qué reformamos» (v4, substitueix el plànol): foto enganxada que canvia
+   amb el panell actiu. main.js ja posa .activa a tot element amb data-estancia. */
+.plano-fotos { position: relative; aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; background: var(--vegetal); }
+.plano-fotos img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transform: scale(1.04); transition: opacity .7s ease, transform 1.2s ease;
+}
+.plano-fotos img.activa { opacity: 1; transform: none; }
+/* Sense JS no hi ha .activa: es veu la primera foto. Amb JS, main.js marca
+   la primera en carregar i després la del panell visible. */
+html:not(.te-js) .plano-fotos img:first-child { opacity: 1; }
+@media (max-width: 860px) {
+  .plano-fotos { aspect-ratio: 16 / 10; max-height: 34vh; width: 100%; }
+}
 
 /* ── Legals ──────────────────────────────────────────────────────────── */
 .legal { max-width: 46rem; padding-block: 3rem var(--seccio); }

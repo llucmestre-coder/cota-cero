@@ -42,14 +42,29 @@
         el.classList.toggle('activa', el.getAttribute('data-estancia') === nom);
       });
     };
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entrades) {
-        entrades.forEach(function (en) {
-          if (en.isIntersecting) activa(en.target.getAttribute('data-estancia'));
-        });
-      }, { rootMargin: '-45% 0px -45% 0px' });
-      panells.forEach(function (p) { io.observe(p); });
-    }
+    // Panell actiu = el que té el centre més a prop del centre de la pantalla.
+    // (Amb scroll + rAF en lloc d'IntersectionObserver: cap franja estreta que
+    // es pugui saltar en un scroll ràpid.)
+    var pendent = false;
+    var actual = null;
+    var calcula = function () {
+      pendent = false;
+      var mig = window.innerHeight / 2;
+      var millor = null;
+      var dist = Infinity;
+      panells.forEach(function (p) {
+        var r = p.getBoundingClientRect();
+        var d = Math.abs(r.top + r.height / 2 - mig);
+        if (d < dist) { dist = d; millor = p; }
+      });
+      var nom = millor && millor.getAttribute('data-estancia');
+      if (nom && nom !== actual) { actual = nom; activa(nom); }
+    };
+    var programa = function () {
+      if (!pendent) { pendent = true; window.requestAnimationFrame(calcula); }
+    };
+    window.addEventListener('scroll', programa, { passive: true });
+    window.addEventListener('resize', programa);
     plano.querySelectorAll('.estancia').forEach(function (el) {
       var ves = function () {
         var p = plano.querySelector('.plano-panell[data-estancia="' + el.getAttribute('data-estancia') + '"]');
