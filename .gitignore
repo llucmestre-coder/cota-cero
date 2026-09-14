@@ -1,0 +1,17 @@
+# Documents interns — no es publiquen (el repo és PÚBLIC)
+CLAUDE.md
+GATES.md
+PLA.md
+PLA*
+README-INTERN.md
+REUNIO-CLIENT.md
+REUNION-CLIENTE.md
+TRASPAS*.md
+PRIMER-CONTACTE.md
+prompt*.md
+prompts/
+.claude/
+.wrangler/
+Thumbs.db
+.DS_Store
+desktop.ini

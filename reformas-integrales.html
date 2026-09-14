@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reformas integrales · Cota Cero Reformas</title>
+  <meta name="description" content="Reforma integral de la vivienda: distribución, instalaciones, carpintería y acabados, con un solo interlocutor y presupuesto cerrado.">
+  <!-- Web de demostració: no s'indexa (PLA.md §Honestedat). -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#EDEEEA">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/fonts.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="assets/js/gsap.min.js" defer></script>
+  <script src="assets/js/ScrollTrigger.min.js" defer></script>
+  <script src="js/i18n.js"></script>
+</head>
+<body>
+  <a class="salta" href="#contingut">Saltar al contenido</a>
+
+  <!-- ═══ CAPÇALERA (model per a totes les pàgines) ═══ -->
+  <header class="cap">
+    <div class="wrap cap-in">
+      <a class="marca" href="index.html" aria-label="Cota Cero Reformas, inicio">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 5a11 11 0 0 1 11 11H16z" fill="currentColor"/><path d="M16 16v11A11 11 0 0 1 5 16z" fill="currentColor"/><path d="M1 16h30" stroke="currentColor" stroke-width="2"/></svg>
+        Cota Cero
+      </a>
+      <nav class="nav" id="nav" aria-label="Principal">
+        <a href="reformas-integrales.html" aria-current="page">Reformas integrales</a>
+        <a href="cocinas.html">Cocinas</a>
+        <a href="banos.html">Baños</a>
+        <a href="contacto.html">Contacto</a>
+        <a class="nav-tel" href="tel:+34600000000">Llamar al 600 000 000</a>
+      </nav>
+      <!-- Desplegable d'idioma (plantilla: recursos-comuns/tria-idioma.html).
+           NOMÉS existeix si el JS ha arrencat: js/i18n.js posa `te-js` a
+           l'<html> des del <head>. Un control mort val menys que cap control. -->
+      <div class="tria-idioma" data-idioma-tria>
+        <button class="tria-idioma-boto" type="button" data-idioma-boto
+                aria-expanded="false" aria-haspopup="true"
+                aria-label="Idioma de la página">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm6.93 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.92 8ZM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96ZM4.26 14a7.85 7.85 0 0 1 0-4h3.38a16.6 16.6 0 0 0-.14 2c0 .68.06 1.34.14 2Zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.99 7.99 0 0 1 5.08 16Zm2.95-8H5.08a7.99 7.99 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.03 8ZM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96ZM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2Zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56ZM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38a7.85 7.85 0 0 1 0 4Z"/></svg>
+          <span data-idioma-actual data-sense-traduir>ES</span>
+          <svg class="tria-idioma-punta" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 15 6 9h12z"/></svg>
+        </button>
+        <!-- Cada idioma es diu com es diu ell mateix, no traduït: qui busca la
+             seva llengua busca la paraula que coneix. Sempre CA · ES · EN. -->
+        <ul class="tria-idioma-menu" data-idioma-menu data-sense-traduir hidden>
+          <li><button type="button" data-idioma-opcio="ca" lang="ca">Català</button></li>
+          <li><button type="button" data-idioma-opcio="es" lang="es">Castellano</button></li>
+          <li><button type="button" data-idioma-opcio="en" lang="en">English</button></li>
+        </ul>
+      </div>
+      <a class="cap-tel" href="tel:+34600000000">600 000 000</a>
+      <a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a>
+      <button class="nav-obre" type="button" aria-expanded="false" aria-controls="nav"><span></span><span class="visually-hidden">Menú</span></button>
+    </div>
+  </header>
+
+  <main id="contingut">
+
+    <!-- ═══ HERO DE SERVEI ═══ -->
+    <section class="servei-hero">
+      <div class="wrap servei-hero-in">
+        <div>
+          <p class="molla"><a href="index.html">Inicio</a> / Reformas integrales</p>
+          <h1>Toda la casa, con un solo interlocutor</h1>
+          <p class="hero-sub">Distribución, instalaciones y acabados coordinados de principio a fin.</p>
+          <div class="botons">
+            <a class="btn btn-principal" href="contacto.html">Pedir presupuesto</a>
+            <a class="btn btn-linia" href="tel:+34600000000">Llamar</a>
+          </div>
+        </div>
+        <div class="ph" style="--ratio:16/9">
+          <p class="ph-etiqueta"><span>Foto: salón reformado, luz natural, 16:9</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ QUÉ INCLUYE / CÓMO LO HACEMOS ═══ -->
+    <section class="seccio">
+      <div class="wrap dues-col">
+        <div>
+          <h2 class="aparicio">Qué incluye</h2>
+          <ul class="inclou">
+            <li>Redistribución de espacios, si hace falta</li>
+            <li>Instalación eléctrica y de fontanería completas</li>
+            <li>Carpintería interior y exterior</li>
+            <li>Suelos y alicatados de toda la vivienda</li>
+            <li>Pintura y acabados</li>
+            <li>Cocina y baños incluidos en el proyecto</li>
+            <li>Gestión de permisos y trámites con la comunidad</li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="aparicio">Cómo lo hacemos</h2>
+          <ol class="passos">
+            <li><div><h3>Empezamos por el plano</h3><p>Empezamos por el plano: cómo quieres distribuir la vivienda y por qué.</p></div></li>
+            <li><div><h3>Planificamos el orden</h3><p>Planificamos el orden de los oficios antes de pedir el primer material.</p></div></li>
+            <li><div><h3>Un jefe de obra</h3><p>Un jefe de obra es tu único contacto durante toda la reforma.</p></div></li>
+            <li><div><h3>Revisamos el avance</h3><p>Revisamos el avance cada semana contigo, no solo al final.</p></div></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ PROYECTO ═══ -->
+    <section class="seccio proceso">
+      <div class="wrap">
+        <article class="projecte">
+          <div class="comparador">
+            <div class="ph ph-ratllat"><p class="ph-etiqueta"><span>Foto: piso antes de la reforma, distribución original, 4:3</span></p></div>
+            <div class="ph comparador-despres"><p class="ph-etiqueta ph-dreta"><span>Foto: piso terminado, salón abierto, 4:3</span></p></div>
+            <span class="etq etq-abans">Antes</span><span class="etq etq-despres">Después</span>
+            <input class="comparador-rang" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después del piso de los años 70">
+            <div class="comparador-nansa" aria-hidden="true"></div>
+          </div>
+          <div>
+            <p class="projecte-tipus">Reforma integral</p>
+            <h3>Piso de los años 70</h3>
+            <p>Redistribuimos un piso con pasillos estrechos y habitaciones cerradas: ahora tiene un salón más grande y un baño más.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ═══ TESTIMONIO + FAQ ═══ -->
+    <section class="seccio" aria-labelledby="faq-titol">
+      <div class="wrap">
+        <figure class="testimoni">
+          <blockquote><p>Nos dieron el presupuesto cerrado antes de empezar y no cambió ni un euro en toda la obra. Recogían el escombro cada tarde, así que seguíamos viviendo cerca sin que fuera un caos. La entrega fue el día que decía el contrato.</p></blockquote>
+          <figcaption>Marta G.<span>Reforma integral</span></figcaption>
+        </figure>
+        <h2 id="faq-titol" class="aparicio">Preguntas frecuentes</h2>
+        <div class="faq">
+          <details>
+            <summary>¿El precio cerrado incluye cocina y baños?</summary>
+            <div><p>Si están dentro del proyecto que presupuestamos, sí. Todo lo acordado va en el mismo precio, sin partidas sueltas después.</p></div>
+          </details>
+          <details>
+            <summary>¿Cuánto dura una reforma integral?</summary>
+            <div><p>Entre 8 y 14 semanas, según los metros y si cambia la distribución. Es un plazo orientativo: te damos la fecha real en el presupuesto.</p></div>
+          </details>
+          <details>
+            <summary>¿Quién se encarga de los permisos?</summary>
+            <div><p>Nosotros. Comprobamos qué necesita tu comunidad o el ayuntamiento y hacemos el trámite antes de empezar.</p></div>
+          </details>
+          <details>
+            <summary>¿Dónde va el escombro?</summary>
+            <div><p>Lo retiramos con contenedor autorizado y lo recogemos cada día de obra, no se acumula en la vivienda.</p></div>
+          </details>
+          <details>
+            <summary>¿Qué garantía tiene la reforma completa?</summary>
+            <div><p>La misma en toda la obra: por escrito, en el contrato, sin depender de a quién le preguntes.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ TAMBIÉN HACEMOS ═══ -->
+    <section class="seccio" style="padding-top:0">
+      <div class="wrap">
+        <h2 class="aparicio">También hacemos</h2>
+        <div class="tambe">
+          <a href="cocinas.html">
+            <h3>Cocinas</h3>
+            <p>Muebles, electrodomésticos e instalaciones nuevas, coordinados para no alargar la obra.</p>
+          </a>
+          <a href="banos.html">
+            <h3>Baños</h3>
+            <p>Cambiamos lo que se ve y lo que no: instalaciones, alicatado y sanitarios.</p>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CTA FINAL ═══ -->
+    <section class="cta-final fosc seccio" aria-labelledby="cta-titol">
+      <div class="wrap cta-final-in">
+        <div>
+          <h2 id="cta-titol">¿Empezamos por el plano de tu casa?</h2>
+          <p class="intro">Visita, presupuesto cerrado y fecha de entrega firmada.</p>
+          <div class="botons"><a class="btn btn-principal" href="contacto.html">Pedir presupuesto</a></div>
+        </div>
+        <p>O llámanos:<br><a class="cta-tel" href="tel:+34600000000">600 000 000</a></p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ═══ PEU (model per a totes les pàgines) ═══ -->
+  <footer class="peu">
+    <div class="wrap">
+      <div class="peu-in">
+        <div>
+          <a class="marca" href="index.html">
+            <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 5a11 11 0 0 1 11 11H16z" fill="currentColor"/><path d="M16 16v11A11 11 0 0 1 5 16z" fill="currentColor"/><path d="M1 16h30" stroke="currentColor" stroke-width="2"/></svg>
+            Cota Cero
+          </a>
+          <p style="margin-top:1rem;max-width:26rem">Reformamos desde el plano hasta la entrega de llaves.</p>
+        </div>
+        <div>
+          <h2>Reformas</h2>
+          <ul>
+            <li><a href="reformas-integrales.html">Reformas integrales</a></li>
+            <li><a href="cocinas.html">Cocinas</a></li>
+            <li><a href="banos.html">Baños</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2>Contacto</h2>
+          <ul>
+            <li><a href="tel:+34600000000">600 000 000</a></li>
+            <li><a href="contacto.html">Pedir presupuesto</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="peu-baix">
+        <span>© 2026 Cota Cero Reformas</span>
+        <a href="aviso-legal.html">Aviso legal</a>
+        <a href="politica-privacidad.html">Privacidad</a>
+        <a href="politica-cookies.html">Cookies</a>
+      </div>
+    </div>
+  </footer>
+
+  <a class="wa" href="https://wa.me/34600000000" aria-label="Escribir por WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3a.5.5 0 0 0 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>
+  </a>
+<script src="js/traduccions.js" defer></script>
+<script src="js/main.js" defer></script>
+</body>
+</html>
