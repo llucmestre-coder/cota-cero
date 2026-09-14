@@ -67,13 +67,11 @@
           <h1>Una cocina nueva, con fecha de entrega firmada</h1>
           <p class="hero-sub">Muebles, electrodomésticos e instalaciones nuevas, coordinados para no alargar la obra.</p>
           <div class="botons">
-            <a class="btn btn-principal" href="contacto.html">Pedir presupuesto</a>
+            <a class="btn btn-principal" href="presupuesto.html?tipo=cocina">Calcula tu presupuesto</a>
             <a class="btn btn-linia" href="tel:+34600000000">Llamar</a>
           </div>
         </div>
-        <div class="ph" style="--ratio:16/9">
-          <p class="ph-etiqueta"><span>Foto: cocina terminada, encimera y frente, 16:9</span></p>
-        </div>
+        <img class="foto" src="assets/img/srv-cocina.jpg" alt="Cocina reformada con muebles nuevos y encimera de una sola pieza." width="1280" height="720">
       </div>
     </section>
 
@@ -109,8 +107,9 @@
       <div class="wrap">
         <article class="projecte">
           <div class="comparador">
+            <!-- IMATGE PENDENT: ab-cocina-antes -->
             <div class="ph ph-ratllat"><p class="ph-etiqueta"><span>Foto: cocina antes de la reforma, tabique cerrado, 4:3</span></p></div>
-            <div class="ph comparador-despres"><p class="ph-etiqueta ph-dreta"><span>Foto: cocina terminada, isla y luz natural, 4:3</span></p></div>
+            <div class="ph comparador-despres"><img src="assets/img/ab-cocina-despues.jpg" alt="La misma cocina ya reformada, abierta y con isla." width="1024" height="640" loading="lazy"></div>
             <span class="etq etq-abans">Antes</span><span class="etq etq-despres">Después</span>
             <input class="comparador-rang" type="range" min="0" max="100" value="50" aria-label="Comparar antes y después de la cocina en forma de L">
             <div class="comparador-nansa" aria-hidden="true"></div>
@@ -163,24 +162,30 @@
         <h2 class="aparicio">También hacemos</h2>
         <div class="tambe">
           <a href="banos.html">
-            <h3>Baños</h3>
-            <p>Cambiamos lo que se ve y lo que no: instalaciones, alicatado y sanitarios.</p>
+            <img src="assets/img/srv-bano.jpg" alt="" width="1280" height="720" loading="lazy">
+            <div class="tambe-text">
+              <h3>Baños</h3>
+              <p>Cambiamos lo que se ve y lo que no: instalaciones, alicatado y sanitarios.</p>
+            </div>
           </a>
           <a href="reformas-integrales.html">
-            <h3>Reformas integrales</h3>
-            <p>Distribución, instalaciones y acabados coordinados de principio a fin.</p>
+            <img src="assets/img/srv-integral.jpg" alt="" width="1280" height="720" loading="lazy">
+            <div class="tambe-text">
+              <h3>Reformas integrales</h3>
+              <p>Distribución, instalaciones y acabados coordinados de principio a fin.</p>
+            </div>
           </a>
         </div>
       </div>
     </section>
 
     <!-- ═══ CTA FINAL ═══ -->
-    <section class="cta-final fosc seccio" aria-labelledby="cta-titol">
+    <section class="cta-final fosc-calid seccio" aria-labelledby="cta-titol">
       <div class="wrap cta-final-in">
         <div>
           <h2 id="cta-titol">¿Empezamos por tu cocina?</h2>
           <p class="intro">Pide presupuesto y te lo entregamos por escrito, partida por partida.</p>
-          <div class="botons"><a class="btn btn-principal" href="contacto.html">Pedir presupuesto</a></div>
+          <div class="botons"><a class="btn btn-principal" href="presupuesto.html?tipo=cocina">Calcula tu presupuesto</a></div>
         </div>
         <p>O llámanos:<br><a class="cta-tel" href="tel:+34600000000">600 000 000</a></p>
       </div>
@@ -210,7 +215,8 @@
           <h2>Contacto</h2>
           <ul>
             <li><a href="tel:+34600000000">600 000 000</a></li>
-            <li><a href="contacto.html">Pedir presupuesto</a></li>
+            <li><a href="presupuesto.html?tipo=cocina">Calcula tu presupuesto</a></li>
+            <li><a href="contacto.html">Escríbenos</a></li>
           </ul>
         </div>
       </div>

@@ -466,6 +466,88 @@ fieldset.camp { border: 0; margin: 0; padding: 0; }
 .wa svg { width: 1.8rem; height: 1.8rem; }
 .wa:hover { background: #17733E; }
 
+/* ── v2: calidesa, fotos i seccions noves (15/09/2026) ─────────────────
+   Roure: la fusta de les fotos. --roure-text passa AA sobre guix; --nit és
+   el fosc càlid de les bandes noves (sobre --nit, accents en --mel o --cinta-clar). */
+:root {
+  --roure:      #B7834F;
+  --roure-text: #8A5A2B;
+  --nit:        #2B2622;
+  --mel:        #E2B98A;
+}
+.fosc-calid { background: var(--nit); color: var(--guix); }
+.fosc-calid .intro { color: #D9D2C8; }
+.fosc-calid .btn-principal { background: var(--mel); color: var(--nit); }
+.fosc-calid .btn-principal:hover { background: var(--blanc); }
+.fosc-calid :focus-visible { outline-color: var(--mel); }
+
+/* Foto de contingut: proporció fixa, sense salts de maquetació */
+.foto { display: block; width: 100%; aspect-ratio: var(--ratio, 4 / 3); object-fit: cover; border-radius: var(--radi); background: var(--vegetal); }
+
+/* Crida a la calculadora (home, després del hero) */
+.calc-crida-in { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(2rem, 5vw, 5rem); align-items: center; }
+.calc-crida h2 { max-width: 14ch; }
+.calc-crida .nota { margin-top: .9rem; font: 500 var(--t-s)/1.3 var(--f-titol); color: #D9D2C8; }
+.calc-tipus { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; }
+.calc-tipus a {
+  position: relative; display: block; border-radius: var(--radi); overflow: hidden; text-decoration: none;
+  color: var(--blanc); aspect-ratio: 3 / 4; isolation: isolate;
+}
+.calc-tipus img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; transition: transform .5s ease; }
+.calc-tipus a::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(43,38,34,0) 40%, rgba(43,38,34,.85) 100%); }
+.calc-tipus span { position: absolute; left: 1rem; right: 1rem; bottom: .9rem; font: 700 1.2rem/1.15 var(--f-titol); }
+.calc-tipus a:hover img { transform: scale(1.04); }
+@media (max-width: 860px) {
+  .calc-crida-in { grid-template-columns: 1fr; }
+  .calc-tipus a { aspect-ratio: 4 / 5; }
+}
+@media (max-width: 480px) { .calc-tipus span { font-size: 1rem; left: .6rem; bottom: .6rem; } }
+
+/* Quiénes somos */
+.nosaltres-in { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+.nosaltres-text p { max-width: 38rem; }
+.nosaltres-text p + p { margin-top: 1.1rem; }
+.nosaltres-fotos { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+.nosaltres-fotos figure { margin: 0; }
+.nosaltres-fotos figure:first-child { grid-column: 1 / -1; }
+.nosaltres-fotos figcaption { margin-top: .45rem; font: 500 var(--t-xs)/1.35 var(--f-titol); color: var(--cota); }
+@media (max-width: 860px) { .nosaltres-in { grid-template-columns: 1fr; } }
+
+/* Galeria de projectes acabats + visor */
+.galeria { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .9rem; margin-top: 3rem; }
+.galeria figure { margin: 0; }
+.galeria figure:nth-child(1), .galeria figure:nth-child(6) { grid-column: span 2; }
+.galeria button { display: block; width: 100%; padding: 0; border: 0; background: none; cursor: zoom-in; border-radius: var(--radi); overflow: hidden; }
+.galeria img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform .5s ease; }
+.galeria figure:nth-child(1) img, .galeria figure:nth-child(6) img { aspect-ratio: 16 / 10; }
+.galeria button:hover img { transform: scale(1.03); }
+.galeria figcaption { margin-top: .55rem; }
+.galeria figcaption strong { display: block; font: 600 1rem/1.3 var(--f-titol); }
+.galeria figcaption span { font: 500 var(--t-xs)/1.3 var(--f-titol); color: var(--roure-text); }
+@media (max-width: 860px) {
+  .galeria { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .galeria figure:nth-child(1), .galeria figure:nth-child(6) { grid-column: 1 / -1; }
+}
+.visor { border: 0; padding: 0; background: transparent; max-width: min(92vw, 1100px); width: 100%; }
+.visor::backdrop { background: rgba(43, 38, 34, .88); }
+.visor img { width: 100%; max-height: 78vh; object-fit: contain; border-radius: var(--radi); }
+.visor p { color: var(--guix); margin-top: .75rem; font: 500 1rem/1.4 var(--f-titol); }
+.visor-tanca {
+  position: absolute; top: .5rem; right: .5rem; width: 2.75rem; height: 2.75rem; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--guix); color: var(--grafit); font: 700 1.3rem/1 var(--f-titol);
+}
+
+/* Pàgines de servei: foto del hero i targetes «También hacemos» amb foto */
+.servei-hero .foto { --ratio: 16 / 10; }
+.tambe a { padding: 0; overflow: hidden; }
+.tambe a img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; transition: transform .5s ease; }
+.tambe a:hover img { transform: scale(1.03); }
+.tambe a .tambe-text { display: block; padding: 1.25rem 1.5rem 1.5rem; }
+
+/* Comparador amb fotos reals */
+.comparador img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.comparador-despres img { clip-path: none; }
+
 /* ── Legals ──────────────────────────────────────────────────────────── */
 .legal { max-width: 46rem; padding-block: 3rem var(--seccio); }
 .legal h1 { font-size: var(--t-xl); margin-bottom: 2rem; }

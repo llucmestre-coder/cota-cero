@@ -100,16 +100,16 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var nom = form.elements['nombre'];
-      var tel = form.elements['telefono'];
-      var priv = form.elements['privacidad'];
+      var email = form.elements['email'];
+      var comentario = form.elements['comentario'];
       var errors = 0;
       marca(nom, nom.value.trim() ? '' : I18N.t('Escribe tu nombre.'));
       if (!nom.value.trim()) errors++;
-      var telOk = /^[+\d][\d\s-]{7,}$/.test(tel.value.trim());
-      marca(tel, telOk ? '' : I18N.t('Escribe un teléfono de al menos 9 cifras.'));
-      if (!telOk) errors++;
-      if (!priv.checked) { errors++; marca(priv, I18N.t('Necesitamos que aceptes la política de privacidad.')); }
-      else marca(priv, '');
+      var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+      marca(email, emailOk ? '' : I18N.t('Escribe un correo válido.'));
+      if (!emailOk) errors++;
+      marca(comentario, comentario.value.trim() ? '' : I18N.t('Cuéntanos qué necesitas.'));
+      if (!comentario.value.trim()) errors++;
       if (errors) {
         var primer = form.querySelector('[aria-invalid="true"]');
         if (primer) primer.focus();
@@ -125,9 +125,9 @@
       }).then(function (r) {
         if (!r.ok) throw new Error(String(r.status));
         form.reset();
-        mostra('ok', I18N.t('Recibido. Te llamamos en un día laborable para concretar la visita.'));
+        mostra('ok', I18N.t('Recibido. Te contestamos en breve.'));
       }).catch(function () {
-        mostra('error', I18N.t('No se ha podido enviar. Llámanos al 600 000 000 y lo vemos por teléfono.'));
+        mostra('error', I18N.t('No se ha podido enviar. Llámanos al 600 000 000 y te atendemos directamente.'));
       }).finally(function () {
         boto.disabled = false;
         boto.textContent = textBoto;
