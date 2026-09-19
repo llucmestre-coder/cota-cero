@@ -652,7 +652,9 @@ fieldset.camp { border: 0; margin: 0; padding: 0; }
    la primera en carregar i després la del panell visible. */
 html:not(.te-js) .plano-fotos img:first-child { opacity: 1; }
 @media (max-width: 860px) {
-  .plano-fotos { aspect-ratio: 16 / 10; max-height: 34vh; width: 100%; }
+  /* Amplada limitada per l'alçada, no max-height: així no es trenca la proporció
+     i les fotos no es tallen més del compte. */
+  .plano-fotos { width: min(100%, calc(34vh * 4 / 3)); margin-inline: auto; }
 }
 
 /* ── Legals ──────────────────────────────────────────────────────────── */
