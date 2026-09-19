@@ -28,7 +28,14 @@
 
   var estat = llegeix() || { pas: 0, respostes: {}, correu: '', resultat: null };
 
+  /* Només es recupera on s'havia quedat si es recarrega la pàgina. Arribant-hi
+     des de qualsevol botó o enllaç, la calculadora comença de zero. */
   function llegeix() {
+    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (!nav || nav.type !== 'reload') {
+      try { sessionStorage.removeItem(DESAT); } catch (e) { /* res */ }
+      return null;
+    }
     try { return JSON.parse(sessionStorage.getItem(DESAT)); } catch (e) { return null; }
   }
   function desa() {
