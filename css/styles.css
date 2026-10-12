@@ -752,3 +752,7 @@ html:not(.te-js) .plano-fotos img:first-child { opacity: 1; }
 .tria-idioma-menu button:hover { background: var(--tria-hover); }
 .tria-idioma-menu button[aria-current='true'] { font-weight: 600; color: var(--tria-actiu); }
 .tria-idioma-menu button[aria-current='true']::after { content: '✓'; margin-left: auto; }
+
+/* Peu amb el crèdit «Demo de Ductik» (12/10/2026): marge a sota perquè, en arribar
+   al final, el botó flotant de WhatsApp no tapi l'última línia del peu. */
+body:has(.wa) .peu { padding-bottom: 5.5rem; }
