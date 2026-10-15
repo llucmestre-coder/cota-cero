@@ -1,0 +1,253 @@
+/* =========================================================================
+   COTA CERO — escena de la sala (home). PLA-ESCENES.md.
+   Estat per defecte = sense JS o amb moviment reduït: hero sobre la sala
+   acabada (la capa de dalt, f6) i les fases en una llista amb la seva foto.
+   Amb js/sala.js, l'<html> porta .sala-moviment: la sala queda fixa, el zoom
+   de la «o» la descobreix i les fases hi pugen per sobre.
+   ========================================================================= */
+
+:root {
+  --sala-fosc: 22 25 28;          /* el grafit del vel, en canals per poder-hi posar alfa */
+  --laser: #7D95FF;               /* la línia del nivell làser: la cinta, encesa */
+  --entra: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Text blanc directament sobre la foto: contacte, volum i halo */
+  --ombra-text: 0 1px 2px rgb(var(--sala-fosc) / .55), 0 4px 16px rgb(var(--sala-fosc) / .5), 0 14px 48px rgb(var(--sala-fosc) / .45);
+  /* El text petit necessita un halo més ferm i més a prop de la lletra (sobre guix blanc, si no, no es llegeix) */
+  --ombra-text-petit: 0 1px 1px rgb(var(--sala-fosc) / .8), 0 0 6px rgb(var(--sala-fosc) / .65), 0 2px 18px rgb(var(--sala-fosc) / .6);
+}
+
+.sala { position: relative; background: var(--grafit); }
+.sala-escenari {
+  position: relative; height: 100svh; min-height: 34rem; overflow: hidden;
+  color: var(--blanc); isolation: isolate;
+}
+.sala-fotos, .sala-capa, .sala-fotos img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sala-fotos { background: var(--vegetal); }
+.sala-fotos img { object-fit: cover; }
+.sala-capa { overflow: hidden; }
+
+/* ── Hero a la cantonada, amb el vel calculat per a una foto blanca ─────── */
+.sala-hero {
+  position: absolute; inset: 0; z-index: 3;
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start;
+  padding: calc(var(--cap-h) + 2rem) var(--gutter) clamp(2.5rem, 7svh, 5.5rem);
+}
+.sala-hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(to right, rgb(var(--sala-fosc) / .9) 0%, rgb(var(--sala-fosc) / .86) 42%, rgb(var(--sala-fosc) / 0) 74%);
+  -webkit-mask-image: linear-gradient(to top, #000 58%, transparent 88%);
+  mask-image: linear-gradient(to top, #000 58%, transparent 88%);
+}
+.sala-hero h1 {
+  max-width: 13ch; color: var(--blanc);
+  font-size: clamp(2.6rem, 1.2rem + 5vw, 5.4rem); line-height: 0.98; letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.sala-hero .hero-sub { max-width: 30rem; margin-top: 1.25rem; color: #E4E7E2; font-size: clamp(1.1rem, 1rem + 0.4vw, 1.3rem); }
+.sala-hero .botons { margin-top: 1.75rem; }
+.sala-hero .btn-linia { border-color: rgb(255 255 255 / .85); color: var(--blanc); }
+.sala-hero :focus-visible { outline-color: var(--cinta-clar); }
+@media (hover: hover) {
+  .sala-hero .btn-linia:hover { background: var(--blanc); color: var(--grafit); }
+}
+@media (max-width: 760px) {
+  .sala-hero::before {
+    background: linear-gradient(to top, rgb(var(--sala-fosc) / .9) 0%, rgb(var(--sala-fosc) / .86) 52%, rgb(var(--sala-fosc) / 0) 82%);
+    -webkit-mask-image: none; mask-image: none;
+  }
+}
+/* Amb moviment, sense vel (en Lluc, 15/10/2026: «que no estigui més fosca la part de darrere»): el text
+   s'aguanta sobre la foto amb una ombra en tres capes (contacte, volum i halo) que li dona cos sense enfosquir la sala.
+   El vel es queda només a l'estat quiet, on el hero va sobre la sala acabada, que és blanca. */
+.sala-moviment .sala-hero::before { content: none; }
+.sala-moviment .sala-hero h1,
+.sala-moviment .sala-hero .hero-sub { text-shadow: var(--ombra-text); }
+.sala-moviment .sala-hero .hero-sub { color: var(--blanc); font: 500 clamp(1.1rem, 1rem + 0.4vw, 1.3rem)/1.45 var(--f-titol); text-shadow: var(--ombra-text-petit); }
+.sala-moviment .sala-hero .btn { box-shadow: 0 10px 30px -8px rgb(0 0 0 / .5); }
+
+/* ── Peces que només existeixen amb moviment ───────────────────────────── */
+.zoom-o, .sala-laser, .sala-regla, .sala-intro-espai { display: none; }
+
+/* ── Fases, estat per defecte: llista amb foto ─────────────────────────── */
+.sala-fases { background: var(--guix); color: var(--grafit); padding-block: var(--seccio); }
+.fases-llista { list-style: none; margin: 0; padding: 0; }
+.fase-obertura, .fase {
+  max-width: var(--ample); margin: 0 auto; padding-inline: var(--gutter);
+}
+.fase-obertura { margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+.fase-obertura h2 { font-size: var(--t-xl); max-width: 18ch; text-wrap: balance; }
+.fase-obertura p { max-width: 36rem; margin-top: 1rem; }
+.fase {
+  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: center;
+}
+.fase + .fase { margin-top: clamp(2.5rem, 5vw, 4.5rem); }
+.fase-foto { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: var(--radi); background: var(--vegetal); }
+@media (max-width: 760px) { .fase { grid-template-columns: 1fr; } }
+
+.fase-quan { font: 600 var(--t-s)/1.2 var(--f-titol); color: var(--cinta); font-variant-numeric: tabular-nums; }
+.fase-targeta h3 { font-size: var(--t-l); margin-top: 0.35rem; letter-spacing: -0.02em; }
+.fase-targeta h3 + p { margin-top: 0.75rem; }
+.fase-tens {
+  display: flex; gap: 0.6rem; align-items: baseline;
+  margin-top: 1.1rem; padding-top: 0.85rem; border-top: 1px solid var(--linia);
+  font: 600 1rem/1.35 var(--f-titol);
+}
+.fase-tens::before { content: ""; flex: none; width: 0.9rem; height: 2px; background: var(--cinta); transform: translateY(-0.25em); }
+.fase-nota { margin-top: 0.9rem; font: 500 var(--t-xs)/1.4 var(--f-titol); color: var(--cota); }
+.fase-targeta .botons { margin-top: 1.4rem; }
+
+/* =========================================================================
+   AMB MOVIMENT (.sala-moviment, el posa js/sala.js)
+   ========================================================================= */
+.sala-moviment .cap {
+  position: fixed; inset: 0 0 auto 0;
+  transition: transform .45s var(--entra);
+}
+/* Sense transició fins al primer fotograma: si no, en carregar es veu la capçalera marxant */
+.sala-moviment:not(.sala-llesta) .cap { transition: none;
+}
+.sala-moviment.intro-activa .cap { transform: translateY(-100%); }
+
+.sala-moviment .sala-escenari { position: sticky; top: 0; margin-bottom: -100svh; }
+.sala-moviment .sala-hero { opacity: 0; visibility: hidden; }  /* l'ensenya el zoom (js/sala.js) */
+.sala-moviment .sala-intro-espai { display: block; height: 100svh; }
+/* Mentre la intro es fa sola, la pàgina no es mou (js/sala.js); la barra no desapareix i res no salta */
+html.sala-moviment { scrollbar-gutter: stable; }
+.intro-bloqueja, .intro-bloqueja body { overflow: hidden; }
+.sala-moviment .sala-fotos { transform-origin: 66% 42%; will-change: transform; }
+.sala-moviment .sala-capa, .sala-moviment .sala-capa img { will-change: transform; }
+
+/* Zoom: vel grafit amb el nom; el forat de la «o» deixa veure la sala */
+.sala-moviment .zoom-o { display: block; position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; overflow: visible; }
+.zoom-o-vel { fill: var(--grafit); }
+.zoom-o-nom { fill: var(--guix); }
+
+/* Nivell làser: la vora de l'estat nou mentre escombra la sala */
+.sala-moviment .sala-laser {
+  display: block; position: absolute; left: 0; right: 0; top: -1px; height: 2px; z-index: 2;
+  background: var(--laser); opacity: 0; will-change: transform, opacity;
+  box-shadow: 0 0 6px 1px rgb(125 149 255 / .9), 0 0 28px 4px rgb(125 149 255 / .45);
+}
+
+/* Regla de fases: on ets */
+.sala-moviment .sala-regla {
+  position: absolute; z-index: 3; left: var(--gutter); top: 50%; translate: 0 -50%;
+  list-style: none; margin: 0; padding: 0;
+  font: 600 var(--t-xs)/1 var(--f-titol); color: rgb(255 255 255 / .7); text-shadow: var(--ombra-text); opacity: 0;
+}
+.sala-regla li::before { box-shadow: 0 1px 6px rgb(var(--sala-fosc) / .6); }
+.sala-regla li { display: flex; align-items: center; gap: 0.6rem; padding-block: 0.42rem; transition: color .2s; }
+.sala-regla li::before { content: ""; width: 0.55rem; height: 2px; background: currentColor; transition: width .25s var(--entra), background-color .2s; }
+.sala-regla li.activa { color: var(--blanc); }
+.sala-regla li.activa::before { width: 1.3rem; background: var(--laser); }
+@media (min-width: 900px) { .sala-moviment .sala-regla { display: block; } }
+
+/* Les fases pugen per sobre de la sala fixa */
+.sala-moviment .sala-fases { position: relative; z-index: 6; background: none; padding-block: 0 35svh; }
+.sala-moviment .fase-obertura,
+.sala-moviment .fase {
+  display: flex; align-items: center; justify-content: flex-end;
+  max-width: none; min-height: 100svh; margin: 0; padding: var(--cap-h) var(--gutter) 2rem;
+}
+.sala-moviment .fase + .fase { margin-top: 0; }
+.sala-moviment .fase-foto { display: none; }
+/* Sense targeta (en Lluc, 15/10/2026): el text va directament sobre la foto, blanc i amb ombra.
+   La profunditat la donen les capes: cada línia puja a una velocitat diferent i la sala avança a poc a poc (js/sala.js). */
+.sala-moviment .fase-targeta {
+  width: min(31rem, 100%); color: var(--blanc); text-shadow: var(--ombra-text);
+}
+.sala-moviment .fase-targeta h2,
+.sala-moviment .fase-targeta h3 { color: var(--blanc); font-size: clamp(2.1rem, 1.3rem + 2.4vw, 3.4rem); line-height: 1; letter-spacing: -0.03em; text-wrap: balance; }
+.sala-moviment .fase-targeta p:not([class]) { font: 500 1.15rem/1.5 var(--f-titol); text-shadow: var(--ombra-text-petit); }
+.sala-moviment .fase-quan { color: var(--cinta-clar); font-size: 1rem; text-shadow: var(--ombra-text-petit); }
+.sala-moviment .fase-tens { border-top-color: rgb(255 255 255 / .5); font-size: 1.05rem; text-shadow: var(--ombra-text-petit); }
+.sala-moviment .fase-tens::before { background: var(--laser); box-shadow: 0 0 10px rgb(125 149 255 / .8); }
+.sala-moviment .fase-nota { color: var(--blanc); text-shadow: var(--ombra-text-petit); }
+.sala-moviment .fase-targeta .btn { box-shadow: 0 10px 30px -8px rgb(0 0 0 / .5); text-shadow: none; }
+.sala-moviment .fase-targeta > * { will-change: transform; }
+@media (max-width: 760px) {
+  .sala-moviment .fase-obertura,
+  .sala-moviment .fase { align-items: flex-end; justify-content: stretch; padding-bottom: 2rem; }
+  .sala-moviment .fase-targeta { width: 100%; }
+  .sala-moviment .fase-targeta p:not([class]) { font-size: 1.05rem; }
+}
+
+/* Càmera: la sala i la línia van juntes quan la sala avança */
+.sala-camera { position: absolute; inset: 0; }
+.sala-moviment .sala-camera { will-change: transform; transform-origin: 42% 46%; }
+
+
+/* =========================================================================
+   CONTRACTE (en Lluc, 15/10/2026): el full de pressupost puja sobre la sala acabada i se signa.
+   Estat per defecte: full estàtic amb la firma i el segell ja posats.
+   ========================================================================= */
+.fase-contracte { max-width: var(--ample); margin: clamp(3rem, 6vw, 5rem) auto 0; padding-inline: var(--gutter); }
+.contracte-fixe { display: grid; justify-items: center; gap: 1.75rem; }
+.contracte {
+  position: relative; width: min(34rem, 100%); padding: clamp(1.5rem, 4vw, 2.5rem);
+  background: var(--blanc); color: var(--grafit); border-radius: 3px;
+  box-shadow: 0 1px 0 var(--linia), 0 30px 60px -20px rgb(var(--sala-fosc) / .55), 0 8px 18px -6px rgb(var(--sala-fosc) / .3);
+  text-shadow: none;
+}
+.contracte-etiqueta { font: 700 var(--t-xs)/1 var(--f-titol); letter-spacing: .12em; text-transform: uppercase; color: var(--cinta); }
+.contracte h2 { margin-top: .6rem; font-size: clamp(1.5rem, 1.1rem + 1.4vw, 2.1rem); line-height: 1.05; letter-spacing: -0.025em; text-wrap: balance; }
+.contracte-sub { margin-top: .6rem; font: 500 var(--t-s)/1.4 var(--f-titol); color: var(--cota); }
+.contracte-partides { list-style: none; margin: 1.25rem 0 0; padding: 0; border-top: 2px solid var(--grafit); }
+.contracte-partides li, .contracte-total {
+  display: flex; justify-content: space-between; gap: 1rem; align-items: baseline;
+  padding: .6rem 0; border-bottom: 1px dashed var(--linia); font: 500 var(--t-s)/1.3 var(--f-titol);
+}
+.contracte-partides b, .contracte-total b { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.contracte-total { border-bottom: 0; padding-top: .9rem; font-weight: 700; font-size: 1.05rem; }
+.contracte-total b { font-size: 1.5rem; letter-spacing: -.02em; }
+.contracte-clausula { margin-top: .4rem; font: 500 var(--t-xs)/1.45 var(--f-titol); color: var(--cota); }
+.contracte-signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 1.5rem; }
+.contracte-firma { display: grid; gap: .35rem; align-content: end; font: 500 var(--t-xs)/1.2 var(--f-titol); color: var(--cota); }
+.contracte-firma svg { width: 100%; height: 3.4rem; fill: none; stroke: var(--cinta-fosc); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.contracte-firma svg, .contracte-firma i { border-bottom: 1px solid var(--grafit); }
+.contracte-firma i { height: 3.4rem; }
+.contracte-segell {
+  position: absolute; right: clamp(1rem, 3vw, 2rem); bottom: 5.2rem; margin: 0; padding: .35rem .8rem;
+  border: 3px solid var(--cinta); border-radius: 4px; color: var(--cinta); rotate: -9deg;
+  font: 800 1.1rem/1 var(--f-titol); letter-spacing: .1em; text-transform: uppercase; opacity: .88; mix-blend-mode: multiply;
+}
+@media (max-width: 520px) {
+  .contracte-segell { font-size: .9rem; }
+}
+
+/* Amb moviment: el full queda enganxat al centre mentre es fa la signatura */
+.sala-moviment .fase-contracte { max-width: none; margin: 0; padding: 0; min-height: 260svh; }
+.sala-moviment .contracte-fixe { position: sticky; top: 0; height: 100svh; align-content: center; padding: var(--cap-h) var(--gutter) 2rem; }
+.sala-moviment .contracte, .sala-moviment .contracte-fixe .botons { will-change: transform, opacity; }
+.sala-moviment .contracte-fixe .btn { box-shadow: 0 10px 30px -8px rgb(0 0 0 / .5); }
+@media (max-height: 760px) {
+  .contracte { padding: 1.1rem 1.5rem; }
+  .contracte h2 { font-size: 1.35rem; }
+  .contracte-partides { margin-top: .8rem; }
+  .contracte-partides li, .contracte-total { padding-block: .35rem; }
+  .contracte-firma svg, .contracte-firma i { height: 2.4rem; }
+  .contracte-signatures { margin-top: .9rem; }
+  .contracte-segell { bottom: 3.8rem; }
+  .sala-moviment .contracte-fixe { gap: 1rem; padding-bottom: 1rem; }
+}
+
+/* =========================================================================
+   CARRIL DE PROJECTES (en Lluc, 15/10/2026): l'scroll vertical mou les fotos de dreta a esquerra;
+   les del mig són més grans i nítides que les dels costats (js/sala.js). Sense moviment: la graella de sempre.
+   ========================================================================= */
+.sala-moviment .galeria-carril { padding-block: 0; }
+.sala-moviment .carril-fixe {
+  height: 100svh; min-height: 34rem; overflow: hidden; display: flex; flex-direction: column; justify-content: center;
+  padding-top: var(--cap-h);
+}
+.sala-moviment .galeria-carril .galeria {
+  display: flex; align-items: flex-end; gap: clamp(1rem, 2.5vw, 2rem); width: max-content; margin-top: clamp(1rem, 4svh, 2.5rem);
+  will-change: transform;
+}
+.sala-moviment .galeria-carril .galeria figure {
+  flex: none; width: clamp(14rem, min(30vw, 32svh), 27rem); transform-origin: 50% 100%; will-change: transform, opacity;
+}
+.sala-moviment .galeria-carril .galeria figure img { aspect-ratio: 4 / 5; }
+.sala-moviment .galeria-carril .galeria button:hover img { transform: none; }
+.sala-moviment .galeria-carril .galeria figcaption { max-width: 100%; }
