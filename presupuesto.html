@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Calcula tu presupuesto · Cota Cero Reformas</title>
-  <meta name="description" content="Calcula en un minuto cuánto puede costar la reforma de tu cocina, tu baño o tu casa. Sin compromiso.">
+  <title>Diseña tu reforma · Cota Cero Reformas</title>
+  <meta name="description" content="Elige cocina, baño o piso entero, cambia acabados y metros en una maqueta 3D y mira el precio cerrado mientras eliges.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Calcula tu presupuesto · Cota Cero Reformas">
-  <meta property="og:description" content="Calcula en un minuto cuánto puede costar la reforma de tu cocina, tu baño o tu casa. Sin compromiso.">
+  <meta property="og:title" content="Diseña tu reforma · Cota Cero Reformas">
+  <meta property="og:description" content="Elige cocina, baño o piso entero, cambia acabados y metros en una maqueta 3D y mira el precio cerrado mientras eliges.">
   <meta property="og:image" content="https://cota-cero.pages.dev/assets/img/srv-integral.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <!-- Web de demostració: no s'indexa (PLA.md §Honestedat). -->
@@ -16,10 +16,12 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/calculadora.css">
+  <link rel="preload" href="assets/fonts/BricolageGrotesque-0.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/panell.css">
   <script src="js/i18n.js"></script>
+  <script type="importmap">{ "imports": { "three": "./assets/js/three/three.module.min.js" } }</script>
 </head>
-<body>
+<body class="pg-panell">
   <a class="salta" href="#contingut">Saltar al contenido</a>
 
   <header class="cap">
@@ -58,129 +60,208 @@
     </div>
   </header>
 
-  <main id="contingut" class="calc">
-    <div class="calc-in wrap" id="calc">
-
-      <div class="calc-cap">
-        <button class="calc-enrere" type="button" data-calc-enrere hidden>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-          Atrás
-        </button>
-        <div class="calc-progres" role="progressbar" aria-label="Progreso" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><i></i></div>
-        <p class="calc-comptador" aria-hidden="true"><span data-calc-num>1</span>/5</p>
+  <main id="contingut" class="pn" data-mode="cocina">
+    <!-- ═══ VISOR 3D ═══ -->
+    <section class="pn-visor" aria-label="Vista 3D de tu reforma">
+      <div class="pn-modes" role="tablist" aria-label="Qué quieres reformar">
+        <button type="button" role="tab" aria-selected="true" data-mode-boto="cocina">Cocina</button>
+        <button type="button" role="tab" aria-selected="false" data-mode-boto="bano">Baño</button>
+        <button type="button" role="tab" aria-selected="false" data-mode-boto="integral">Piso entero</button>
       </div>
-      <ul class="calc-resum" data-calc-resum aria-label="Tus respuestas"></ul>
+      <canvas class="pn-canvas" aria-hidden="true"></canvas>
+      <div class="pn-etiquetes" aria-hidden="true"></div>
+      <p class="pn-estat" data-estat="carrega">Montando la maqueta…</p>
+      <p class="pn-pista">Arrastra para girarla</p>
+    </section>
 
-      <!-- 1. Tipus d'obra -->
-      <section class="calc-pas" data-pas="tipo" aria-labelledby="p-tipo">
-        <p class="calc-intro">Calcula tu presupuesto en 1 minuto. Sin compromiso.</p>
-        <h1 id="p-tipo" tabindex="-1">¿Qué quieres reformar?</h1>
-        <div class="calc-ops calc-ops-foto">
-          <button class="calc-op" type="button" data-valor="cocina"><img src="assets/img/srv-cocina.jpg" alt="" width="1280" height="720"><span class="calc-op-nom">Cocina</span></button>
-          <button class="calc-op" type="button" data-valor="bano"><img src="assets/img/srv-bano.jpg" alt="" width="1280" height="720"><span class="calc-op-nom">Baño</span></button>
-          <button class="calc-op" type="button" data-valor="casa"><img src="assets/img/srv-integral.jpg" alt="" width="1280" height="720"><span class="calc-op-nom">Toda la casa</span></button>
-        </div>
-      </section>
+    <!-- ═══ PANELL ═══ -->
+    <section class="pn-panell" aria-labelledby="pn-titol">
+      <div class="pn-cos">
+        <h1 id="pn-titol">Diseña tu reforma y mira lo que cuesta mientras eliges.</h1>
+        <p class="pn-intro">Cada cambio mueve el precio. Antes de firmar venimos a medir, y si todo cuadra, firmamos este precio.</p>
 
-      <!-- 2. Mida (els trams depenen del tipus) -->
-      <section class="calc-pas" data-pas="mida" aria-labelledby="p-mida" hidden>
-        <h2 id="p-mida" tabindex="-1">¿Qué tamaño tiene?</h2>
-        <p class="calc-ajuda">Mueve la barra. Una idea aproximada es suficiente.</p>
-        <div class="calc-slider">
-          <output class="calc-m2" for="calc-metres" aria-hidden="true"><span data-calc-m2-num>10</span> m²</output>
-          <input type="range" id="calc-metres" min="3" max="30" step="1" value="10" aria-label="Metros cuadrados">
-          <div class="calc-slider-escala" aria-hidden="true"><span data-calc-min>3 m²</span><span data-calc-max>30 m²</span></div>
-          <button class="btn btn-principal" type="button" data-calc-continua>Continuar</button>
-        </div>
-      </section>
-
-      <!-- 3. Què inclou -->
-      <section class="calc-pas" data-pas="inclou" aria-labelledby="p-inclou" hidden>
-        <h2 id="p-inclou" tabindex="-1">¿Hay que mover paredes o instalaciones?</h2>
-        <div class="calc-ops calc-ops-dues">
-          <button class="calc-op" type="button" data-valor="mantener"><span class="calc-op-nom">No, mantener la distribución</span><span class="calc-op-desc">Cambiamos acabados e instalaciones donde ya están.</span></button>
-          <button class="calc-op" type="button" data-valor="mover"><span class="calc-op-nom">Sí, cambiar la distribución</span><span class="calc-op-desc">Movemos tabiques, tomas de agua o desagües.</span></button>
-        </div>
-      </section>
-
-      <!-- 4. Acabats -->
-      <section class="calc-pas" data-pas="acabats" aria-labelledby="p-acabats" hidden>
-        <h2 id="p-acabats" tabindex="-1">¿Qué acabados buscas?</h2>
-        <div class="calc-ops calc-ops-foto">
-          <button class="calc-op" type="button" data-valor="basicos"><img src="assets/img/acab-basico.jpg" alt="" width="768" height="768" loading="lazy"><span class="calc-op-nom">Básicos</span><span class="calc-op-desc">Materiales de gama estándar, bien colocados.</span></button>
-          <button class="calc-op" type="button" data-valor="medios"><img src="assets/img/acab-medio.jpg" alt="" width="768" height="768" loading="lazy"><span class="calc-op-nom">Medios</span><span class="calc-op-desc">Porcelánico grande, madera y grifería de diseño.</span></button>
-          <button class="calc-op" type="button" data-valor="altos"><img src="assets/img/acab-alto.jpg" alt="" width="768" height="768" loading="lazy"><span class="calc-op-nom">Altos</span><span class="calc-op-desc">Piedra natural, madera maciza y muebles a medida.</span></button>
-        </div>
-      </section>
-
-      <!-- 5. Quan -->
-      <section class="calc-pas" data-pas="inici" aria-labelledby="p-inici" hidden>
-        <h2 id="p-inici" tabindex="-1">¿Cuándo te gustaría empezar?</h2>
-        <div class="calc-ops">
-          <button class="calc-op" type="button" data-valor="ya"><span class="calc-op-nom">Lo antes posible</span></button>
-          <button class="calc-op" type="button" data-valor="meses"><span class="calc-op-nom">En 1 a 3 meses</span></button>
-          <button class="calc-op" type="button" data-valor="mirando"><span class="calc-op-nom">Solo estoy mirando precios</span></button>
-        </div>
-      </section>
-
-      <!-- 6. Correu + captcha -->
-      <section class="calc-pas" data-pas="correu" aria-labelledby="p-correu" hidden>
-        <h2 id="p-correu" tabindex="-1">Tu estimación está lista</h2>
-        <p class="calc-ajuda">Verifica tu correo para verla.</p>
-        <form class="calc-form" data-calc-form-correu novalidate>
-          <label for="calc-email">Tu correo</label>
-          <div class="calc-fila">
-            <input id="calc-email" name="email" type="email" autocomplete="email" inputmode="email" required>
-            <button class="btn btn-principal" type="submit">Enviarme el código</button>
-          </div>
-          <div class="calc-captcha" id="calc-turnstile"></div>
-          <p class="calc-error" data-calc-error role="alert"></p>
-          <p class="calc-legal">Guardamos tu correo y tus respuestas para poder contactarte sobre esta reforma. Más información en la <a href="politica-privacidad.html">política de privacidad</a>.</p>
-        </form>
-      </section>
-
-      <!-- 7. Codi -->
-      <section class="calc-pas" data-pas="codi" aria-labelledby="p-codi" hidden>
-        <h2 id="p-codi" tabindex="-1">Escribe el código</h2>
-        <p class="calc-ajuda">Lo hemos enviado a <strong data-calc-correu></strong>. Caduca en 10 minutos.</p>
-        <form class="calc-form" data-calc-form-codi novalidate>
-          <fieldset class="calc-codi">
-            <legend class="visually-hidden">Código de 6 cifras</legend>
-            <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-label="Cifra 1">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Cifra 2">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Cifra 3">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Cifra 4">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Cifra 5">
-            <input type="text" inputmode="numeric" maxlength="1" aria-label="Cifra 6">
+        <!-- ── Cocina ── -->
+        <form class="pn-opcions" data-per="cocina" aria-label="Opciones de la cocina">
+          <fieldset class="pn-grup">
+            <legend>Superficie <output data-tria="cocina.m2"></output></legend>
+            <input class="pn-rang" type="range" name="m2" min="6" max="30" step="1" value="12" aria-label="Metros cuadrados de la cocina">
+            <div class="pn-rang-escala" aria-hidden="true"><span>6 m²</span><span>30 m²</span></div>
+            <p class="pn-avis" data-avis aria-live="polite" hidden></p>
           </fieldset>
-          <p class="calc-error" data-calc-error role="alert"></p>
-          <div class="calc-accions">
-            <button class="calc-enllac" type="button" data-calc-reenvia disabled>Reenviar código</button>
-            <button class="calc-enllac" type="button" data-calc-canvia-correu>Cambiar el correo</button>
-          </div>
+          <fieldset class="pn-grup">
+            <legend>Distribución <output data-tria="cocina.forma"></output></legend>
+            <div class="pn-targetes">
+              <label class="pn-targeta"><input type="radio" name="forma" value="lineal" checked><span class="pn-dib" data-dib="lineal"></span><b>Lineal</b><small>Una pared</small></label>
+              <label class="pn-targeta"><input type="radio" name="forma" value="l"><span class="pn-dib" data-dib="l"></span><b>En L</b><small>Dos paredes</small></label>
+              <label class="pn-targeta"><input type="radio" name="forma" value="isla"><span class="pn-dib" data-dib="isla"></span><b>Con isla</b><small>Para comer en ella</small></label>
+            </div>
+          </fieldset>
+          <fieldset class="pn-grup">
+            <legend>Muebles <output data-tria="cocina.frente"></output></legend>
+            <div class="pn-mostres">
+              <label class="pn-mostra" style="--m:#E7E3DA"><input type="radio" name="frente" value="blanco" checked><span class="visually-hidden">Blanco roto</span></label>
+              <label class="pn-mostra" style="--m:#8F9B86"><input type="radio" name="frente" value="salvia"><span class="visually-hidden">Verde salvia</span></label>
+              <label class="pn-mostra" style="--m:#2B3446"><input type="radio" name="frente" value="noche"><span class="visually-hidden">Azul noche</span></label>
+              <label class="pn-mostra" style="--m:#3A3C3F"><input type="radio" name="frente" value="grafito"><span class="visually-hidden">Grafito</span></label>
+              <label class="pn-mostra pn-mostra-fusta"><input type="radio" name="frente" value="roble"><span class="visually-hidden">Roble</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="pn-grup">
+            <legend>Encimera <output data-tria="cocina.encimera"></output></legend>
+            <div class="pn-targetes">
+              <label class="pn-targeta"><input type="radio" name="encimera" value="roble" checked><span class="pn-mat" data-mat="roble"></span><b>Roble macizo</b><small>Incluida</small></label>
+              <label class="pn-targeta"><input type="radio" name="encimera" value="cuarzo"><span class="pn-mat" data-mat="cuarzo"></span><b>Cuarzo blanco</b><small>+1.450 €</small></label>
+              <label class="pn-targeta"><input type="radio" name="encimera" value="marmol"><span class="pn-mat" data-mat="marmol"></span><b>Mármol negro</b><small>+2.900 €</small></label>
+            </div>
+          </fieldset>
+          <fieldset class="pn-grup">
+            <legend>Suelo <output data-tria="cocina.suelo"></output></legend>
+            <div class="pn-targetes">
+              <label class="pn-targeta"><input type="radio" name="suelo" value="porcelanico" checked><span class="pn-mat" data-mat="porcelanico"></span><b>Porcelánico</b><small>Incluido</small></label>
+              <label class="pn-targeta"><input type="radio" name="suelo" value="espiga"><span class="pn-mat" data-mat="espiga"></span><b>Roble en espiga</b><small>+95 €/m²</small></label>
+              <label class="pn-targeta"><input type="radio" name="suelo" value="microcemento"><span class="pn-mat" data-mat="microcemento"></span><b>Microcemento</b><small>+75 €/m²</small></label>
+            </div>
+          </fieldset>
+          <fieldset class="pn-grup">
+            <legend>Qué hacemos nosotros</legend>
+            <div class="pn-paquets">
+              <label class="pn-paquet"><input type="radio" name="paquete" value="esencial" checked><b>Muebles y encimera</b><small>Montados, con fregadero y grifo.</small></label>
+              <label class="pn-paquet"><input type="radio" name="paquete" value="completa"><b>Y la instalación</b><small>Además, luz y agua nuevas con boletín.</small></label>
+              <label class="pn-paquet"><input type="radio" name="paquete" value="llave"><b>Llave en mano</b><small>Además, electrodomésticos y pintura.</small></label>
+            </div>
+          </fieldset>
         </form>
-      </section>
 
-      <!-- 8. Resultat -->
-      <section class="calc-pas calc-resultat" data-pas="resultat" aria-labelledby="p-resultat" hidden>
-        <p class="calc-intro" id="p-resultat" tabindex="-1">Estimación orientativa para tu reforma</p>
-        <p class="calc-preu" data-calc-preu></p>
-        <p class="calc-ajuda">IVA no incluido. El presupuesto cerrado lo hacemos después de ver la vivienda.</p>
-        <p class="calc-ajuda">También te hemos enviado este resumen a tu correo.</p>
-        <ul class="calc-resultat-resum" data-calc-resultat-resum></ul>
-        <a class="btn calc-wa" data-calc-wa href="#" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3a.5.5 0 0 0 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>
-          Enviar mi reforma por WhatsApp
-        </a>
-        <p class="calc-ajuda">Se abrirá WhatsApp con tu resumen ya escrito. Solo tienes que enviarlo.</p>
-        <div class="calc-accions">
-          <a class="calc-enllac" href="contacto.html">Prefiero que me escribáis</a>
-          <button class="calc-enllac" type="button" data-calc-reinicia>Calcular otra reforma</button>
+        <!-- ── Baño ── -->
+        <form class="pn-opcions" data-per="bano" aria-label="Opciones del baño" hidden>
+          <fieldset class="pn-grup">
+            <legend>Superficie <output data-tria="bano.m2"></output></legend>
+            <input class="pn-rang" type="range" name="m2" min="4" max="12" step="0.5" value="5" aria-label="Metros cuadrados del baño">
+            <div class="pn-rang-escala" aria-hidden="true"><span>4 m²</span><span>12 m²</span></div>
+            <p class="pn-avis" data-avis aria-live="polite" hidden></p>
+          </fieldset>
+          <fieldset class="pn-grup">
+            <legend>Para ducharte <output data-tria="bano.tipo"></output></legend>
+            <div class="pn-targetes pn-targetes-2">
+              <label class="pn-targeta"><input type="radio" name="tipo" value="ducha" checked><span class="pn-dib" data-dib="ducha"></span><b>Ducha a ras de suelo</b><small>Sin escalón</small></label>
+              <label class="pn-targeta"><input type="radio" name="tipo" value="banera"><span class="pn-dib" data-dib="banera"></span><b>Bañera</b><small>Con mampara</small></label>
+            </div>
+          </fieldset>
+          <fieldset class="pn-grup">
+            <legend>Paredes <output data-tria="bano.pared"></output></legend>
+            <div class="pn-mostres">
+              <label class="pn-mostra" style="--m:#ECEAE4"><input type="radio" name="pared" value="blanco" checked><span class="visually-hidden">Azulejo blanco mate</span></label>
+              <label class="pn-mostra" style="--m:#9DB4A6"><input type="radio" name="pared" value="verde"><span class="visually-hidden">Verde agua</span></label>
+              <label class="pn-mostra" style="--m:#2C4C9A"><input type="radio" name="pared" value="cobalto"><span class="visually-hidden">Azul cobalto</span></label>
+              <label class="pn-mostra" style="--m:#A7A6A0"><input type="radio" name="pared" value="micro"><span class="visually-hidden">Microcemento gris</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="pn-grup">
+            <legend>Mueble del lavabo <output data-tria="bano.mueble"></output></legend>
+            <div class="pn-mostres">
+              <label class="pn-mostra pn-mostra-fusta"><input type="radio" name="mueble" value="roble" checked><span class="visually-hidden">Roble</span></label>
+              <label class="pn-mostra" style="--m:#ECEAE4"><input type="radio" name="mueble" value="blanco"><span class="visually-hidden">Blanco</span></label>
+              <label class="pn-mostra" style="--m:#3A3C3F"><input type="radio" name="mueble" value="grafito"><span class="visually-hidden">Grafito</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="pn-grup">
+            <legend>Qué hacemos nosotros</legend>
+            <div class="pn-paquets">
+              <label class="pn-paquet"><input type="radio" name="paquete" value="esencial" checked><b>Alicatado y sanitarios</b><small>Paredes, suelo, plato o bañera, inodoro y lavabo.</small></label>
+              <label class="pn-paquet"><input type="radio" name="paquete" value="completa"><b>Y la fontanería</b><small>Además, tuberías nuevas y mampara a medida.</small></label>
+              <label class="pn-paquet"><input type="radio" name="paquete" value="llave"><b>Llave en mano</b><small>Además, toallero eléctrico y luz nueva.</small></label>
+            </div>
+          </fieldset>
+        </form>
+
+        <!-- ── Piso entero ── -->
+        <form class="pn-opcions" data-per="integral" aria-label="Opciones del piso" hidden>
+          <fieldset class="pn-grup">
+            <legend>Superficie <output data-tria="integral.m2"></output></legend>
+            <input class="pn-rang" type="range" name="m2" min="45" max="160" step="5" value="80" aria-label="Metros cuadrados">
+            <div class="pn-rang-escala" aria-hidden="true"><span>45 m²</span><span>160 m²</span></div>
+          </fieldset>
+          <fieldset class="pn-grup pn-grup-comptadors">
+            <legend class="visually-hidden">Habitaciones</legend>
+            <div class="pn-comptador">
+              <span id="pn-dorm">Dormitorios</span>
+              <button type="button" data-compta="dorm" data-pas="-1" aria-label="Un dormitorio menos">−</button>
+              <output data-tria="integral.dorm" aria-labelledby="pn-dorm">2</output>
+              <button type="button" data-compta="dorm" data-pas="1" aria-label="Un dormitorio más">+</button>
+            </div>
+            <div class="pn-comptador">
+              <span id="pn-banys">Baños</span>
+              <button type="button" data-compta="banos" data-pas="-1" aria-label="Un baño menos">−</button>
+              <output data-tria="integral.banos" aria-labelledby="pn-banys">1</output>
+              <button type="button" data-compta="banos" data-pas="1" aria-label="Un baño más">+</button>
+            </div>
+            <p class="pn-avis" data-avis aria-live="polite" hidden></p>
+          </fieldset>
+          <fieldset class="pn-grup">
+            <legend>Suelo de toda la casa <output data-tria="integral.suelo"></output></legend>
+            <div class="pn-targetes">
+              <label class="pn-targeta"><input type="radio" name="suelo" value="porcelanico" checked><span class="pn-mat" data-mat="porcelanico"></span><b>Porcelánico</b><small>Incluido</small></label>
+              <label class="pn-targeta"><input type="radio" name="suelo" value="espiga"><span class="pn-mat" data-mat="espiga"></span><b>Roble en espiga</b><small>+28 €/m²</small></label>
+              <label class="pn-targeta"><input type="radio" name="suelo" value="microcemento"><span class="pn-mat" data-mat="microcemento"></span><b>Microcemento</b><small>+22 €/m²</small></label>
+            </div>
+          </fieldset>
+          <fieldset class="pn-grup">
+            <legend>Qué hacemos nosotros</legend>
+            <div class="pn-paquets">
+              <label class="pn-paquet"><input type="radio" name="paquete" value="esencial" checked><b>Acabados</b><small>Suelos, pintura, puertas, cocina y baños nuevos.</small></label>
+              <label class="pn-paquet"><input type="radio" name="paquete" value="completa"><b>Y las instalaciones</b><small>Además, electricidad y fontanería nuevas con boletín.</small></label>
+              <label class="pn-paquet"><input type="radio" name="paquete" value="llave"><b>A medida</b><small>Además, cambiamos la distribución y las ventanas.</small></label>
+            </div>
+          </fieldset>
+        </form>
+
+        <!-- ── Comú: quan comencem ── -->
+        <fieldset class="pn-grup pn-setmanes">
+          <legend>Cuándo empezamos <output data-tria="setmana"></output></legend>
+          <div class="pn-dies" data-setmanes></div>
+          <p class="pn-entrega">Te la entregamos la <strong>semana del <span data-entrega>…</span></strong>. Va en el contrato.</p>
+        </fieldset>
+
+        <details class="pn-partides">
+          <summary>Ver las partidas</summary>
+          <ul data-partides></ul>
+        </details>
+      </div>
+
+      <!-- ── Preu fix a baix ── -->
+      <div class="pn-preu">
+        <div class="pn-preu-xifra">
+          <span class="pn-preu-etiqueta">Precio cerrado, IVA incluido</span>
+          <output class="pn-preu-total" data-total aria-live="polite">—</output>
         </div>
-      </section>
-
-    </div>
+        <div class="pn-accions">
+          <button type="button" class="btn btn-linia" data-obre-pdf>Descargar PDF</button>
+          <button type="button" class="btn pn-wa" data-whatsapp>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></svg>
+            Hablar por WhatsApp
+          </button>
+        </div>
+        <p class="pn-error" data-error-wa role="alert" hidden>No hemos podido abrir WhatsApp. Llámanos al <a href="tel:+34600000000">600 000 000</a>.</p>
+      </div>
+    </section>
   </main>
+
+  <!-- ═══ PDF: correu i descàrrega ═══ -->
+  <dialog class="pn-dialeg" data-dialeg-pdf aria-labelledby="pn-pdf-titol">
+    <form class="pn-pdf" data-form-pdf novalidate>
+      <button type="button" class="pn-tanca" data-tanca aria-label="Cerrar">×</button>
+      <h2 id="pn-pdf-titol">Tu reforma en PDF</h2>
+      <p>La maqueta, lo que has elegido y el precio de cada partida, en una hoja que puedes guardar o enseñar en casa.</p>
+      <label class="pn-camp">
+        <span>Tu correo</span>
+        <input type="email" name="correu" autocomplete="email" required placeholder="nombre@correo.com">
+      </label>
+      <p class="pn-error" data-error-pdf role="alert" hidden>Escribe un correo válido, por ejemplo nombre@correo.com.</p>
+      <p class="pn-legal">Usamos tu correo solo para hablar de esta reforma. Más detalles en la <a href="politica-privacidad.html">política de privacidad</a>.</p>
+      <button type="submit" class="btn btn-principal pn-baixa" data-baixa-pdf>Descargar PDF</button>
+      <p class="pn-fet" data-fet-pdf role="status" hidden>Listo. Lo tienes en tus descargas.</p>
+    </form>
+  </dialog>
 
   <footer class="peu peu-mini">
     <div class="wrap peu-baix">
@@ -194,6 +275,7 @@
 
   <script src="js/traduccions.js" defer></script>
   <script src="js/main.js" defer></script>
-  <script src="js/calculadora.js" defer></script>
+  <!-- Mòdul: s'executa després de traduccions.js (I18N ja llest) -->
+  <script type="module" src="js/panell.js"></script>
 </body>
 </html>
