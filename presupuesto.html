@@ -63,15 +63,14 @@
   <main id="contingut" class="pn" data-mode="cocina">
     <!-- ═══ VISOR 3D ═══ -->
     <section class="pn-visor" aria-label="Vista 3D de tu reforma">
-      <div class="pn-modes" role="tablist" aria-label="Qué quieres reformar">
-        <button type="button" role="tab" aria-selected="true" data-mode-boto="cocina">Cocina</button>
-        <button type="button" role="tab" aria-selected="false" data-mode-boto="bano">Baño</button>
-        <button type="button" role="tab" aria-selected="false" data-mode-boto="integral">Piso entero</button>
-      </div>
+      <button type="button" class="pn-torna" data-torna hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z" fill="currentColor"/></svg>
+        Volver al piso
+      </button>
       <canvas class="pn-canvas" aria-hidden="true"></canvas>
       <div class="pn-etiquetes" aria-hidden="true"></div>
       <p class="pn-estat" data-estat="carrega">Montando la maqueta…</p>
-      <p class="pn-pista">Arrastra para girarla</p>
+      <p class="pn-pista">Toca una zona para elegirla. Arrastra para girar el piso.</p>
     </section>
 
     <!-- ═══ PANELL ═══ -->
@@ -80,8 +79,41 @@
         <h1 id="pn-titol">Diseña tu reforma y mira lo que cuesta mientras eliges.</h1>
         <p class="pn-intro">Cada cambio mueve el precio. Antes de firmar venimos a medir, y si todo cuadra, firmamos este precio.</p>
 
+        <!-- ── El pis: quantes estances i quines es reformen ── -->
+        <section class="pn-grup pn-pis" aria-labelledby="pn-pis-titol">
+          <h2 id="pn-pis-titol" class="pn-titol-grup">Tu piso</h2>
+          <div class="pn-grup-comptadors">
+            <div class="pn-comptador">
+              <span id="pn-dorm">Dormitorios</span>
+              <button type="button" data-compta="dorm" data-pas="-1" aria-label="Un dormitorio menos">−</button>
+              <output data-compte="dorm" aria-labelledby="pn-dorm">2</output>
+              <button type="button" data-compta="dorm" data-pas="1" aria-label="Un dormitorio más">+</button>
+            </div>
+            <div class="pn-comptador">
+              <span id="pn-banys">Baños</span>
+              <button type="button" data-compta="banos" data-pas="-1" aria-label="Un baño menos">−</button>
+              <output data-compte="banos" aria-labelledby="pn-banys">1</output>
+              <button type="button" data-compta="banos" data-pas="1" aria-label="Un baño más">+</button>
+            </div>
+          </div>
+          <p class="pn-zones-titol" id="pn-zones-titol">¿Qué quieres reformar? Tócalo en la maqueta o aquí.</p>
+          <div class="pn-zones" data-zones role="group" aria-labelledby="pn-zones-titol"></div>
+          <button type="button" class="pn-tot" data-tot>Reformar todo el piso</button>
+        </section>
+
+        <!-- ── Editor de la zona triada ── -->
+        <section class="pn-editor" data-editor aria-labelledby="pn-editor-nom" hidden>
+          <div class="pn-editor-cap">
+            <h2 id="pn-editor-nom" class="pn-titol-grup" data-editor-nom>Cocina</h2>
+            <label class="pn-interruptor"><input type="checkbox" data-incloure checked><span>Reformar esta zona</span></label>
+          </div>
+          <button type="button" class="btn btn-linia pn-dins" data-dins hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/></svg>
+            Verla por dentro
+          </button>
+
         <!-- ── Cocina ── -->
-        <form class="pn-opcions" data-per="cocina" aria-label="Opciones de la cocina">
+        <form class="pn-opcions" data-per="cocina" aria-label="Opciones de la cocina" hidden>
           <fieldset class="pn-grup">
             <legend>Superficie <output data-tria="cocina.m2"></output></legend>
             <input class="pn-rang" type="range" name="m2" min="6" max="30" step="1" value="12" aria-label="Metros cuadrados de la cocina">
@@ -174,46 +206,40 @@
           </fieldset>
         </form>
 
-        <!-- ── Piso entero ── -->
-        <form class="pn-opcions" data-per="integral" aria-label="Opciones del piso" hidden>
-          <fieldset class="pn-grup">
-            <legend>Superficie <output data-tria="integral.m2"></output></legend>
-            <input class="pn-rang" type="range" name="m2" min="45" max="160" step="5" value="80" aria-label="Metros cuadrados">
-            <div class="pn-rang-escala" aria-hidden="true"><span>45 m²</span><span>160 m²</span></div>
+        <!-- ── Dormitorio, salón o pasillo ── -->
+        <form class="pn-opcions" data-per="estancia" aria-label="Opciones de la estancia" hidden>
+          <fieldset class="pn-grup" data-camp="m2">
+            <legend>Superficie <output data-tria="estancia.m2"></output></legend>
+            <input class="pn-rang" type="range" name="m2" min="7" max="40" step="0.5" value="12" aria-label="Metros cuadrados de la estancia">
+            <div class="pn-rang-escala" aria-hidden="true"><span data-rang-min></span><span data-rang-max></span></div>
           </fieldset>
-          <fieldset class="pn-grup pn-grup-comptadors">
-            <legend class="visually-hidden">Habitaciones</legend>
-            <div class="pn-comptador">
-              <span id="pn-dorm">Dormitorios</span>
-              <button type="button" data-compta="dorm" data-pas="-1" aria-label="Un dormitorio menos">−</button>
-              <output data-tria="integral.dorm" aria-labelledby="pn-dorm">2</output>
-              <button type="button" data-compta="dorm" data-pas="1" aria-label="Un dormitorio más">+</button>
-            </div>
-            <div class="pn-comptador">
-              <span id="pn-banys">Baños</span>
-              <button type="button" data-compta="banos" data-pas="-1" aria-label="Un baño menos">−</button>
-              <output data-tria="integral.banos" aria-labelledby="pn-banys">1</output>
-              <button type="button" data-compta="banos" data-pas="1" aria-label="Un baño más">+</button>
-            </div>
-            <p class="pn-avis" data-avis aria-live="polite" hidden></p>
-          </fieldset>
+          <p class="pn-nota" data-camp="pasillo">El pasillo mide lo que deja el resto del piso.</p>
           <fieldset class="pn-grup">
-            <legend>Suelo de toda la casa <output data-tria="integral.suelo"></output></legend>
-            <div class="pn-targetes">
-              <label class="pn-targeta"><input type="radio" name="suelo" value="porcelanico" checked><span class="pn-mat" data-mat="porcelanico"></span><b>Porcelánico</b><small>Incluido</small></label>
-              <label class="pn-targeta"><input type="radio" name="suelo" value="espiga"><span class="pn-mat" data-mat="espiga"></span><b>Roble en espiga</b><small>+28 €/m²</small></label>
-              <label class="pn-targeta"><input type="radio" name="suelo" value="microcemento"><span class="pn-mat" data-mat="microcemento"></span><b>Microcemento</b><small>+22 €/m²</small></label>
+            <legend>Suelo <output data-tria="estancia.suelo"></output></legend>
+            <div class="pn-targetes pn-targetes-4">
+              <label class="pn-targeta"><input type="radio" name="suelo" value="mantener"><span class="pn-mat" data-mat="viejo"></span><b>Dejar el actual</b><small>Incluido</small></label>
+              <label class="pn-targeta"><input type="radio" name="suelo" value="porcelanico" checked><span class="pn-mat" data-mat="porcelanico"></span><b>Porcelánico</b><small>+55 €/m²</small></label>
+              <label class="pn-targeta"><input type="radio" name="suelo" value="espiga"><span class="pn-mat" data-mat="espiga"></span><b>Roble en espiga</b><small>+85 €/m²</small></label>
+              <label class="pn-targeta"><input type="radio" name="suelo" value="microcemento"><span class="pn-mat" data-mat="microcemento"></span><b>Microcemento</b><small>+75 €/m²</small></label>
             </div>
           </fieldset>
           <fieldset class="pn-grup">
-            <legend>Qué hacemos nosotros</legend>
+            <legend>Paredes <output data-tria="estancia.paredes"></output></legend>
             <div class="pn-paquets">
-              <label class="pn-paquet"><input type="radio" name="paquete" value="esencial" checked><b>Acabados</b><small>Suelos, pintura, puertas, cocina y baños nuevos.</small></label>
-              <label class="pn-paquet"><input type="radio" name="paquete" value="completa"><b>Y las instalaciones</b><small>Además, electricidad y fontanería nuevas con boletín.</small></label>
-              <label class="pn-paquet"><input type="radio" name="paquete" value="llave"><b>A medida</b><small>Además, cambiamos la distribución y las ventanas.</small></label>
+              <label class="pn-paquet"><input type="radio" name="paredes" value="mantener"><b>Como están</b><small>No las tocamos.</small></label>
+              <label class="pn-paquet"><input type="radio" name="paredes" value="pintar" checked><b>Pintar</b><small>Dos manos de pintura plástica. +22 €/m²</small></label>
+              <label class="pn-paquet"><input type="radio" name="paredes" value="alisar"><b>Alisar y pintar</b><small>Quitamos el gotelé y la dejamos lisa. +48 €/m²</small></label>
+            </div>
+          </fieldset>
+          <fieldset class="pn-grup" data-camp="extres">
+            <legend>Extras</legend>
+            <div class="pn-paquets">
+              <label class="pn-check" data-camp="armario"><input type="checkbox" name="armario"><b>Armario empotrado</b><small>+1.400 €</small></label>
+              <label class="pn-check" data-camp="ventanas"><input type="checkbox" name="ventanas"><b>Ventanas nuevas</b><small>+900 € por ventana</small></label>
             </div>
           </fieldset>
         </form>
+        </section>
 
         <!-- ── Comú: quan comencem ── -->
         <fieldset class="pn-grup pn-setmanes">
@@ -234,6 +260,7 @@
           <span class="pn-preu-etiqueta">Precio cerrado, IVA incluido</span>
           <output class="pn-preu-total" data-total aria-live="polite">—</output>
         </div>
+        <p class="pn-cap-zona" data-cap-zona>Elige al menos una zona para ver el precio.</p>
         <div class="pn-accions">
           <button type="button" class="btn btn-linia" data-obre-pdf>Descargar PDF</button>
           <button type="button" class="btn pn-wa" data-whatsapp>
