@@ -237,6 +237,11 @@
 .pn-rang { width: 100%; accent-color: var(--cinta); margin: .2rem 0 0; height: 1.5rem; }
 .pn-rang-escala { display: flex; justify-content: space-between; font: 500 .6875rem/1 var(--f-titol); color: var(--cota); }
 
+/* Superficie total del piso */
+.pn-total-m2 { display: grid; gap: .25rem; margin-top: .75rem; }
+.pn-total-m2 label { display: flex; justify-content: space-between; font: 600 .8125rem/1.2 var(--f-titol); }
+.pn-total-m2 output { font-variant-numeric: tabular-nums; color: var(--cota); }
+
 /* Comptadors */
 .pn-grup-comptadors { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
 .pn-comptador {
