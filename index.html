@@ -14,8 +14,10 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#EDEEEA">
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/BricolageGrotesque-0.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/sala.css">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -27,7 +29,11 @@
   </script>
   <script src="assets/js/gsap.min.js" defer></script>
   <script src="assets/js/ScrollTrigger.min.js" defer></script>
+  <script src="assets/js/lenis.min.js" defer></script>
   <script src="js/i18n.js"></script>
+  <!-- Escena de la sala: el mode amb moviment es decideix abans de pintar (si no, la pàgina salta).
+       js/sala.js el treu si GSAP no arrenca. -->
+  <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('sala-moviment', 'intro-activa', 'intro-bloqueja');</script>
 </head>
 <body>
   <a class="salta" href="#contingut">Saltar al contenido</a>
@@ -73,33 +79,155 @@
 
   <main id="contingut">
 
-    <!-- ═══ HERO ═══ -->
-    <section class="hero-foto" aria-labelledby="hero-titol">
-      <img class="hero-foto-img" src="assets/img/srv-integral.jpg" alt="" width="1280" height="720" fetchpriority="high">
-      <div class="wrap hero-foto-in">
-        <h1 id="hero-titol">Antes de tocar una pared, hacemos el plano</h1>
-        <p class="hero-sub">Precio cerrado, fecha firmada y un equipo que no cambia a mitad de obra.</p>
-        <div class="botons">
-          <a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a>
-          <a class="btn btn-linia" href="tel:+34600000000">Llamar</a>
+    <!-- ═══ ESCENA DE LA SALA (PLA-ESCENES.md) ═══
+         Sense JS o amb moviment reduït: el hero es veu sobre la sala acabada (f6, la capa de dalt)
+         i cada fase porta la seva foto. Amb js/sala.js: zoom dins de la «o» de Cero, la sala queda
+         fixa i les fases hi pugen per sobre mentre la sala es reforma. -->
+    <section class="sala" id="sala" aria-labelledby="hero-titol">
+      <div class="sala-escenari">
+        <div class="sala-camera">
+        <div class="sala-fotos">
+          <img class="sala-base" src="assets/img/sala/f0-1920.webp" srcset="assets/img/sala/f0-960.webp 960w, assets/img/sala/f0-1920.webp 1920w" sizes="100vw" alt="" width="1920" height="1080" fetchpriority="high">
+          <div class="sala-capa" data-fase="1"><img src="assets/img/sala/f1-1920.webp" srcset="assets/img/sala/f1-960.webp 960w, assets/img/sala/f1-1920.webp 1920w" sizes="100vw" alt="" width="1920" height="1080" decoding="async"></div>
+          <div class="sala-capa" data-fase="2"><img src="assets/img/sala/f2-1920.webp" srcset="assets/img/sala/f2-960.webp 960w, assets/img/sala/f2-1920.webp 1920w" sizes="100vw" alt="" width="1920" height="1080" decoding="async"></div>
+          <div class="sala-capa" data-fase="3"><img src="assets/img/sala/f3-1920.webp" srcset="assets/img/sala/f3-960.webp 960w, assets/img/sala/f3-1920.webp 1920w" sizes="100vw" alt="" width="1920" height="1080" decoding="async"></div>
+          <div class="sala-capa" data-fase="4"><img src="assets/img/sala/f4-1920.webp" srcset="assets/img/sala/f4-960.webp 960w, assets/img/sala/f4-1920.webp 1920w" sizes="100vw" alt="" width="1920" height="1080" decoding="async"></div>
+          <div class="sala-capa" data-fase="5"><img src="assets/img/sala/f5-1920.webp" srcset="assets/img/sala/f5-960.webp 960w, assets/img/sala/f5-1920.webp 1920w" sizes="100vw" alt="" width="1920" height="1080" decoding="async"></div>
+          <div class="sala-capa" data-fase="6"><img src="assets/img/sala/f6-1920.webp" srcset="assets/img/sala/f6-960.webp 960w, assets/img/sala/f6-1920.webp 1920w" sizes="100vw" alt="" width="1920" height="1080" decoding="async"></div>
         </div>
-        <p class="hero-nota">En 1 minuto y sin compromiso.</p>
+        <div class="sala-laser" aria-hidden="true"></div>
+        </div>
+        <!-- Zoom: «Cota Cero» amb els contorns reals de Bricolage Grotesque (PLA-eines/contorn-o.py).
+             El vel fosc té un forat amb la forma de l'interior de l'última «o». -->
+        <svg class="zoom-o" viewBox="-880 -1150 6000 1500" aria-hidden="true" focusable="false">
+          <defs>
+            <mask id="zoom-o-forat" maskUnits="userSpaceOnUse" x="-200000" y="-200000" width="400000" height="400000">
+              <rect x="-200000" y="-200000" width="400000" height="400000" fill="#fff"/>
+              <path fill="#000" d="M3962.8 -94.3Q3997.8 -94.3 4022 -113Q4046.2 -131.7 4059 -167.7Q4071.8 -203.8 4071.8 -254.2Q4071.8 -308.7 4058.1 -346.4Q4044.3 -384.2 4018.8 -404.6Q3993.2 -425 3957.2 -425Q3923 -425 3898.7 -406Q3874.5 -387 3861.6 -350.7Q3848.7 -314.3 3848.7 -263.5Q3848.7 -183.7 3878.9 -139Q3909.2 -94.3 3962.8 -94.3Z"/>
+            </mask>
+          </defs>
+          <g class="zoom-o-g">
+            <rect class="zoom-o-vel" x="-200000" y="-200000" width="400000" height="400000" mask="url(#zoom-o-forat)"/>
+            <path class="zoom-o-nom" d="M339.3 13.8Q258.3 13.8 199.4 -12.6Q140.5 -39 102.5 -86.3Q64.5 -133.7 46.6 -195.4Q28.7 -257.2 28.7 -327.7Q28.7 -400.5 47.3 -463.7Q65.8 -526.8 103.4 -573.9Q141 -621 198.9 -647.4Q256.8 -673.8 336.2 -673.8Q404.7 -673.8 455 -654.2Q505.3 -634.5 536.7 -600.1Q568.2 -565.7 581.2 -520.5Q594.3 -475.3 589.8 -425L456.8 -408.2Q457.7 -453.5 443.3 -486Q429 -518.5 401.2 -536.2Q373.3 -553.8 332 -553.8Q296.8 -553.8 268.7 -540.1Q240.7 -526.3 220.8 -498.8Q201 -471.2 190.5 -430Q180 -388.8 180 -334Q180 -263.5 198.2 -212.4Q216.3 -161.3 252.6 -133.7Q288.8 -106 342.3 -106Q391 -106 420.5 -128Q450 -150 463.2 -189.5Q476.3 -229 472.8 -280L609.3 -267.2Q613.7 -211.2 600.5 -160.7Q587.3 -110.2 554.7 -70.7Q522.2 -31.2 468.8 -8.7Q415.5 13.8 339.3 13.8Z M890.7 13.8Q816 13.8 757.7 -16.6Q699.3 -47 666.4 -108.2Q633.5 -169.5 633.5 -261.8Q633.5 -357.2 667.6 -418.3Q701.7 -479.5 760.2 -509.2Q818.7 -539 892.2 -539Q968.3 -539 1026.2 -508.4Q1084 -477.8 1116.5 -416.5Q1149 -355.2 1149 -262Q1149 -166.5 1115.1 -105.4Q1081.2 -44.3 1022.7 -15.3Q964.2 13.8 890.7 13.8Z M893.8 -94.3Q928.8 -94.3 953 -113Q977.2 -131.7 990 -167.7Q1002.8 -203.8 1002.8 -254.2Q1002.8 -308.7 989.1 -346.4Q975.3 -384.2 949.8 -404.6Q924.2 -425 888.2 -425Q854 -425 829.7 -406Q805.5 -387 792.6 -350.7Q779.7 -314.3 779.7 -263.5Q779.7 -183.7 809.9 -139Q840.2 -94.3 893.8 -94.3Z M1393 11.3Q1305.8 11.3 1262.5 -34.1Q1219.2 -79.5 1219.2 -173.5V-411.3H1159.5V-504.8H1168.3Q1223.3 -511.5 1246.6 -541Q1269.8 -570.5 1275 -630L1276.2 -643.5H1361.8V-525H1486.7V-408H1361.8V-186Q1361.8 -147.7 1380.2 -131Q1398.7 -114.3 1426.8 -114.3Q1441.7 -114.3 1457.6 -118.7Q1473.5 -123 1486.7 -131V-3.2Q1458 5.5 1434.9 8.4Q1411.8 11.3 1393 11.3Z M1666.5 13.8Q1626.3 13.8 1590.8 -0.3Q1555.2 -14.5 1532.8 -45.9Q1510.3 -77.3 1510.3 -129.5Q1510.3 -177.5 1528.8 -207.6Q1547.3 -237.7 1578.9 -256.1Q1610.5 -274.5 1648.8 -284.2Q1687.2 -293.8 1726 -300.8Q1779.2 -310.7 1805.5 -316.6Q1831.8 -322.5 1841.1 -330.7Q1850.3 -339 1850.3 -353.7Q1850.3 -387.7 1826.1 -405.5Q1801.8 -423.3 1763.5 -423.3Q1739.7 -423.3 1716 -414.5Q1692.3 -405.7 1676.9 -383.9Q1661.5 -362.2 1661.5 -323L1532.3 -333.5Q1531.8 -393.7 1552.6 -433.6Q1573.3 -473.5 1608.4 -496.4Q1643.5 -519.3 1685.2 -529.2Q1726.8 -539 1768.2 -539Q1842.2 -539 1891.7 -511.3Q1941.3 -483.7 1966.2 -430.8Q1991.2 -377.8 1991.2 -301.2V-206.2Q1991.3 -172 1991.4 -137.3Q1991.5 -102.7 1991.6 -68.4Q1991.7 -34.2 1991.7 0H1865.3Q1866.2 -38.3 1866.8 -76.9Q1867.5 -115.5 1868.2 -158.2H1861.7Q1856.8 -110.8 1830.9 -71.8Q1805 -32.7 1763.1 -9.4Q1721.2 13.8 1666.5 13.8Z M1723 -93.5Q1743.5 -93.5 1765.6 -101.6Q1787.7 -109.7 1806.8 -127.2Q1826 -144.7 1838 -173.4Q1850 -202.2 1850.3 -242.7L1850.5 -266.3L1877.3 -270.7Q1868.5 -257 1848.4 -248.9Q1828.3 -240.8 1803.1 -236.3Q1777.8 -231.7 1752.1 -226.9Q1726.3 -222.2 1704.3 -213.8Q1682.3 -205.5 1668.7 -191.3Q1655 -177.2 1655 -152.3Q1655 -124.2 1674.2 -108.8Q1693.5 -93.5 1723 -93.5Z M2529.3 13.8Q2448.3 13.8 2389.4 -12.6Q2330.5 -39 2292.5 -86.3Q2254.5 -133.7 2236.6 -195.4Q2218.7 -257.2 2218.7 -327.7Q2218.7 -400.5 2237.3 -463.7Q2255.8 -526.8 2293.4 -573.9Q2331 -621 2388.9 -647.4Q2446.8 -673.8 2526.2 -673.8Q2594.7 -673.8 2645 -654.2Q2695.3 -634.5 2726.7 -600.1Q2758.2 -565.7 2771.2 -520.5Q2784.3 -475.3 2779.8 -425L2646.8 -408.2Q2647.7 -453.5 2633.3 -486Q2619 -518.5 2591.2 -536.2Q2563.3 -553.8 2522 -553.8Q2486.8 -553.8 2458.7 -540.1Q2430.7 -526.3 2410.8 -498.8Q2391 -471.2 2380.5 -430Q2370 -388.8 2370 -334Q2370 -263.5 2388.2 -212.4Q2406.3 -161.3 2442.6 -133.7Q2478.8 -106 2532.3 -106Q2581 -106 2610.5 -128Q2640 -150 2653.2 -189.5Q2666.3 -229 2662.8 -280L2799.3 -267.2Q2803.7 -211.2 2790.5 -160.7Q2777.3 -110.2 2744.7 -70.7Q2712.2 -31.2 2658.8 -8.7Q2605.5 13.8 2529.3 13.8Z M3084 13.8Q3012.5 13.8 2963.1 -7.1Q2913.7 -28 2882.7 -64.9Q2851.7 -101.8 2837.6 -150Q2823.5 -198.2 2823.5 -252.8Q2823.5 -309.8 2838.1 -361.4Q2852.7 -413 2883 -452.9Q2913.3 -492.8 2960.9 -515.9Q3008.5 -539 3074.5 -539Q3139.2 -539 3186.1 -516.7Q3233 -494.3 3261.7 -454.1Q3290.5 -413.8 3300 -360.2Q3309.5 -306.5 3300 -243.2L2913.3 -237V-318.5L3190.3 -323.7L3169.7 -276.5Q3174.7 -323.3 3165.7 -356.2Q3156.7 -389 3134.4 -406.5Q3112.2 -424 3074.5 -424Q3034.5 -424 3009.7 -403.6Q2984.8 -383.2 2973.9 -346.3Q2963 -309.3 2963 -259.7Q2963 -175.5 2993.6 -135.2Q3024.2 -95 3085.5 -95Q3113.3 -95 3131.8 -102.6Q3150.3 -110.2 3161.6 -123.7Q3172.8 -137.3 3177.3 -155.3Q3181.7 -173.3 3180.5 -194L3313 -186.3Q3315.3 -151 3304.7 -115.7Q3294 -80.5 3267.4 -51.3Q3240.8 -22.2 3195.7 -4.2Q3150.5 13.8 3084 13.8Z M3350.7 0V-276.5L3350.3 -525H3476.5L3472.8 -307.5H3481.2Q3487.2 -392.3 3505.1 -442.6Q3523 -492.8 3550.7 -514.8Q3578.3 -536.8 3613.2 -536.8Q3630.3 -536.8 3648.9 -532.2Q3667.5 -527.7 3685.7 -517.7L3678.2 -358.5Q3657.7 -370.2 3638 -375.8Q3618.3 -381.3 3600.7 -381.3Q3566.7 -381.3 3542.9 -360.3Q3519.2 -339.3 3506.7 -298.7Q3494.2 -258 3494.2 -199.8V0Z M3959.7 13.8Q3885 13.8 3826.7 -16.6Q3768.3 -47 3735.4 -108.2Q3702.5 -169.5 3702.5 -261.8Q3702.5 -357.2 3736.6 -418.3Q3770.7 -479.5 3829.2 -509.2Q3887.7 -539 3961.2 -539Q4037.3 -539 4095.2 -508.4Q4153 -477.8 4185.5 -416.5Q4218 -355.2 4218 -262Q4218 -166.5 4184.1 -105.4Q4150.2 -44.3 4091.7 -15.3Q4033.2 13.8 3959.7 13.8Z M3962.8 -94.3Q3997.8 -94.3 4022 -113Q4046.2 -131.7 4059 -167.7Q4071.8 -203.8 4071.8 -254.2Q4071.8 -308.7 4058.1 -346.4Q4044.3 -384.2 4018.8 -404.6Q3993.2 -425 3957.2 -425Q3923 -425 3898.7 -406Q3874.5 -387 3861.6 -350.7Q3848.7 -314.3 3848.7 -263.5Q3848.7 -183.7 3878.9 -139Q3909.2 -94.3 3962.8 -94.3Z"/>
+          </g>
+        </svg>
+        <div class="sala-hero">
+          <h1 id="hero-titol">Antes de tocar una pared, hacemos el plano</h1>
+          <p class="hero-sub">Precio cerrado, fecha firmada y un equipo que no cambia a mitad de obra.</p>
+          <div class="botons">
+            <a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a>
+            <a class="btn btn-linia" href="tel:+34600000000">Llamar</a>
+          </div>
+        </div>
+        <ol class="sala-regla" aria-hidden="true">
+          <li>Visita</li><li>Plano</li><li>Derribo</li><li>Instalaciones</li><li>Paredes</li><li>Acabados</li><li>Entrega</li>
+        </ol>
       </div>
-    </section>
 
-    <!-- ═══ CRIDA A LA CALCULADORA (v2: el valor principal de la web) ═══ -->
-    <section class="calc-crida fosc-calid seccio" aria-labelledby="calc-crida-titol">
-      <div class="wrap calc-crida-in">
-        <div>
-          <h2 id="calc-crida-titol">Ponle un número a tu reforma</h2>
-          <p class="intro">Responde unas preguntas sobre tu cocina, tu baño o tu casa entera y te damos una horquilla de precio.</p>
-          <div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
-          <p class="nota">1 minuto, sin compromiso.</p>
+      <div class="sala-intro-espai" aria-hidden="true"></div>
+
+      <div class="sala-fases">
+        <div class="fase fase-obertura">
+          <div class="fase-targeta">
+            <h2>Así es una reforma con nosotros</h2>
+            <p>Este es el piso el día que entramos por primera vez. Sigue bajando y míralo cambiar, paso a paso, hasta el día que te damos las llaves.</p>
+            <p class="fase-nota">Plazos orientativos de una reforma integral de unos 70&nbsp;m².</p>
+          </div>
         </div>
-        <div class="calc-tipus">
-          <a href="presupuesto.html?tipo=cocina"><img src="assets/img/srv-cocina.jpg" alt="" width="1280" height="720" loading="lazy"><span>Cocina</span></a>
-          <a href="presupuesto.html?tipo=bano"><img src="assets/img/srv-bano.jpg" alt="" width="1280" height="720" loading="lazy"><span>Baño</span></a>
-          <a href="presupuesto.html?tipo=casa"><img src="assets/img/srv-integral.jpg" alt="" width="1280" height="720" loading="lazy"><span>Toda la casa</span></a>
+        <ol class="fases-llista">
+          <li class="fase" data-fase="0">
+            <img class="fase-foto" src="assets/img/sala/f0-960.webp" alt="" width="960" height="540" loading="lazy">
+            <div class="fase-targeta">
+              <p class="fase-quan">Día 1</p>
+              <h3>Visita y medición</h3>
+              <p>Venimos a casa, lo medimos todo con láser y hacemos fotos de cada pared. Sin medir no damos números: ningún precio a ojo.</p>
+              <p class="fase-tens">Te llevas el plano de cómo está hoy.</p>
+            </div>
+          </li>
+          <li class="fase" data-fase="1">
+            <img class="fase-foto" src="assets/img/sala/f1-960.webp" alt="" width="960" height="540" loading="lazy">
+            <div class="fase-targeta">
+              <p class="fase-quan">En cinco días</p>
+              <h3>Plano y precio cerrado</h3>
+              <p>Te enseñamos el plano nuevo y el presupuesto partida por partida. Lo que no está escrito no se cobra. Con cinta azul marcamos en la pared dónde irá cada enchufe, para que lo veas antes de empezar.</p>
+              <p class="fase-tens">Te llevas el presupuesto firmado, con fecha de entrega.</p>
+            </div>
+          </li>
+          <li class="fase" data-fase="2">
+            <img class="fase-foto" src="assets/img/sala/f2-960.webp" alt="" width="960" height="540" loading="lazy">
+            <div class="fase-targeta">
+              <p class="fase-quan">Semana 1</p>
+              <h3>Derribo y obra limpia</h3>
+              <p>Protegemos la escalera y el ascensor y sacamos lo viejo. Cada tarde se recoge, y los escombros salen en sacos el mismo día: no se quedan en el rellano.</p>
+              <p class="fase-tens">Te llevas un jefe de obra con nombre y teléfono.</p>
+            </div>
+          </li>
+          <li class="fase" data-fase="3">
+            <img class="fase-foto" src="assets/img/sala/f3-960.webp" alt="" width="960" height="540" loading="lazy">
+            <div class="fase-targeta">
+              <p class="fase-quan">Semanas 2 y 3</p>
+              <h3>Instalaciones nuevas</h3>
+              <p>Luz y agua nuevas, con boletín. Antes de cerrar las paredes lo fotografiamos todo y te pasamos las fotos, así sabrás por dónde va cada tubo dentro de diez años.</p>
+              <p class="fase-tens">Te llevas las fotos de todo lo que queda tapado.</p>
+            </div>
+          </li>
+          <li class="fase" data-fase="4">
+            <img class="fase-foto" src="assets/img/sala/f4-960.webp" alt="" width="960" height="540" loading="lazy">
+            <div class="fase-targeta">
+              <p class="fase-quan">Semanas 3 a 5</p>
+              <h3>Paredes, techo y ventanas</h3>
+              <p>Paredes a nivel, techo liso y ventanas nuevas que cierran de verdad. Cada viernes te contamos cómo va la obra comparada con el calendario que firmamos.</p>
+              <p class="fase-tens">Te llevas un parte semanal del avance.</p>
+            </div>
+          </li>
+          <li class="fase" data-fase="5">
+            <img class="fase-foto" src="assets/img/sala/f5-960.webp" alt="" width="960" height="540" loading="lazy">
+            <div class="fase-targeta">
+              <p class="fase-quan">Semanas 6 y 7</p>
+              <h3>Suelo y acabados</h3>
+              <p>Ponemos lo que elegiste en el presupuesto: el mismo suelo, la misma pintura, los mismos radiadores. Si a mitad de obra quieres cambiar algo, antes te damos el precio por escrito.</p>
+              <p class="fase-tens">Ningún cambio sin precio previo.</p>
+            </div>
+          </li>
+          <li class="fase" data-fase="6">
+            <img class="fase-foto" src="assets/img/sala/f6-960.webp" alt="" width="960" height="540" loading="lazy">
+            <div class="fase-targeta">
+              <p class="fase-quan">Semana 8</p>
+              <h3>Entrega y garantía</h3>
+              <p>Repasamos la casa contigo, punto por punto, y no damos la obra por cerrada hasta que tú la apruebas. Te dejamos las llaves y la garantía por escrito.</p>
+              <p class="fase-tens">Te llevas la garantía firmada.</p>
+              <div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
+            </div>
+          </li>
+        </ol>
+
+        <!-- Contracte: el full de pressupost tancat puja sobre la sala acabada i se signa (js/sala.js) -->
+        <div class="fase-contracte">
+          <div class="contracte-fixe">
+            <article class="contracte" aria-labelledby="contracte-titol">
+              <p class="contracte-etiqueta">Presupuesto cerrado</p>
+              <h2 id="contracte-titol">El día que firmamos, el precio deja de moverse</h2>
+              <p class="contracte-sub">Reforma integral de un piso de 70&nbsp;m². Cada partida, por escrito.</p>
+              <ul class="contracte-partides">
+                <li><span>Derribo y gestión de residuos</span><b>3.400 €</b></li>
+                <li><span>Electricidad y fontanería nuevas</span><b>7.900 €</b></li>
+                <li><span>Paredes, techo y ventanas</span><b>9.600 €</b></li>
+                <li><span>Suelo y acabados</span><b>8.200 €</b></li>
+                <li><span>Cocina y baño</span><b>12.800 €</b></li>
+              </ul>
+              <p class="contracte-total"><span>Total, IVA incluido</span><b>41.900 €</b></p>
+              <p class="contracte-clausula">Lo que no está escrito, no se cobra. Entrega en 8 semanas, con fecha firmada.</p>
+              <div class="contracte-signatures">
+                <div class="contracte-firma">
+                  <svg viewBox="0 0 220 70" aria-hidden="true" focusable="false"><path pathLength="1" d="M8 48C20 12 34 8 34 26c0 16-14 34-6 38 8 3 18-24 28-30 6-4 4 12 4 18 0 8 8 4 14-6 5-8 8-12 10-6 3 8-6 16 4 14 14-3 22-22 28-22 7 0 0 18 6 20 10 3 22-24 42-26 8-1 20 2 34 6"/></svg>
+                  <span>Sergi y Laura · Cota Cero</span>
+                </div>
+                <div class="contracte-firma contracte-firma-tu"><i></i><span>Tú</span></div>
+              </div>
+              <p class="contracte-segell" aria-hidden="true">Precio cerrado</p>
+            </article>
+            <div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
+          </div>
         </div>
       </div>
     </section>
@@ -181,23 +309,6 @@
       </div>
     </section>
 
-    <!-- ═══ PROCESO (és una seqüència: numerat) ═══ -->
-    <section class="proceso seccio" aria-labelledby="proces-titol">
-      <div class="wrap">
-        <h2 id="proces-titol" class="aparicio">De la visita a las llaves</h2>
-        <div class="proceso-cont">
-        <div class="proceso-linia" aria-hidden="true"><i></i></div>
-        <ol class="proceso-llista">
-          <li><h3>Visita</h3><p>Vemos la vivienda y hablamos de lo que necesitas, sin compromiso.</p></li>
-          <li><h3>Presupuesto cerrado</h3><p>Te lo entregamos por escrito, partida por partida.</p></li>
-          <li><h3>Planificación</h3><p>Fijamos fechas, materiales y quién hace qué, antes de tocar nada.</p></li>
-          <li><h3>Obra</h3><p>Empezamos en la fecha acordada y protegemos lo que no se reforma.</p></li>
-          <li><h3>Entrega de llaves</h3><p>Revisamos juntos cada detalle antes de darte la vivienda por terminada.</p></li>
-        </ol>
-        </div>
-      </div>
-    </section>
-
     <!-- ═══ PROYECTOS ═══ -->
     <section class="seccio" aria-labelledby="projectes-titol">
       <div class="wrap">
@@ -251,10 +362,12 @@
     </section>
 
     <!-- ═══ GALERIA DE PROJECTES ACABATS (v2) ═══ -->
-    <section class="seccio" aria-labelledby="galeria-titol" style="background:var(--vegetal)">
+    <section class="seccio galeria-carril" aria-labelledby="galeria-titol" style="background:var(--vegetal)">
+      <div class="carril-fixe">
       <div class="wrap">
         <h2 id="galeria-titol" class="aparicio">Proyectos acabados</h2>
         <p class="intro">Algunas de las reformas que hemos hecho, tal como quedaron.</p>
+      </div>
         <div class="galeria">
           <figure><button type="button" data-visor><img src="assets/img/gal-01.jpg" alt="Cocina en L, blanca y de roble, abierta al comedor." width="1024" height="768" loading="lazy"></button><figcaption><strong>Cocina en L, blanca y roble</strong><span>Cocina</span></figcaption></figure>
           <figure><button type="button" data-visor><img src="assets/img/gal-02.jpg" alt="Baño pequeño con alicatado verde en vertical y grifería en latón." width="768" height="1024" loading="lazy"></button><figcaption><strong>Baño en verde y latón</strong><span>Baño</span></figcaption></figure>
@@ -382,6 +495,7 @@
   </a>
 <script src="js/traduccions.js" defer></script>
 <script src="js/main.js" defer></script>
+<script src="js/sala.js" defer></script>
 <script src="js/galeria.js" defer></script>
 </body>
 </html>
