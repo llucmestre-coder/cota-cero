@@ -96,6 +96,11 @@
               <button type="button" data-compta="banos" data-pas="1" aria-label="Un baño más">+</button>
             </div>
           </div>
+          <div class="pn-total-m2">
+            <label for="pn-m2-total">Superficie total <output data-m2-total></output></label>
+            <input class="pn-rang" id="pn-m2-total" type="range" min="40" max="200" step="1" value="70" data-m2-slider>
+            <p class="pn-nota">Reparte los metros entre las estancias. Después puedes afinar cada una.</p>
+          </div>
           <p class="pn-zones-titol" id="pn-zones-titol">¿Qué quieres reformar? Tócalo en la maqueta o aquí.</p>
           <div class="pn-zones" data-zones role="group" aria-labelledby="pn-zones-titol"></div>
           <button type="button" class="pn-tot" data-tot>Reformar todo el piso</button>

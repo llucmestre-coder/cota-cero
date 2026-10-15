@@ -171,6 +171,7 @@ function pintaPanell() {
     + `<span class="pn-zona-nom">${nomZona(z)}</span><span class="pn-zona-m2">${fmtNum(z.opts.m2)} m²</span></button>`).join('');
   $('[data-tot]').hidden = r.triades.length === st.zones.size;
   $$('[data-compte]').forEach(o => { o.textContent = st[o.dataset.compte]; });
+  pintaTotalM2();
   $$('[data-compta]').forEach(b => {
     const k = b.dataset.compta, max = k === 'dorm' ? 5 : 3;
     b.disabled = +b.dataset.pas < 0 ? st[k] <= 1 : st[k] >= max;
@@ -1619,6 +1620,36 @@ $$('[data-compta]').forEach(b => b.addEventListener('click', () => {
   if (renderer) { muntaPla(true); nouObjectiu(); }
   pintaPanell();
 }));
+/* ── Superficie total: reparteix els m² entre les estances (el passadís surt sol) ── */
+const elM2Total = $('[data-m2-slider]');
+function zonesM2() { return [...st.zones.values()].filter(z => z.tipus !== 'pasillo'); }
+function pintaTotalM2() {
+  const zs = zonesM2(), suma = zs.reduce((a, z) => a + z.opts.m2, 0);
+  elM2Total.min = Math.ceil(zs.reduce((a, z) => a + RANG[z.tipus][0], 0));
+  elM2Total.max = Math.floor(zs.reduce((a, z) => a + RANG[z.tipus][1], 0));
+  if (document.activeElement !== elM2Total) elM2Total.value = Math.round(suma);
+  $('[data-m2-total]').textContent = fmtNum(suma) + ' m²';
+}
+elM2Total.addEventListener('input', () => {
+  const zs = zonesM2(), objectiu = +elM2Total.value;
+  for (let ronda = 0; ronda < 3; ronda++) {
+    const suma = zs.reduce((a, z) => a + z.opts.m2, 0);
+    if (Math.abs(suma - objectiu) < 1) break;
+    const f = objectiu / suma;
+    zs.forEach(z => {
+      const [mn, mx, pas] = RANG[z.tipus];
+      z.opts.m2 = Math.min(mx, Math.max(mn, Math.round(z.opts.m2 * f / pas) * pas));
+    });
+  }
+  zs.forEach(z => {
+    if (z.tipus === 'cocina' && z.opts.m2 < 16 && z.opts.forma === 'isla') z.opts.forma = 'l';
+    if (z.tipus === 'bano' && z.opts.m2 < 5 && z.opts.tipo === 'banera') z.opts.tipo = 'ducha';
+  });
+  if (st.activa) obreEditor(st.activa);
+  if (renderer) { muntaPla(true); nouObjectiu(); }
+  refrescaInterior();
+  refresca();
+});
 $('[data-incloure]').addEventListener('change', e => {
   const z = st.zones.get(st.activa);
   if (z) { z.on = e.target.checked; refresca(); }
