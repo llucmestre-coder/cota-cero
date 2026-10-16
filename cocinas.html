@@ -8,7 +8,7 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Cocinas · Cota Cero Reformas">
   <meta property="og:description" content="Reforma integral de cocinas: muebles, electrodomésticos, instalaciones y acabados, con presupuesto cerrado y fecha de entrega.">
-  <meta property="og:image" content="https://cota-cero.pages.dev/assets/img/srv-integral.jpg">
+  <meta property="og:image" content="https://cota-cero.pages.dev/assets/img/srv-cocina.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <!-- Web de demostració: no s'indexa (PLA.md §Honestedat). -->
   <meta name="robots" content="noindex, nofollow">
@@ -16,9 +16,14 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/servei.css?v=14">
   <script src="assets/js/gsap.min.js" defer></script>
   <script src="assets/js/ScrollTrigger.min.js" defer></script>
+  <script src="assets/js/lenis.min.js" defer></script>
   <script src="js/i18n.js"></script>
+  <!-- Recorregut: el mode amb moviment es decideix abans de pintar (si no, la pàgina salta).
+       js/servei.js el treu si GSAP no arrenca. -->
+  <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('ruta-moviment');</script>
 </head>
 <body>
   <a class="salta" href="#contingut">Saltar al contenido</a>
@@ -64,44 +69,76 @@
 
   <main id="contingut">
 
-    <!-- ═══ HERO DE SERVEI ═══ -->
-    <section class="hero-foto servei" aria-labelledby="hero-titol">
-      <img class="hero-foto-img" src="assets/img/srv-cocina.jpg" alt="" width="1280" height="720" fetchpriority="high">
-      <div class="wrap hero-foto-in">
-        <p class="molla"><a href="index.html">Inicio</a> / Cocinas</p>
-        <h1 id="hero-titol">Una cocina nueva, con fecha de entrega firmada</h1>
-        <p class="hero-sub">Muebles, electrodomésticos e instalaciones nuevas, coordinados para no alargar la obra.</p>
-        <div class="botons">
+    <!-- ═══ RECORREGUT (PLA-ESCENES.md): la foto del servei queda fixa i la càmera s'hi passeja;
+         a cada parada, una cota assenyala l'element (js/servei.js). Sense JS o amb moviment
+         reduït: hero amb vel i les parades en graella. ═══ -->
+    <section class="ruta" aria-labelledby="hero-titol">
+      <div class="ruta-escenari">
+        <div class="ruta-camera">
+          <img class="ruta-foto" src="assets/img/srv-cocina.jpg" alt="Cocina reformada con muebles de roble, isla blanca y dos lámparas negras colgadas." width="1280" height="720" fetchpriority="high">
+        </div>
+        <div class="ruta-cotes" aria-hidden="true">
+          <svg focusable="false"><path class="cota-linia"/><circle class="cota-punt" r="0"/></svg>
+          <span class="cota-nom">Muebles a medida</span>
+          <span class="cota-nom">Luz y extracción</span>
+          <span class="cota-nom">Agua y luz nuevas</span>
+          <span class="cota-nom">Encimera y frente</span>
+          <span class="cota-nom">Suelo y paredes</span>
+        </div>
+        <div class="ruta-hero">
+          <p class="molla"><a href="index.html">Inicio</a> / Cocinas</p>
+          <h1 id="hero-titol">Una cocina nueva, con fecha de entrega firmada</h1>
+          <p class="hero-sub">Muebles, electrodomésticos e instalaciones nuevas, coordinados para no alargar la obra.</p>
+          <div class="botons">
             <a class="btn btn-principal" href="presupuesto.html?tipo=cocina">Calcula tu presupuesto</a>
             <a class="btn btn-linia" href="tel:+34600000000">Llamar</a>
+          </div>
+        </div>
+      </div>
+      <div class="ruta-espai" aria-hidden="true"></div>
+      <div class="ruta-parades">
+        <div class="ruta-obertura">
+          <h2>Qué incluye</h2>
+          <p>Recorre la cocina. Todo lo que señalamos entra en el precio cerrado.</p>
+        </div>
+        <article class="parada" data-x="0.23" data-y="0.42" data-s="1.3">
+          <h3>Muebles a medida</h3>
+          <p>Los dibujamos con las medidas de tu cocina, hasta el último hueco. Los electrodomésticos pueden ser nuevos o los tuyos: los dejamos integrados.</p>
+        </article>
+        <article class="parada" data-x="0.54" data-y="0.3" data-s="1.3">
+          <h3>Luz y extracción</h3>
+          <p>Luz colgada sobre la isla y la encimera, y una campana con salida de humos al exterior.</p>
+        </article>
+        <article class="parada" data-x="0.478" data-y="0.57" data-s="1.4">
+          <h3>Agua y luz nuevas</h3>
+          <p>Fontanería y electricidad nuevas en toda la cocina. Los enchufes van donde usarás los aparatos, no donde estaban.</p>
+        </article>
+        <article class="parada" data-x="0.42" data-y="0.665" data-s="1.3">
+          <h3>Encimera y frente</h3>
+          <p>Cuarzo, porcelánico o madera. Ves la muestra antes de pedirla, y el frente entre la encimera y los muebles va a juego.</p>
+        </article>
+        <article class="parada" data-x="0.6" data-y="0.95" data-s="1.25">
+          <h3>Suelo y paredes</h3>
+          <p>Suelo nuevo en toda la cocina. En las paredes, azulejo donde salpica y pintura lavable en el resto.</p>
+        </article>
+        <div class="ruta-final">
+          <h2>Todo esto, en un solo precio</h2>
+          <p>Cada partida sale por escrito en el presupuesto. Diseña tu cocina en el panel y mira el precio mientras eliges.</p>
+          <div class="botons"><a class="btn btn-principal" href="presupuesto.html?tipo=cocina">Diseña tu cocina</a></div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ QUÉ INCLUYE / CÓMO LO HACEMOS ═══ -->
-    <section class="fosc-calid seccio">
-      <div class="wrap dues-col">
-        <div>
-          <h2 class="aparicio">Qué incluye</h2>
-          <ul class="inclou">
-            <li>Muebles de cocina a medida, según el espacio</li>
-            <li>Encimera y frente, a elegir el material</li>
-            <li>Electrodomésticos nuevos, o instalación de los tuyos</li>
-            <li>Instalación eléctrica y de fontanería renovadas</li>
-            <li>Extracción de humos y ventilación</li>
-            <li>Suelo y alicatado</li>
-            <li>Iluminación y enchufes donde los necesites, no donde quedaban antes</li>
-          </ul>
-        </div>
-        <div>
-          <h2 class="aparicio">Cómo lo hacemos</h2>
-          <ol class="passos">
-            <li><div><h3>Medimos primero</h3><p>Medimos y dibujamos la cocina contigo antes de pedir ni un mueble.</p></div></li>
-            <li><div><h3>Margen en los pedidos</h3><p>Pedimos los materiales con margen, para no parar la obra esperando un envío.</p></div></li>
-            <li><div><h3>Oficios coordinados</h3><p>Coordinamos electricista, fontanero y montador para que no se pisen entre ellos.</p></div></li>
-            <li><div><h3>Resto de la casa protegido</h3><p>Protegemos el resto de la casa mientras dura la obra de la cocina.</p></div></li>
-          </ol>
-        </div>
+    <!-- ═══ CÓMO LO HACEMOS ═══ -->
+    <section class="seccio servei-passos">
+      <div class="wrap">
+        <h2 class="aparicio">Cómo lo hacemos</h2>
+        <ol class="passos-fila">
+          <li><h3>Medimos primero</h3><p>Medimos y dibujamos la cocina contigo antes de pedir ni un mueble.</p></li>
+          <li><h3>Margen en los pedidos</h3><p>Pedimos los materiales con margen, para no parar la obra esperando un envío.</p></li>
+          <li><h3>Oficios coordinados</h3><p>Coordinamos electricista, fontanero y montador para que no se pisen entre ellos.</p></li>
+          <li><h3>Resto de la casa protegido</h3><p>Protegemos el resto de la casa mientras dura la obra de la cocina.</p></li>
+        </ol>
       </div>
     </section>
 
@@ -155,7 +192,7 @@
     </section>
 
     <!-- ═══ TAMBIÉN HACEMOS ═══ -->
-    <section class="seccio" style="padding-top:0">
+    <section class="seccio seccio-seguida">
       <div class="wrap">
         <h2 class="aparicio">También hacemos</h2>
         <div class="tambe">
@@ -233,5 +270,6 @@
   </a>
 <script src="js/traduccions.js" defer></script>
 <script src="js/main.js" defer></script>
+<script src="js/servei.js?v=14" defer></script>
 </body>
 </html>

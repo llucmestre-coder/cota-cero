@@ -8,7 +8,7 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Baños · Cota Cero Reformas">
   <meta property="og:description" content="Reforma integral de baños: fontanería, alicatado, sanitarios y mampara, con presupuesto cerrado y fecha de entrega.">
-  <meta property="og:image" content="https://cota-cero.pages.dev/assets/img/srv-integral.jpg">
+  <meta property="og:image" content="https://cota-cero.pages.dev/assets/img/srv-bano.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <!-- Web de demostració: no s'indexa (PLA.md §Honestedat). -->
   <meta name="robots" content="noindex, nofollow">
@@ -16,9 +16,14 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="css/fonts.css">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/servei.css?v=14">
   <script src="assets/js/gsap.min.js" defer></script>
   <script src="assets/js/ScrollTrigger.min.js" defer></script>
+  <script src="assets/js/lenis.min.js" defer></script>
   <script src="js/i18n.js"></script>
+  <!-- Recorregut: el mode amb moviment es decideix abans de pintar (si no, la pàgina salta).
+       js/servei.js el treu si GSAP no arrenca. -->
+  <script>if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('ruta-moviment');</script>
 </head>
 <body>
   <a class="salta" href="#contingut">Saltar al contenido</a>
@@ -64,64 +69,76 @@
 
   <main id="contingut">
 
-    <!-- ═══ HERO DE SERVEI ═══ -->
-    <section class="hero-foto servei" aria-labelledby="hero-titol">
-      <img class="hero-foto-img" src="assets/img/srv-bano.jpg" alt="" width="1280" height="720" fetchpriority="high">
-      <div class="wrap hero-foto-in">
-        <p class="molla"><a href="index.html">Inicio</a> / Baños</p>
-        <h1 id="hero-titol">Un baño nuevo, revisado desde las bajantes</h1>
-        <p class="hero-sub">Cambiamos lo que se ve y lo que no: instalaciones, alicatado y sanitarios.</p>
-        <div class="botons">
+    <!-- ═══ RECORREGUT (PLA-ESCENES.md): la foto del servei queda fixa i la càmera s'hi passeja;
+         a cada parada, una cota assenyala l'element (js/servei.js). Sense JS o amb moviment
+         reduït: hero amb vel i les parades en graella. ═══ -->
+    <section class="ruta" aria-labelledby="hero-titol">
+      <div class="ruta-escenari">
+        <div class="ruta-camera">
+          <img class="ruta-foto" src="assets/img/srv-bano.jpg" alt="Baño reformado con ducha de obra, mampara de vidrio, lavabo sobre un mueble de roble y espejo redondo." width="1280" height="720" fetchpriority="high">
+        </div>
+        <div class="ruta-cotes" aria-hidden="true">
+          <svg focusable="false"><path class="cota-linia"/><circle class="cota-punt" r="0"/></svg>
+          <span class="cota-nom">Ducha y desagüe</span>
+          <span class="cota-nom">Mampara</span>
+          <span class="cota-nom">Impermeabilización y alicatado</span>
+          <span class="cota-nom">Luz, enchufes y ventilación</span>
+          <span class="cota-nom">Lavabo y sanitarios</span>
+        </div>
+        <div class="ruta-hero">
+          <p class="molla"><a href="index.html">Inicio</a> / Baños</p>
+          <h1 id="hero-titol">Un baño nuevo, revisado desde las bajantes</h1>
+          <p class="hero-sub">Cambiamos lo que se ve y lo que no: instalaciones, alicatado y sanitarios.</p>
+          <div class="botons">
             <a class="btn btn-principal" href="presupuesto.html?tipo=bano">Calcula tu presupuesto</a>
             <a class="btn btn-linia" href="tel:+34600000000">Llamar</a>
+          </div>
+        </div>
+      </div>
+      <div class="ruta-espai" aria-hidden="true"></div>
+      <div class="ruta-parades">
+        <div class="ruta-obertura">
+          <h2>Qué incluye</h2>
+          <p>Recorre el baño. Todo lo que señalamos entra en el precio cerrado.</p>
+        </div>
+        <article class="parada" data-x="0.37" data-y="0.935" data-s="1.35">
+          <h3>Ducha y desagüe</h3>
+          <p>Plato de ducha a ras de suelo, o bañera si la prefieres. Antes de cerrar el suelo cambiamos los desagües y revisamos la bajante.</p>
+        </article>
+        <article class="parada" data-x="0.355" data-y="0.62" data-s="1.3">
+          <h3>Mampara</h3>
+          <p>De vidrio y a medida, o cortina si lo prefieres. La medimos con el alicatado ya puesto.</p>
+        </article>
+        <article class="parada" data-x="0.5" data-y="0.3" data-s="1.3">
+          <h3>Impermeabilización y alicatado</h3>
+          <p>Primero impermeabilizamos la zona de la ducha. Después va el azulejo que hayas elegido, en paredes y suelo.</p>
+        </article>
+        <article class="parada" data-x="0.715" data-y="0.11" data-s="1.3">
+          <h3>Luz, enchufes y ventilación</h3>
+          <p>Luz sobre el espejo y enchufes con la toma de tierra revisada. Para la humedad, un extractor o el conducto renovado.</p>
+        </article>
+        <article class="parada" data-x="0.7" data-y="0.66" data-s="1.3">
+          <h3>Lavabo y sanitarios</h3>
+          <p>Inodoro, lavabo y grifería nuevos. El mueble del lavabo se hace a la medida del hueco.</p>
+        </article>
+        <div class="ruta-final">
+          <h2>Todo esto, en un solo precio</h2>
+          <p>Cada partida sale por escrito en el presupuesto. Diseña tu baño en el panel y mira el precio mientras eliges.</p>
+          <div class="botons"><a class="btn btn-principal" href="presupuesto.html?tipo=bano">Diseña tu baño</a></div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ QUÉ INCLUYE / CÓMO LO HACEMOS ═══ -->
-    <section class="fosc-calid seccio">
-      <div class="wrap dues-col">
-        <div>
-          <h2 class="aparicio">Qué incluye</h2>
-          <ul class="inclou">
-            <li>Fontanería y desagües renovados</li>
-            <li>Sanitarios: inodoro, lavabo, ducha o bañera</li>
-            <li>Mampara o cortina, a elegir</li>
-            <li>Alicatado y suelo</li>
-            <li>Impermeabilización antes de alicatar</li>
-            <li>Ventilación: extractor o renovación del conducto</li>
-            <li>Iluminación y enchufes con toma de tierra revisada</li>
-          </ul>
-        </div>
-        <div>
-          <h2 class="aparicio">Cómo lo hacemos</h2>
-          <ol class="passos">
-            <li>
-              <div>
-                <h3>Bajantes e impermeabilización</h3>
-                <p>Revisamos primero las bajantes y la impermeabilización, no solo lo que se ve al final.</p>
-              </div>
-            </li>
-            <li>
-              <div>
-                <h3>El baño entero</h3>
-                <p>Levantamos el baño entero: alicatado, sanitarios y suelo, no parche sobre parche.</p>
-              </div>
-            </li>
-            <li>
-              <div>
-                <h3>Oficios coordinados</h3>
-                <p>Coordinamos fontanero y alicatador para no tener el baño parado entre oficios.</p>
-              </div>
-            </li>
-            <li>
-              <div>
-                <h3>Prueba de agua</h3>
-                <p>Probamos el agua y los desagües antes de dar la obra por terminada.</p>
-              </div>
-            </li>
-          </ol>
-        </div>
+    <!-- ═══ CÓMO LO HACEMOS ═══ -->
+    <section class="seccio servei-passos">
+      <div class="wrap">
+        <h2 class="aparicio">Cómo lo hacemos</h2>
+        <ol class="passos-fila">
+          <li><h3>Bajantes e impermeabilización</h3><p>Revisamos primero las bajantes y la impermeabilización, no solo lo que se ve al final.</p></li>
+          <li><h3>El baño entero</h3><p>Levantamos el baño entero: alicatado, sanitarios y suelo, no parche sobre parche.</p></li>
+          <li><h3>Oficios coordinados</h3><p>Coordinamos fontanero y alicatador para no tener el baño parado entre oficios.</p></li>
+          <li><h3>Prueba de agua</h3><p>Probamos el agua y los desagües antes de dar la obra por terminada.</p></li>
+        </ol>
       </div>
     </section>
 
@@ -149,7 +166,7 @@
     <section class="seccio">
       <div class="wrap">
 
-        <h2 class="aparicio" style="margin-top:5rem">Preguntas frecuentes</h2>
+        <h2 class="aparicio">Preguntas frecuentes</h2>
         <div class="faq">
           <details>
             <summary>¿El presupuesto incluye la demolición?</summary>
@@ -176,7 +193,7 @@
     </section>
 
     <!-- ═══ TAMBIÉN HACEMOS ═══ -->
-    <section class="seccio" style="padding-top:0">
+    <section class="seccio seccio-seguida">
       <div class="wrap">
         <h2 class="aparicio">También hacemos</h2>
         <div class="tambe">
@@ -254,5 +271,6 @@
   </a>
 <script src="js/traduccions.js" defer></script>
 <script src="js/main.js" defer></script>
+<script src="js/servei.js?v=14" defer></script>
 </body>
 </html>
