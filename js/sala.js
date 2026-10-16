@@ -147,11 +147,9 @@
       tlPassos.to(p, { autoAlpha: 1, y: 0, duration: 0.08, ease: 'power2.out' }, 0.02 + i * (0.9 / pas.length));
     });
     tlPassos.to({}, { duration: 0.15 });   // tots junts, quiets, una estona abans que el blanc pugi
-    ScrollTrigger.create({
-      trigger: passos, start: 'top top',
-      onEnter: function () { gsap.set(capaFinal, { autoAlpha: 1 }); },
-      onLeaveBack: function () { gsap.set(capaFinal, { autoAlpha: 0 }); }
-    });
+    // El fons dels passos és de vidre (en Lluc, 16/10/2026): a través seu, la sala passa a poc a poc de les runes
+    // a la reforma feta mentre avancen els passos, en lloc de canviar de cop amagada.
+    tlPassos.fromTo(capaFinal, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.85, ease: 'power1.inOut' }, 0.05);
     // Mentre la sala en runes és a la vista, la càmera hi avança una mica (com entrar a l'habitació)
     gsap.fromTo(sala.querySelector('.sala-camera'), { scale: 1 }, {
       scale: 1.06, ease: 'none',

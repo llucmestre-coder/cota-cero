@@ -8,7 +8,7 @@
 
 :root {
   --sala-fosc: 22 25 28;          /* el grafit del vel, en canals per poder-hi posar alfa */
-  --laser: #7D95FF;               /* la línia del nivell làser: la cinta, encesa */
+  --laser: #E2B98A;               /* la línia del nivell làser: la cinta, encesa */
   --entra: cubic-bezier(0.22, 1, 0.36, 1);
   /* Sobre --vegetal (fons del carril) --cota i --roure-text no arriben a 4,5:1 (4,30 i 4,27) */
   --cota-vegetal: #535A55;        /* 5,16:1 */
@@ -118,7 +118,7 @@ html.sala-moviment { scrollbar-gutter: stable; }
 .sala-moviment .sala-laser {
   display: block; position: absolute; left: 0; right: 0; top: -1px; height: 2px; z-index: 2;
   background: var(--laser); opacity: 0; will-change: transform, opacity;
-  box-shadow: 0 0 6px 1px rgb(125 149 255 / .9), 0 0 28px 4px rgb(125 149 255 / .45);
+  box-shadow: 0 0 6px 1px rgb(226 185 138 / .9), 0 0 28px 4px rgb(226 185 138 / .45);
 }
 
 /* Regla de fases: on ets */
@@ -153,7 +153,7 @@ html.sala-moviment { scrollbar-gutter: stable; }
 .sala-moviment .fase-targeta p:not([class]) { font: 500 1.15rem/1.5 var(--f-titol); text-shadow: var(--ombra-text-petit); }
 .sala-moviment .fase-quan { color: var(--cinta-clar); font-size: 1rem; text-shadow: var(--ombra-text-petit); }
 .sala-moviment .fase-tens { border-top-color: rgb(255 255 255 / .5); font-size: 1.05rem; text-shadow: var(--ombra-text-petit); }
-.sala-moviment .fase-tens::before { background: var(--laser); box-shadow: 0 0 10px rgb(125 149 255 / .8); }
+.sala-moviment .fase-tens::before { background: var(--laser); box-shadow: 0 0 10px rgb(226 185 138 / .8); }
 .sala-moviment .fase-nota { color: var(--blanc); text-shadow: var(--ombra-text-petit); }
 .sala-moviment .fase-targeta .btn { box-shadow: 0 10px 30px -8px rgb(0 0 0 / .5); text-shadow: none; }
 .sala-moviment .fase-targeta > * { will-change: transform; }
@@ -411,6 +411,17 @@ html.habitacio-oberta { overflow: hidden; }
   position: sticky; top: 0; height: 100svh; max-width: none; margin: 0; background: var(--blanc);
   display: flex; flex-direction: column; justify-content: center;
   padding: calc(var(--cap-h) + 1rem) max(var(--gutter), (100% - var(--ample)) / 2 + var(--gutter)) 2rem;
+}
+/* Vidre (en Lluc, 16/10/2026): es veu la sala de darrere canviant de les runes a la reforma feta */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .sala-moviment .obra-fixe {
+    background: rgb(255 255 255 / .34);
+    -webkit-backdrop-filter: blur(7px) saturate(1.1); backdrop-filter: blur(7px) saturate(1.1);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .8);
+    /* el vidre deixa passar molta llum: el text porta un halo blanc perquè es llegeixi sobre les runes */
+    text-shadow: 0 0 2px rgb(255 255 255 / .95), 0 0 14px rgb(255 255 255 / .9);
+  }
+  .sala-moviment .obra-pas p:not([class]), .sala-moviment .obra-nota { color: #3A403C; }
 }
 .sala-moviment .sala-final { height: 100svh; }
 .sala-moviment .sala-final-foto { display: none; }

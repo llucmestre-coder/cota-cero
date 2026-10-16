@@ -491,7 +491,7 @@ function preparaMaterials() {
   mat('rajola', { map: tex('az#ECEAE4', .6, azulejo('#ECEAE4')), roughness: .3 });
   mat('moble', { map: tex('robleV', .8), roughness: .55 });
   mat('terraBany', { map: tex('rajolaTerra', .8), roughness: .4 });
-  M.cota = new THREE.MeshBasicMaterial({ color: 0x2A4BD7 });
+  M.cota = new THREE.MeshBasicMaterial({ color: 0x8A5A2B });
 }
 
 /* UV en metres: cada cara de la caixa rep les seves mides reals, així
@@ -1377,7 +1377,7 @@ function capturaMaqueta(w = 1600, h = 1000) {
     g.font = `600 ${cota ? 20 : 22}px "Bricolage Grotesque", Arial, sans-serif`;
     const amp = Math.max(g.measureText(nom).width, sub ? g.measureText(sub).width : 0) + 22;
     const alt = sub ? 54 : 32;
-    g.fillStyle = cota ? '#2A4BD7' : 'rgba(255,255,255,.88)';
+    g.fillStyle = cota ? '#8A5A2B' : 'rgba(255,255,255,.88)';
     g.beginPath(); g.roundRect(x - amp / 2, y - alt / 2, amp, alt, 6); g.fill();
     g.fillStyle = cota ? '#FFFFFF' : '#22262A';
     g.fillText(nom, x, sub ? y - 10 : y);
@@ -1477,7 +1477,7 @@ function fesPdf(r, jpeg, correu) {
   }
   yd -= 6;
   text($('.pn-preu-etiqueta').textContent.trim(), cx2, yd, 9, { col: '#5F6661' }); yd -= 30;
-  text(eur(r.total), cx2, yd, 28, { negreta: true, col: '#2A4BD7' });
+  text(eur(r.total), cx2, yd, 28, { negreta: true, col: '#8A5A2B' });
   // Peu
   linia(M, 74, W - M, 74);
   trenca(I18N.t('Lo que no está en esta lista no se cobra. Antes de firmar venimos a tu casa a medir, y si todo cuadra, firmamos este precio.'), 8.5, amp).forEach((l, i) => text(l, M, 60 - i * 11, 8.5, { col: '#5F6661' }));

@@ -8,7 +8,7 @@
 
 :root {
   --ruta-fosc: 22 25 28;          /* grafit del vel i de les ombres, en canals per poder-hi posar alfa */
-  --laser: #7D95FF;               /* la línia de la cota: la cinta, encesa (com el nivell làser de la home) */
+  --laser: #E2B98A;               /* la línia de la cota: la cinta, encesa (com el nivell làser de la home) */
   --entra: cubic-bezier(0.22, 1, 0.36, 1);
   /* Amb moviment, el text va directament sobre la foto, SENSE cap fons ni ombra fosca (en Lluc, 16/10/2026).
      Les fotos de servei són clares (guix, rajola blanca, roure): el text hi va en grafit, que s'hi llegeix sol.
@@ -113,9 +113,9 @@
 .ruta-cotes svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .cota-linia {
   fill: none; stroke: var(--laser); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
-  filter: drop-shadow(0 0 3px rgb(125 149 255 / .9)) drop-shadow(0 1px 3px rgb(var(--ruta-fosc) / .6));
+  filter: drop-shadow(0 0 3px rgb(226 185 138 / .9)) drop-shadow(0 1px 3px rgb(var(--ruta-fosc) / .6));
 }
-.cota-punt { fill: var(--laser); stroke: var(--blanc); stroke-width: 2; filter: drop-shadow(0 0 6px rgb(125 149 255 / .9)); }
+.cota-punt { fill: var(--laser); stroke: var(--blanc); stroke-width: 2; filter: drop-shadow(0 0 6px rgb(226 185 138 / .9)); }
 .cota-nom {
   position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0;
   font: 700 1.05rem/1.2 var(--f-titol); letter-spacing: -0.005em; color: var(--ruta-tinta); text-shadow: var(--ruta-ombra-petita);
