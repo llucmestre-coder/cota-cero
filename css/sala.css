@@ -10,60 +10,51 @@
   --sala-fosc: 22 25 28;          /* el grafit del vel, en canals per poder-hi posar alfa */
   --laser: #7D95FF;               /* la línia del nivell làser: la cinta, encesa */
   --entra: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Sobre --vegetal (fons del carril) --cota i --roure-text no arriben a 4,5:1 (4,30 i 4,27) */
+  --cota-vegetal: #535A55;        /* 5,16:1 */
+  --roure-vegetal: #7A4E24;       /* 5,20:1 */
   /* Text blanc directament sobre la foto: contacte, volum i halo */
-  --ombra-text: 0 1px 2px rgb(var(--sala-fosc) / .55), 0 4px 16px rgb(var(--sala-fosc) / .5), 0 14px 48px rgb(var(--sala-fosc) / .45);
+  --ombra-text: 0 1px 2px rgb(var(--sala-fosc) / .6), 0 2px 8px rgb(var(--sala-fosc) / .4), 0 6px 22px rgb(var(--sala-fosc) / .45), 0 16px 56px rgb(var(--sala-fosc) / .4);
   /* El text petit necessita un halo més ferm i més a prop de la lletra (sobre guix blanc, si no, no es llegeix) */
   --ombra-text-petit: 0 1px 1px rgb(var(--sala-fosc) / .8), 0 0 6px rgb(var(--sala-fosc) / .65), 0 2px 18px rgb(var(--sala-fosc) / .6);
 }
 
-.sala { position: relative; background: var(--grafit); }
+/* clip i no hidden: retalla el segell gran abans de caure (al mòbil eixamplava la pàgina) sense trencar els sticky */
+.sala { position: relative; background: var(--grafit); overflow-x: clip; }
 .sala-escenari {
   position: relative; height: 100svh; min-height: 34rem; overflow: hidden;
   color: var(--blanc); isolation: isolate;
 }
-.sala-fotos, .sala-capa, .sala-fotos img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sala-fotos, .sala-capa, .sala-fotos picture, .sala-fotos img { position: absolute; inset: 0; width: 100%; height: 100%; }
 .sala-fotos { background: var(--vegetal); }
 .sala-fotos img { object-fit: cover; }
 .sala-capa { overflow: hidden; }
 
-/* ── Hero a la cantonada, amb el vel calculat per a una foto blanca ─────── */
+/* ── Hero a la cantonada, directament sobre la foto ───────────────────────
+   Sense vel, tampoc en mode quiet (en Lluc, 15 i 16/10/2026: «que no estigui més fosca la part de darrere»,
+   «que vagi directament sobre la imatge»). El text s'aguanta amb una ombra en capes (contacte, vora, volum i halo)
+   que li dona cos sense enfosquir la sala; el text petit, amb la més ferma i en Bricolage. */
 .sala-hero {
   position: absolute; inset: 0; z-index: 3;
   display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start;
   padding: calc(var(--cap-h) + 2rem) var(--gutter) clamp(2.5rem, 7svh, 5.5rem);
 }
-.sala-hero::before {
-  content: ""; position: absolute; inset: 0; z-index: -1;
-  background: linear-gradient(to right, rgb(var(--sala-fosc) / .9) 0%, rgb(var(--sala-fosc) / .86) 42%, rgb(var(--sala-fosc) / 0) 74%);
-  -webkit-mask-image: linear-gradient(to top, #000 58%, transparent 88%);
-  mask-image: linear-gradient(to top, #000 58%, transparent 88%);
-}
 .sala-hero h1 {
-  max-width: 13ch; color: var(--blanc);
+  max-width: 13ch; color: var(--blanc); text-shadow: var(--ombra-text);
   font-size: clamp(2.6rem, 1.2rem + 5vw, 5.4rem); line-height: 0.98; letter-spacing: -0.035em;
   text-wrap: balance;
 }
-.sala-hero .hero-sub { max-width: 30rem; margin-top: 1.25rem; color: #E4E7E2; font-size: clamp(1.1rem, 1rem + 0.4vw, 1.3rem); }
+.sala-hero .hero-sub {
+  max-width: 30rem; margin-top: 1.25rem; color: var(--blanc); text-shadow: var(--ombra-text-petit);
+  font: 500 clamp(1.1rem, 1rem + 0.4vw, 1.3rem)/1.45 var(--f-titol);
+}
 .sala-hero .botons { margin-top: 1.75rem; }
+.sala-hero .btn { box-shadow: 0 10px 30px -8px rgb(0 0 0 / .5); }
 .sala-hero .btn-linia { border-color: rgb(255 255 255 / .85); color: var(--blanc); }
 .sala-hero :focus-visible { outline-color: var(--cinta-clar); }
 @media (hover: hover) {
   .sala-hero .btn-linia:hover { background: var(--blanc); color: var(--grafit); }
 }
-@media (max-width: 760px) {
-  .sala-hero::before {
-    background: linear-gradient(to top, rgb(var(--sala-fosc) / .9) 0%, rgb(var(--sala-fosc) / .86) 52%, rgb(var(--sala-fosc) / 0) 82%);
-    -webkit-mask-image: none; mask-image: none;
-  }
-}
-/* Amb moviment, sense vel (en Lluc, 15/10/2026: «que no estigui més fosca la part de darrere»): el text
-   s'aguanta sobre la foto amb una ombra en tres capes (contacte, volum i halo) que li dona cos sense enfosquir la sala.
-   El vel es queda només a l'estat quiet, on el hero va sobre la sala acabada, que és blanca. */
-.sala-moviment .sala-hero::before { content: none; }
-.sala-moviment .sala-hero h1,
-.sala-moviment .sala-hero .hero-sub { text-shadow: var(--ombra-text); }
-.sala-moviment .sala-hero .hero-sub { color: var(--blanc); font: 500 clamp(1.1rem, 1rem + 0.4vw, 1.3rem)/1.45 var(--f-titol); text-shadow: var(--ombra-text-petit); }
-.sala-moviment .sala-hero .btn { box-shadow: 0 10px 30px -8px rgb(0 0 0 / .5); }
 
 /* ── Peces que només existeixen amb moviment ───────────────────────────── */
 .zoom-o, .sala-laser, .sala-regla, .sala-intro-espai { display: none; }
@@ -110,13 +101,13 @@
 .sala-moviment.intro-activa .cap { transform: translateY(-100%); }
 
 .sala-moviment .sala-escenari { position: sticky; top: 0; margin-bottom: -100svh; }
-.sala-moviment .sala-hero { opacity: 0; visibility: hidden; }  /* l'ensenya el zoom (js/sala.js) */
+/* El hero es pinta des del principi, tapat pel vel del zoom (z-index 4): així és l'LCP del primer pintat */
 .sala-moviment .sala-intro-espai { display: block; height: 100svh; }
 /* Mentre la intro es fa sola, la pàgina no es mou (js/sala.js); la barra no desapareix i res no salta */
 html.sala-moviment { scrollbar-gutter: stable; }
 .intro-bloqueja, .intro-bloqueja body { overflow: hidden; }
 .sala-moviment .sala-fotos { transform-origin: 66% 42%; will-change: transform; }
-.sala-moviment .sala-capa, .sala-moviment .sala-capa img { will-change: transform; }
+.sala-moviment .sala-capa, .sala-moviment .sala-capa > picture { will-change: transform; }
 
 /* Zoom: vel grafit amb el nom; el forat de la «o» deixa veure la sala */
 .sala-moviment .zoom-o { display: block; position: absolute; inset: 0; width: 100%; height: 100%; z-index: 4; overflow: visible; }
@@ -166,10 +157,13 @@ html.sala-moviment { scrollbar-gutter: stable; }
 .sala-moviment .fase-nota { color: var(--blanc); text-shadow: var(--ombra-text-petit); }
 .sala-moviment .fase-targeta .btn { box-shadow: 0 10px 30px -8px rgb(0 0 0 / .5); text-shadow: none; }
 .sala-moviment .fase-targeta > * { will-change: transform; }
-@media (max-width: 760px) {
+/* Mòbil i tauleta: el text a baix, sobre el terra (al mig hi ha la finestra blanca i no es llegia) */
+@media (max-width: 899px) {
   .sala-moviment .fase-obertura,
-  .sala-moviment .fase { align-items: flex-end; justify-content: stretch; padding-bottom: 2rem; }
-  .sala-moviment .fase-targeta { width: 100%; }
+  .sala-moviment .fase { align-items: flex-end; justify-content: flex-start; padding-bottom: 2rem; }
+  .sala-moviment .fase-targeta { width: min(36rem, 100%); }
+}
+@media (max-width: 760px) {
   .sala-moviment .fase-targeta p:not([class]) { font-size: 1.05rem; }
 }
 
@@ -212,8 +206,15 @@ html.sala-moviment { scrollbar-gutter: stable; }
   border: 3px solid var(--cinta); border-radius: 4px; color: var(--cinta); rotate: -9deg;
   font: 800 1.1rem/1 var(--f-titol); letter-spacing: .1em; text-transform: uppercase; opacity: .88; mix-blend-mode: multiply;
 }
+/* El gap de la graella ja separa el botó del full */
+.contracte-fixe .botons { margin-top: 0; }
+/* Al mòbil el full ha de cabre sencer sota la capçalera (375×812 sobresortia 13 px per dalt) */
 @media (max-width: 520px) {
-  .contracte-segell { font-size: .9rem; }
+  .contracte-partides li, .contracte-total { padding-block: .45rem; }
+  .contracte-signatures { margin-top: 1.1rem; }
+  .contracte-firma svg, .contracte-firma i { height: 2.8rem; }
+  .contracte-segell { font-size: .9rem; bottom: 4.6rem; }
+  .sala-moviment .contracte-fixe { gap: 1rem; }
 }
 
 /* Amb moviment: el full queda enganxat al centre mentre es fa la signatura */
@@ -231,11 +232,19 @@ html.sala-moviment { scrollbar-gutter: stable; }
   .contracte-segell { bottom: 3.8rem; }
   .sala-moviment .contracte-fixe { gap: 1rem; padding-bottom: 1rem; }
 }
+/* 375×667 i més baixos: el full encara sobresortia uns pocs píxels per sota la capçalera */
+@media (max-height: 700px) {
+  .contracte-partides li, .contracte-total { padding-block: .26rem; }
+  .contracte-sub { margin-top: .35rem; }
+  .sala-moviment .contracte-fixe { gap: .75rem; padding-top: calc(var(--cap-h) + .25rem); padding-bottom: .75rem; }
+}
 
 /* =========================================================================
    CARRIL DE PROJECTES (en Lluc, 15/10/2026): l'scroll vertical mou les fotos de dreta a esquerra;
    les del mig són més grans i nítides que les dels costats (js/sala.js). Sense moviment: la graella de sempre.
    ========================================================================= */
+.galeria-carril .intro { color: var(--cota-vegetal); }
+.galeria-carril .galeria figcaption span { color: var(--roure-vegetal); }
 .sala-moviment .galeria-carril { padding-block: 0; }
 .sala-moviment .carril-fixe {
   height: 100svh; min-height: 34rem; overflow: hidden; display: flex; flex-direction: column; justify-content: center;
