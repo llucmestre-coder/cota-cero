@@ -6,10 +6,9 @@
    veure per dins. El preu i el panell funcionen encara que WebGL falli.
    Res de fotos: tot és geometria i textures dibuixades aquí.
    ════════════════════════════════════════════════════════════════ */
-import * as THREE from 'three';
-import { OrbitControls } from '../assets/js/three/OrbitControls.js';
-import { RoomEnvironment } from '../assets/js/three/RoomEnvironment.js';
-import { RoundedBoxGeometry } from '../assets/js/three/RoundedBoxGeometry.js';
+// Three.js es carrega després del primer pintat (carrega3D, al final): el preu i el panell
+// funcionen de seguida i la maqueta arriba un moment després (Lighthouse mòbil, 15/10/2026).
+let THREE, OrbitControls, RoomEnvironment, RoundedBoxGeometry;
 
 // Textos del JS: I18N.t amb la frase castellana escrita literal (js/i18n.js). Sense i18n, queda el castellà.
 const I18N = window.I18N || { t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (tot, k) => v[k] ?? tot) : s) };
@@ -429,9 +428,19 @@ function tex(nom, metres, canvas) {   // textura amb UV en metres (vegeu uvMetre
 }
 
 /* Mostres del panell: un tros de la mateixa textura */
-function pintaMostres() {
-  $$('.pn-mat').forEach(el => { el.style.backgroundImage = `url(${llenc(el.dataset.mat, 512, DIBUIX[el.dataset.mat]).toDataURL('image/jpeg', .8)})`; });
-  document.documentElement.style.setProperty('--fusta', `url(${llenc('robleV', 512, DIBUIX.robleV).toDataURL('image/jpeg', .8)})`);
+async function pintaMostres() {
+  // Els llenços (512 px, els mateixos que fa servir la maqueta) costen ~40 ms cadascun: se'n dibuixa un
+  // per tros de temps lliure, i la mostra es codifica a 192 px (el JPEG de 512 px eren 33 ms més per mostra).
+  const petit = document.createElement('canvas'); petit.width = petit.height = 192;
+  const px = petit.getContext('2d');
+  const mini = c => { px.drawImage(c, 0, 0, 192, 192); return petit.toDataURL('image/jpeg', .82); };
+  const respira = () => new Promise(r => (window.requestIdleCallback ? requestIdleCallback(r, { timeout: 300 }) : setTimeout(r, 16)));
+  for (const el of $$('.pn-mat')) {
+    if (!LLENÇ[el.dataset.mat]) await respira();
+    el.style.backgroundImage = `url(${mini(llenc(el.dataset.mat, 512, DIBUIX[el.dataset.mat]))})`;
+  }
+  await respira();
+  document.documentElement.style.setProperty('--fusta', `url(${mini(llenc('robleV', 512, DIBUIX.robleV))})`);
   const dib = {
     lineal: '<rect x="8" y="6" width="112" height="12"/>',
     l: '<rect x="8" y="6" width="112" height="12"/><rect x="8" y="18" width="12" height="34"/>',
@@ -752,7 +761,7 @@ function caixaR(w, h, d, r, material, x, y, z, pare) {
    peces només es mouen i s'estiren (res de reconstruir), i ho fan
    lliscant cap a la nova distribució a cada fotograma. */
 const HM = 1.1, PASS = 1.05, TE = .2, TI = .1;
-const GEO = new THREE.BoxGeometry(1, 1, 1);
+let GEO;   // BoxGeometry(1,1,1), es crea a carrega3D
 let pla = null, plaAra = null, plaObj = null, radiObjectiu = null, hover = null, interior = null;
 
 function caixaU(material, pare, ombra = true) {
@@ -1214,7 +1223,7 @@ function refrescaInterior() {
 }
 
 /* ── Tocar la maqueta ── */
-const ray = new THREE.Raycaster(), punter = new THREE.Vector2();
+let ray, punter;   // Raycaster i Vector2, es creen a carrega3D
 function zonaSota(e) {
   if (!pla || st.vista !== 'pis') return null;
   const r = canvas.getBoundingClientRect();
@@ -1592,15 +1601,36 @@ function tocaZona(id) {
 }
 function refresca() { if (plaAra) plaAra._brut = true; pintaPanell(); brut = true; }
 
+// Les mostres de material (llenços de 512 px) es dibuixen quan el fil queda lliure: abans era 1 s de bloqueig en mòbil
 pintaMostres();
 preparaSetmanes();
 sincronitzaZones();
-if (iniciaWebGL()) {
+/* La maqueta: Three.js i l'escena es preparen quan la pàgina ja s'ha pintat. Mentrestant (i si WebGL
+   falla) el panell va com sense 3D: totes les crides a la maqueta comproven `renderer`. */
+async function carrega3D() {
+  try {
+    const [t, oc, re, rb] = await Promise.all([
+      import('three'),
+      import('../assets/js/three/OrbitControls.js'),
+      import('../assets/js/three/RoomEnvironment.js'),
+      import('../assets/js/three/RoundedBoxGeometry.js'),
+    ]);
+    THREE = t; OrbitControls = oc.OrbitControls; RoomEnvironment = re.RoomEnvironment; RoundedBoxGeometry = rb.RoundedBoxGeometry;
+  } catch (e) { return; }
+  GEO = new THREE.BoxGeometry(1, 1, 1);
+  ray = new THREE.Raycaster(); punter = new THREE.Vector2();
+  await new Promise(r => setTimeout(r));   // cedeix el fil entre carregar i muntar l'escena
+  if (!iniciaWebGL()) return;
   muntaPla(true);
   ombraPer(Math.max(plaObj.W, plaObj.D) + 2);
   posa(vista('pis', Math.max(plaObj.W, plaObj.D)), QUIET ? 0 : 1600);
-} else calculaPlaSenseWebGL();
-function calculaPlaSenseWebGL() { /* sense 3D, el passadís es queda amb els m² per defecte */ }
+  aplicaMaterials();
+  if (st.activa) obreEditor(st.activa);
+  refresca();
+}
+const quanLliure = window.requestIdleCallback ? f => requestIdleCallback(f, { timeout: 700 }) : f => setTimeout(f, 200);
+if (document.readyState === 'complete') quanLliure(carrega3D);
+else addEventListener('load', () => quanLliure(carrega3D), { once: true });
 
 elZones.addEventListener('click', e => {
   const b = e.target.closest('[data-zona]');
