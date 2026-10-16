@@ -651,6 +651,11 @@ fieldset.camp { border: 0; margin: 0; padding: 0; }
 /* Sense JS no hi ha .activa: es veu la primera foto. Amb JS, main.js marca
    la primera en carregar i després la del panell visible. */
 html:not(.te-js) .plano-fotos img:first-child { opacity: 1; }
+/* A escriptori la foto va enganxada: l'amplada també la limita l'alçada de la pantalla (sota la capçalera i amb
+   marge), perquè sencera hi càpiga i no quedi tallada per baix (en Lluc, 16/10/2026). */
+@media (min-width: 861px) {
+  .plano-fotos { width: min(100%, calc((100svh - var(--cap-h) - 5rem) * 4 / 3)); }
+}
 @media (max-width: 860px) {
   /* Amplada limitada per l'alçada, no max-height: així no es trenca la proporció
      i les fotos no es tallen més del compte. */

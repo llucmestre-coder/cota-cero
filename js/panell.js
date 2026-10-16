@@ -1623,9 +1623,14 @@ async function carrega3D() {
   if (!iniciaWebGL()) return;
   muntaPla(true);
   ombraPer(Math.max(plaObj.W, plaObj.D) + 2);
-  posa(vista('pis', Math.max(plaObj.W, plaObj.D)), QUIET ? 0 : 1600);
+  // Des de «Diseña tu cocina/baño» (?tipo=cocina|bano) s'entra directament a la vista de dins d'aquella habitació,
+  // no al pis sencer (en Lluc, 16/10/2026). «Volver al piso» hi continua portant.
+  const z = st.activa && st.zones.get(st.activa);
+  const dins = z && (entrada === 'cocina' || entrada === 'bano') && FORM_DE[z.tipus] === entrada;
+  if (!dins) posa(vista('pis', Math.max(plaObj.W, plaObj.D)), QUIET ? 0 : 1600);
   aplicaMaterials();
   if (st.activa) obreEditor(st.activa);
+  if (dins) obreInterior();
   refresca();
 }
 const quanLliure = window.requestIdleCallback ? f => requestIdleCallback(f, { timeout: 700 }) : f => setTimeout(f, 200);

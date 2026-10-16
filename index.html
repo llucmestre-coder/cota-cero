@@ -16,8 +16,8 @@
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/BricolageGrotesque-0.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/fonts.css">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/sala.css">
+  <link rel="stylesheet" href="css/styles.css?v=obra5">
+  <link rel="stylesheet" href="css/sala.css?v=obra5">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -92,14 +92,8 @@
              El retall vertical és el centre de la foto, que és el que el cover ja ensenyava: l'enquadrament no canvia. -->
         <div class="sala-fotos">
           <picture><source media="(max-aspect-ratio: 3/4)" srcset="assets/img/sala/f0-v810.webp 810w, assets/img/sala/f0-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img class="sala-base" src="assets/img/sala/f0-1920.webp" srcset="assets/img/sala/f0-960.webp 960w, assets/img/sala/f0-1920.webp 1920w, assets/img/sala/f0-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" fetchpriority="high"></picture>
-          <div class="sala-capa" data-fase="1"><picture><source media="(max-aspect-ratio: 3/4)" srcset="assets/img/sala/f1-v810.webp 810w, assets/img/sala/f1-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img src="assets/img/sala/f1-1920.webp" srcset="assets/img/sala/f1-960.webp 960w, assets/img/sala/f1-1920.webp 1920w, assets/img/sala/f1-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
-          <div class="sala-capa" data-fase="2"><picture><source media="(max-aspect-ratio: 3/4)" srcset="assets/img/sala/f2-v810.webp 810w, assets/img/sala/f2-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img src="assets/img/sala/f2-1920.webp" srcset="assets/img/sala/f2-960.webp 960w, assets/img/sala/f2-1920.webp 1920w, assets/img/sala/f2-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
-          <div class="sala-capa" data-fase="3"><picture><source media="(max-aspect-ratio: 3/4)" srcset="assets/img/sala/f3-v810.webp 810w, assets/img/sala/f3-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img src="assets/img/sala/f3-1920.webp" srcset="assets/img/sala/f3-960.webp 960w, assets/img/sala/f3-1920.webp 1920w, assets/img/sala/f3-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
-          <div class="sala-capa" data-fase="4"><picture><source media="(max-aspect-ratio: 3/4)" srcset="assets/img/sala/f4-v810.webp 810w, assets/img/sala/f4-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img src="assets/img/sala/f4-1920.webp" srcset="assets/img/sala/f4-960.webp 960w, assets/img/sala/f4-1920.webp 1920w, assets/img/sala/f4-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
-          <div class="sala-capa" data-fase="5"><picture><source media="(max-aspect-ratio: 3/4)" srcset="assets/img/sala/f5-v810.webp 810w, assets/img/sala/f5-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img src="assets/img/sala/f5-1920.webp" srcset="assets/img/sala/f5-960.webp 960w, assets/img/sala/f5-1920.webp 1920w, assets/img/sala/f5-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
           <div class="sala-capa" data-fase="6"><picture><source media="(max-aspect-ratio: 3/4)" srcset="assets/img/sala/f6-v810.webp 810w, assets/img/sala/f6-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img src="assets/img/sala/f6-1920.webp" srcset="assets/img/sala/f6-960.webp 960w, assets/img/sala/f6-1920.webp 1920w, assets/img/sala/f6-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
         </div>
-        <div class="sala-laser" aria-hidden="true"></div>
         </div>
         <!-- Zoom: «Cota Cero» amb els contorns reals de Bricolage Grotesque (PLA-eines/contorn-o.py).
              El vel fosc té un forat amb la forma de l'interior de l'última «o». -->
@@ -123,94 +117,108 @@
             <a class="btn btn-linia" href="tel:+34600000000">Llamar</a>
           </div>
         </div>
-        <ol class="sala-regla" aria-hidden="true">
-          <li>Visita</li><li>Plano</li><li>Derribo</li><li>Instalaciones</li><li>Paredes</li><li>Acabados</li><li>Entrega</li>
-        </ol>
       </div>
 
       <div class="sala-intro-espai" aria-hidden="true"></div>
 
       <div class="sala-fases">
-        <div class="fase fase-obertura">
-          <div class="fase-targeta">
-            <h2>Así es una reforma con nosotros</h2>
-            <p>Este es el piso el día que entramos por primera vez. Sigue bajando y míralo cambiar, paso a paso, hasta el día que te damos las llaves.</p>
-            <p class="fase-nota">Plazos orientativos de una reforma integral de unos 70&nbsp;m².</p>
+        <!-- Els passos (en Lluc, 16/10/2026): un fons blanc puja sobre la sala en runes i s'hi queda; els 7 passos
+             apareixen d'esquerra a dreta sobre una línia a mesura que es baixa, i al final es veuen tots junts.
+             Després el blanc puja i descobreix la sala acabada (js/sala.js). -->
+        <section class="obra" aria-labelledby="obra-titol">
+          <div class="obra-fixe">
+            <header class="obra-cap">
+              <h2 id="obra-titol">Así es una reforma con nosotros</h2>
+              <p class="obra-nota">Plazos orientativos de una reforma integral de unos 70&nbsp;m².</p>
+            </header>
+            <ol class="obra-llista">
+              <li class="obra-pas"><p class="obra-quan">Día 1</p><h3>Visita y medición</h3><p>Lo medimos todo con láser. Ningún precio a ojo.</p></li>
+              <li class="obra-pas"><p class="obra-quan">En cinco días</p><h3>Plano y precio cerrado</h3><p>Partida por partida. Lo que no está escrito no se cobra.</p></li>
+              <li class="obra-pas"><p class="obra-quan">Semana 1</p><h3>Derribo y obra limpia</h3><p>Escalera protegida y escombro fuera cada tarde.</p></li>
+              <li class="obra-pas"><p class="obra-quan">Semanas 2 y 3</p><h3>Instalaciones nuevas</h3><p>Luz y agua nuevas, con boletín y fotos de todo.</p></li>
+              <li class="obra-pas"><p class="obra-quan">Semanas 3 a 5</p><h3>Paredes, techo y ventanas</h3><p>Paredes a nivel y un parte de obra cada viernes.</p></li>
+              <li class="obra-pas"><p class="obra-quan">Semanas 6 y 7</p><h3>Suelo y acabados</h3><p>Lo que elegiste. Ningún cambio sin precio.</p></li>
+              <li class="obra-pas"><p class="obra-quan">Semana 8</p><h3>Entrega y garantía</h3><p>Lo repasamos contigo y te damos la garantía firmada.</p></li>
+            </ol>
+          </div>
+        </section>
+        <div class="sala-final">
+          <img class="sala-final-foto" src="assets/img/sala/f6-1920.webp" srcset="assets/img/sala/f6-960.webp 960w, assets/img/sala/f6-1920.webp 1920w" sizes="100vw" alt="El mismo salón ya reformado: paredes lisas, suelo de roble en espiga y muebles." width="1920" height="1080" loading="lazy" decoding="async">
+          <div class="sala-final-text">
+            <p class="sala-final-frase">Así te la devolvemos.</p>
+            <div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
           </div>
         </div>
-        <ol class="fases-llista">
-          <li class="fase" data-fase="0">
-            <img class="fase-foto" src="assets/img/sala/f0-960.webp" alt="" width="960" height="540" loading="lazy">
-            <div class="fase-targeta">
-              <p class="fase-quan">Día 1</p>
-              <h3>Visita y medición</h3>
-              <p>Venimos a casa, lo medimos todo con láser y hacemos fotos de cada pared. Sin medir no damos números: ningún precio a ojo.</p>
-              <p class="fase-tens">Te llevas el plano de cómo está hoy.</p>
-            </div>
-          </li>
-          <li class="fase" data-fase="1">
-            <img class="fase-foto" src="assets/img/sala/f1-960.webp" alt="" width="960" height="540" loading="lazy">
-            <div class="fase-targeta">
-              <p class="fase-quan">En cinco días</p>
-              <h3>Plano y precio cerrado</h3>
-              <p>Te enseñamos el plano nuevo y el presupuesto partida por partida. Lo que no está escrito no se cobra. Con cinta azul marcamos en la pared dónde irá cada enchufe, para que lo veas antes de empezar.</p>
-              <p class="fase-tens">Te llevas el presupuesto firmado, con fecha de entrega.</p>
-            </div>
-          </li>
-          <li class="fase" data-fase="2">
-            <img class="fase-foto" src="assets/img/sala/f2-960.webp" alt="" width="960" height="540" loading="lazy">
-            <div class="fase-targeta">
-              <p class="fase-quan">Semana 1</p>
-              <h3>Derribo y obra limpia</h3>
-              <p>Protegemos la escalera y el ascensor y sacamos lo viejo. Cada tarde se recoge, y los escombros salen en sacos el mismo día: no se quedan en el rellano.</p>
-              <p class="fase-tens">Te llevas un jefe de obra con nombre y teléfono.</p>
-            </div>
-          </li>
-          <li class="fase" data-fase="3">
-            <img class="fase-foto" src="assets/img/sala/f3-960.webp" alt="" width="960" height="540" loading="lazy">
-            <div class="fase-targeta">
-              <p class="fase-quan">Semanas 2 y 3</p>
-              <h3>Instalaciones nuevas</h3>
-              <p>Luz y agua nuevas, con boletín. Antes de cerrar las paredes lo fotografiamos todo y te pasamos las fotos, así sabrás por dónde va cada tubo dentro de diez años.</p>
-              <p class="fase-tens">Te llevas las fotos de todo lo que queda tapado.</p>
-            </div>
-          </li>
-          <li class="fase" data-fase="4">
-            <img class="fase-foto" src="assets/img/sala/f4-960.webp" alt="" width="960" height="540" loading="lazy">
-            <div class="fase-targeta">
-              <p class="fase-quan">Semanas 3 a 5</p>
-              <h3>Paredes, techo y ventanas</h3>
-              <p>Paredes a nivel, techo liso y ventanas nuevas que cierran de verdad. Cada viernes te contamos cómo va la obra comparada con el calendario que firmamos.</p>
-              <p class="fase-tens">Te llevas un parte semanal del avance.</p>
-            </div>
-          </li>
-          <li class="fase" data-fase="5">
-            <img class="fase-foto" src="assets/img/sala/f5-960.webp" alt="" width="960" height="540" loading="lazy">
-            <div class="fase-targeta">
-              <p class="fase-quan">Semanas 6 y 7</p>
-              <h3>Suelo y acabados</h3>
-              <p>Ponemos lo que elegiste en el presupuesto: el mismo suelo, la misma pintura, los mismos radiadores. Si a mitad de obra quieres cambiar algo, antes te damos el precio por escrito.</p>
-              <p class="fase-tens">Ningún cambio sin precio previo.</p>
-            </div>
-          </li>
-          <li class="fase" data-fase="6">
-            <img class="fase-foto" src="assets/img/sala/f6-960.webp" alt="" width="960" height="540" loading="lazy">
-            <div class="fase-targeta">
-              <p class="fase-quan">Semana 8</p>
-              <h3>Entrega y garantía</h3>
-              <p>Repasamos la casa contigo, punto por punto, y no damos la obra por cerrada hasta que tú la apruebas. Te dejamos las llaves y la garantía por escrito.</p>
-              <p class="fase-tens">Te llevas la garantía firmada.</p>
-              <div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
-            </div>
-          </li>
-        </ol>
+        <div class="sala-final-espai" aria-hidden="true"></div>
+      </div>
+    </section>
 
-        <!-- Contracte: el full de pressupost tancat puja sobre la sala acabada i se signa (js/sala.js) -->
+    <!-- ═══ LES DUES PORTES (en Lluc, 16/10/2026): acabada la sala, es tria per quina porta s'entra.
+         Cada porta obre la seva habitació a pantalla completa (js/portes.js); sense JS, els enllaços porten a la pàgina del servei. ═══ -->
+    <section class="portes" aria-labelledby="portes-titol">
+      <div class="portes-in">
+        <h2 id="portes-titol">¿Y la cocina? ¿Y el baño?</h2>
+        <p class="portes-sub">Abre una puerta y mira lo que hacemos dentro.</p>
+        <div class="portes-parell">
+          <a class="porta" href="cocinas.html" data-porta="porta-cocina">
+            <span class="porta-marc"><img src="assets/img/srv-cocina.jpg" alt="" width="1280" height="720" loading="lazy" decoding="async"></span>
+            <span class="porta-nom">Cocina</span>
+          </a>
+          <a class="porta" href="banos.html" data-porta="porta-bano">
+            <span class="porta-marc"><img src="assets/img/gal-02.jpg" alt="" width="768" height="1024" loading="lazy" decoding="async"></span>
+            <span class="porta-nom">Baño</span>
+          </a>
+        </div>
+      </div>
+      <dialog class="habitacio" id="porta-cocina" aria-labelledby="hab-cocina-titol">
+        <img class="habitacio-foto" src="assets/img/srv-cocina.jpg" alt="Cocina reformada con muebles de roble y encimera clara." width="1280" height="720" loading="lazy" decoding="async">
+        <div class="habitacio-text">
+          <p class="habitacio-etiqueta">Cocina</p>
+          <h3 id="hab-cocina-titol">Medimos antes de pedir un solo mueble</h3>
+          <ul>
+            <li>Los muebles se encargan con la cocina ya medida: llegan y encajan.</li>
+            <li>Agua, luz y extracción nuevas, con boletín.</li>
+            <li>Muebles, encimera, suelo y paredes en un solo precio.</li>
+          </ul>
+          <div class="botons">
+            <a class="btn btn-principal" href="presupuesto.html?tipo=cocina">Diseña tu cocina</a>
+            <a class="btn btn-linia" href="cocinas.html">Ver cocinas</a>
+          </div>
+        </div>
+        <button class="habitacio-tanca" type="button" data-tanca>Volver al pasillo</button>
+      </dialog>
+      <dialog class="habitacio" id="porta-bano" aria-labelledby="hab-bano-titol">
+        <img class="habitacio-foto" src="assets/img/gal-02.jpg" alt="Baño pequeño con alicatado verde en vertical y grifería en latón." width="768" height="1024" loading="lazy" decoding="async">
+        <div class="habitacio-text">
+          <p class="habitacio-etiqueta">Baño</p>
+          <h3 id="hab-bano-titol">Impermeabilizado antes de poner un azulejo</h3>
+          <ul>
+            <li>Plato de ducha a ras de suelo y desagüe nuevo.</li>
+            <li>Sin humedades en el piso de abajo: lo comprobamos antes de alicatar.</li>
+            <li>Mampara, mueble y grifería en el mismo presupuesto.</li>
+          </ul>
+          <div class="botons">
+            <a class="btn btn-principal" href="presupuesto.html?tipo=bano">Diseña tu baño</a>
+            <a class="btn btn-linia" href="banos.html">Ver baños</a>
+          </div>
+        </div>
+        <button class="habitacio-tanca" type="button" data-tanca>Volver al pasillo</button>
+      </dialog>
+    </section>
+
+    <!-- ═══ CONTRACTE (mogut avall de la sala el 16/10/2026): el full de pressupost puja sobre la sala acabada i se signa (js/sala.js) ═══ -->
+    <section class="contracte-seccio" aria-labelledby="contracte-titol">
+      <div class="contracte-fons" aria-hidden="true"><img src="assets/img/sala/f6-1920.webp" srcset="assets/img/sala/f6-960.webp 960w, assets/img/sala/f6-1920.webp 1920w, assets/img/sala/f6-2880.webp 2880w" sizes="100vw" alt="" width="1920" height="1080" loading="lazy" decoding="async"></div>
         <div class="fase-contracte">
           <div class="contracte-fixe">
-            <article class="contracte" aria-labelledby="contracte-titol">
-              <p class="contracte-etiqueta">Presupuesto cerrado</p>
+            <div class="contracte-explica">
               <h2 id="contracte-titol">El día que firmamos, el precio deja de moverse</h2>
+              <p>Antes de empezar te damos el presupuesto partida por partida. Lo firmas tú, lo firmamos nosotros, y lo que no está escrito no se cobra.</p>
+              <p>Lo hace nuestro propio equipo, sin subcontratas de última hora, y cada tarde dejamos la obra recogida.</p>
+              <div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
+            </div>
+            <article class="contracte" aria-labelledby="contracte-etiqueta">
+              <p class="contracte-etiqueta" id="contracte-etiqueta">Presupuesto cerrado</p>
               <p class="contracte-sub">Reforma integral de un piso de 70&nbsp;m². Cada partida, por escrito.</p>
               <ul class="contracte-partides">
                 <li><span>Derribo y gestión de residuos</span><b>3.400 €</b></li>
@@ -230,10 +238,9 @@
               </div>
               <p class="contracte-segell" aria-hidden="true">Precio cerrado</p>
             </article>
-            <div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
           </div>
         </div>
-      </div>
+      <div class="contracte-espai" aria-hidden="true"></div>
     </section>
 
     <!-- ═══ SIGNATURA: EL PLÀNOL ═══ -->
@@ -276,42 +283,6 @@
       </div>
     </section>
 
-    <!-- ═══ POR QUÉ NOSOTROS: LA LLEGENDA ═══ -->
-    <section class="fosc-calid seccio" aria-labelledby="per-que-titol">
-      <div class="wrap llegenda">
-        <div class="llegenda-cap aparicio">
-          <h2 id="per-que-titol">Lo que firmamos contigo</h2>
-          <p class="intro">Las tres cosas que más preocupan antes de una reforma son el precio, el plazo y el desorden. Por eso van en el contrato.</p>
-        </div>
-        <ul class="llegenda-llista">
-          <li>
-            <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M9 4 H25 L31 10 V36 H9 Z"/><path d="M14 16 H26 M14 22 H26"/><path class="accent" d="M14 29 L18 32 L26 26"/></svg>
-            <h3>Precio cerrado por escrito</h3>
-            <p>Lo que firmamos es lo que pagas, sin partidas que aparecen a mitad de obra.</p>
-          </li>
-          <li>
-            <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M5 9 H35 V35 H5 Z M5 16 H35 M12 4 V12 M28 4 V12"/><path class="accent" d="M13 25 L18 29 L27 21"/></svg>
-            <h3>Fecha en el contrato</h3>
-            <p>La entrega tiene una fecha firmada, no una estimación de boca.</p>
-          </li>
-          <li>
-            <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M8 24 A12 12 0 0 1 32 24 Z M4 24 H36 M20 12 V8"/><path class="accent" d="M8 32 H32"/></svg>
-            <h3>Equipo propio</h3>
-            <p>Los oficios que entran en tu casa son nuestro equipo, no subcontratas de última hora.</p>
-          </li>
-          <li>
-            <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M24 4 L17 22 M11 22 H23 L27 36 H7 Z"/><path class="accent" d="M12 30 H22"/></svg>
-            <h3>Obra limpia cada día</h3>
-            <p>Antes de irnos, recogemos: escombro fuera y suelos protegidos, todos los días.</p>
-          </li>
-          <li>
-            <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4 L34 9 V20 C34 28 28 33 20 36 C12 33 6 28 6 20 V9 Z"/><path class="accent" d="M14 20 L18 24 L26 16"/></svg>
-            <h3>Garantía por escrito</h3>
-            <p>Lo que hacemos queda garantizado por contrato, no de palabra.</p>
-          </li>
-        </ul>
-      </div>
-    </section>
 
     <!-- ═══ PROYECTOS ═══ -->
     <section class="seccio" aria-labelledby="projectes-titol">
@@ -499,7 +470,8 @@
   </a>
 <script src="js/traduccions.js" defer></script>
 <script src="js/main.js" defer></script>
-<script src="js/sala.js" defer></script>
+<script src="js/sala.js?v=obra5" defer></script>
+<script src="js/portes.js?v=obra5" defer></script>
 <script src="js/galeria.js" defer></script>
 </body>
 </html>
