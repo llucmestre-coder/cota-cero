@@ -260,3 +260,219 @@ html.sala-moviment { scrollbar-gutter: stable; }
 .sala-moviment .galeria-carril .galeria figure img { aspect-ratio: 4 / 5; }
 .sala-moviment .galeria-carril .galeria button:hover img { transform: none; }
 .sala-moviment .galeria-carril .galeria figcaption { max-width: 100%; }
+
+/* Fases clares (4-6: guix blanc i pintura): el blanc amb ombra no es llegia. Text grafit amb un fil de llum,
+   com a les pagines de servei (en Lluc, 16/10/2026). */
+.sala-moviment .fase-clara .fase-targeta { color: var(--grafit); text-shadow: 0 1px 0 rgb(255 255 255 / .75), 0 2px 1px rgb(255 255 255 / .3), 0 6px 10px rgb(var(--sala-fosc) / .14); }
+.sala-moviment .fase-clara .fase-targeta h3 { color: var(--grafit); }
+.sala-moviment .fase-clara .fase-targeta p:not([class]),
+.sala-moviment .fase-clara .fase-tens,
+.sala-moviment .fase-clara .fase-nota { color: var(--grafit); text-shadow: 0 1px 0 rgb(255 255 255 / .7); }
+.sala-moviment .fase-clara .fase-quan { color: var(--cinta); text-shadow: 0 1px 0 rgb(255 255 255 / .7); }
+.sala-moviment .fase-clara .fase-tens { border-top-color: rgb(var(--sala-fosc) / .35); }
+.sala-moviment .fase-clara .fase-tens::before { background: var(--cinta); box-shadow: none; }
+
+/* =========================================================================
+   LES DUES PORTES (en Lluc, 16/10/2026): acabada la sala, es tria cuina o bany.
+   Cada porta és un enllaç a la pàgina del servei; amb JS (js/portes.js) obre la
+   seva habitació a pantalla completa, sortint del forat de la porta.
+   ========================================================================= */
+.portes { position: relative; z-index: 7; background: var(--guix); padding-block: var(--seccio); overflow: hidden; }
+.portes-in { max-width: var(--ample); margin: 0 auto; padding-inline: var(--gutter); text-align: center; }
+.portes h2 { font-size: var(--t-xl); letter-spacing: -0.03em; text-wrap: balance; }
+.portes-sub { margin-top: .75rem; color: var(--cota); font: 500 var(--t-s)/1.4 var(--f-titol); }
+.portes-parell {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 15rem)); justify-content: center;
+  gap: clamp(1.5rem, 9vw, 8rem); margin-top: clamp(2rem, 5vw, 3.5rem);
+  /* el sòcol: una línia de terra sota les dues portes */
+  background: linear-gradient(var(--linia), var(--linia)) bottom 2.6rem left 0 / 100% 1px no-repeat;
+}
+.porta { display: grid; justify-items: center; gap: 1rem; color: var(--grafit); text-decoration: none; }
+.porta-marc {
+  position: relative; display: block; height: min(52svh, 30rem); max-width: 100%; aspect-ratio: 5 / 11; overflow: hidden;
+  background: var(--grafit); border: .7rem solid var(--blanc); border-bottom: 0;
+  box-shadow: 0 0 0 1px var(--linia), 0 30px 50px -30px rgb(var(--sala-fosc) / .45);
+  perspective: 900px;
+}
+.porta-marc img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.06); filter: brightness(.9); transition: transform .8s var(--entra), filter .8s var(--entra); }
+/* La fulla de la porta, entreoberta; s'obre més quan hi passes per sobre */
+.porta-marc::after {
+  content: ""; position: absolute; inset: 0; transform-origin: 0 50%;
+  background: linear-gradient(90deg, #F7F7F4, #E9EAE5);
+  box-shadow: inset -1px 0 0 var(--linia), 12px 0 24px -12px rgb(var(--sala-fosc) / .35);
+  transform: rotateY(-72deg); transition: transform .8s var(--entra);
+}
+.porta-nom { display: inline-flex; align-items: center; gap: .5rem; font: 600 1.2rem/1 var(--f-titol); }
+.porta-nom::after { content: "→"; color: var(--cinta); transition: transform .4s var(--entra); }
+.porta:focus-visible { outline: none; }
+.porta:focus-visible .porta-marc { outline: 2px solid var(--cinta); outline-offset: 4px; }
+@media (hover: hover) {
+  .porta:hover .porta-marc::after { transform: rotateY(-84deg); }
+  .porta:hover .porta-marc img { transform: scale(1); filter: none; }
+  .porta:hover .porta-nom::after { transform: translateX(4px); }
+}
+.porta:focus-visible .porta-marc::after { transform: rotateY(-84deg); }
+@media (max-width: 520px) {
+  .portes-parell { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+  .porta-marc { border-width: .5rem; }
+}
+
+/* L'habitació oberta: foto a pantalla completa i un full blanc amb el que s'hi fa */
+.habitacio {
+  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none;
+  margin: 0; padding: 0; border: 0; background: transparent; color: var(--grafit); overflow: hidden;
+}
+.habitacio::backdrop { background: rgb(var(--sala-fosc) / .55); }
+.habitacio-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.habitacio-text {
+  position: absolute; right: var(--gutter); bottom: var(--gutter); width: min(27rem, calc(100% - 2 * var(--gutter)));
+  max-height: calc(100% - 6rem); overflow: auto;
+  padding: clamp(1.25rem, 3vw, 2rem); background: var(--blanc); border-radius: 3px;
+  box-shadow: 0 30px 60px -20px rgb(var(--sala-fosc) / .55);
+}
+.habitacio-etiqueta { font: 700 var(--t-xs)/1 var(--f-titol); letter-spacing: .12em; text-transform: uppercase; color: var(--cinta); }
+.habitacio-text h3 { margin-top: .6rem; font-size: clamp(1.4rem, 1.1rem + 1vw, 1.9rem); line-height: 1.08; letter-spacing: -0.025em; text-wrap: balance; }
+.habitacio-text ul { list-style: none; margin: 1rem 0 0; padding: 0; border-top: 2px solid var(--grafit); }
+.habitacio-text li { padding: .6rem 0; border-bottom: 1px dashed var(--linia); font: 500 var(--t-s)/1.4 var(--f-titol); }
+.habitacio-text .botons { margin-top: 1.25rem; }
+.habitacio-tanca {
+  position: absolute; top: var(--gutter); left: var(--gutter); padding: .7rem 1.1rem; border: 0; border-radius: 999px;
+  background: var(--blanc); color: var(--grafit); font: 600 var(--t-s)/1 var(--f-titol); cursor: pointer;
+  box-shadow: 0 10px 30px -10px rgb(var(--sala-fosc) / .6);
+}
+.habitacio-tanca::before { content: "← "; }
+.habitacio-tanca:focus-visible { outline: 2px solid var(--cinta); outline-offset: 3px; }
+@media (max-width: 600px) {
+  .habitacio-text { left: var(--gutter); right: var(--gutter); width: auto; max-height: 62%; }
+}
+html.habitacio-oberta { overflow: hidden; }
+
+/* El contracte, en una secció pròpia (16/10/2026): el full sobre la sala acabada */
+.contracte-seccio { position: relative; z-index: 7; isolation: isolate; overflow-x: clip;   /* el segell, abans de caure, és més gran i sobresortiria */ background: var(--grafit); padding-block: var(--seccio); }
+.contracte-fons { position: absolute; inset: 0; z-index: -1; }
+.contracte-fons img { width: 100%; height: 100%; object-fit: cover; }
+.contracte-seccio .fase-contracte { margin-top: 0; }
+.sala-moviment .contracte-seccio { padding-block: 0; }
+.sala-moviment .contracte-fons { position: sticky; top: 0; height: 100svh; margin-bottom: -100svh; }
+@media (prefers-reduced-motion: reduce) {
+  .porta-marc img, .porta-marc::after, .porta-nom::after { transition: none; }
+}
+/* La regla de fases, sobre les fases clares (4-6): grafit */
+.sala-moviment .sala-regla { transition: color .3s, opacity .3s; }
+.sala-moviment .sala-regla.regla-clara { color: rgb(34 38 42 / .55); text-shadow: 0 1px 0 rgb(255 255 255 / .7); }
+.sala-regla.regla-clara li.activa { color: var(--grafit); }
+.sala-regla.regla-clara li::before { box-shadow: none; }
+.sala-regla.regla-clara li.activa::before { background: var(--cinta); }
+
+/* =========================================================================
+   ELS PASSOS (en Lluc, 16/10/2026; substitueixen les fases sobre la sala).
+   Fons blanc; els 7 passos en una sola imatge, sobre una línia. Sense moviment:
+   tots visibles. Amb moviment (js/sala.js): el blanc es queda fix i la línia i els
+   passos apareixen d'esquerra a dreta; després el blanc puja i hi ha la sala acabada.
+   ========================================================================= */
+.obra { background: var(--blanc); color: var(--grafit); padding-block: var(--seccio); }
+.obra-fixe { max-width: var(--ample); margin: 0 auto; padding-inline: var(--gutter); }
+.obra-cap h2 { font-size: var(--t-xl); letter-spacing: -0.03em; max-width: 20ch; text-wrap: balance; }
+.obra-nota { margin-top: .6rem; font: 500 var(--t-xs)/1.4 var(--f-titol); color: var(--cota); }
+.obra-llista {
+  --linia: 1; position: relative; list-style: none; margin: clamp(2rem, 6svh, 3.5rem) 0 0; padding: 2.2rem 0 0;
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1.25rem;
+}
+.obra-llista::before {
+  content: ""; position: absolute; left: 0; right: 0; top: .55rem; height: 2px; background: var(--cinta);
+  transform: scaleX(var(--linia)); transform-origin: 0 50%;
+}
+.obra-pas { position: relative; }
+.obra-pas::before {
+  content: ""; position: absolute; left: 0; top: calc(-2.2rem + .55rem + 1px); width: .8rem; height: .8rem; border-radius: 50%;
+  background: var(--blanc); border: 2px solid var(--cinta); transform: translateY(-50%);
+}
+.obra-quan { font: 600 var(--t-xs)/1.2 var(--f-titol); color: var(--cinta); font-variant-numeric: tabular-nums; }
+.obra-pas h3 { margin-top: .35rem; font: 600 1.05rem/1.15 var(--f-titol); letter-spacing: -0.01em; text-wrap: balance; }
+.obra-pas p:not([class]) { margin-top: .45rem; font: 500 .875rem/1.4 var(--f-titol); color: var(--cota); }
+@media (max-width: 899px) {
+  .obra-llista { grid-template-columns: 1fr; gap: .9rem; padding: 0 0 0 1.6rem; }
+  .obra-llista::before { left: .3rem; right: auto; top: 0; bottom: 0; width: 2px; height: auto; transform: scaleY(var(--linia)); transform-origin: 50% 0; }
+  .obra-pas::before { left: calc(-1.6rem + .3rem + 1px); top: .45rem; transform: translate(-50%, -50%); }
+  .obra-pas h3 { margin-top: .15rem; font-size: 1rem; }
+  .obra-pas p:not([class]) { margin-top: .2rem; font-size: .8125rem; }
+}
+
+/* La sala acabada, al final. Sense moviment: la foto amb la frase. Amb moviment: la foto és la sala fixa de sota. */
+.sala-final { position: relative; color: var(--blanc); }
+.sala-final-foto { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; min-height: 22rem; }
+.sala-final-text { position: absolute; left: var(--gutter); right: var(--gutter); bottom: clamp(1.5rem, 6svh, 4rem); }
+.sala-final-frase { font: 700 clamp(2.1rem, 1.3rem + 2.4vw, 3.4rem)/1 var(--f-titol); letter-spacing: -0.03em; text-shadow: var(--ombra-text); }
+.sala-final .botons { margin-top: 1.25rem; }
+
+/* Amb moviment */
+.sala-moviment .obra { height: 330svh; padding: 0; background: none; }
+.sala-moviment .obra-fixe {
+  position: sticky; top: 0; height: 100svh; max-width: none; margin: 0; background: var(--blanc);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: calc(var(--cap-h) + 1rem) max(var(--gutter), (100% - var(--ample)) / 2 + var(--gutter)) 2rem;
+}
+.sala-moviment .sala-final { height: 100svh; }
+.sala-moviment .sala-final-foto { display: none; }
+.sala-moviment .sala-final-text { bottom: clamp(2.5rem, 7svh, 5.5rem); }
+.sala-moviment .sala-final .btn { box-shadow: 0 10px 30px -8px rgb(0 0 0 / .5); }
+.sala-moviment .sala-fases { padding-bottom: 0; }
+
+/* Portes més grans (en Lluc, 16/10/2026) */
+.portes-parell { grid-template-columns: repeat(2, minmax(0, 20rem)); }
+.porta-marc { height: min(66svh, 40rem); }
+@media (max-width: 520px) {
+  .portes-parell { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .porta-marc { height: min(58svh, 30rem); }
+}
+@media (min-width: 900px) {
+  .obra-cap h2 { font-size: var(--t-xxl); }
+  .obra-llista { gap: 1.75rem; margin-top: clamp(2.5rem, 8svh, 5rem); }
+  .obra-quan { font-size: .9375rem; }
+  .obra-pas h3 { font-size: clamp(1.15rem, .8rem + .7vw, 1.45rem); }
+  .obra-pas p:not([class]) { font-size: clamp(.9375rem, .8rem + .3vw, 1.0625rem); }
+}
+
+/* La sala acabada es queda fixa de fons i les portes hi pugen per sobre (en Lluc, 16/10/2026): la secció de la sala
+   s'allarga una pantalla (l'espai) i les portes la tapen pujant aquesta mateixa pantalla. */
+.sala-final-espai { display: none; }
+.sala-moviment .sala-final-espai { display: block; height: 100svh; }
+.sala-moviment .portes { margin-top: -100svh; box-shadow: 0 -30px 60px -20px rgb(var(--sala-fosc) / .35); }
+/* El pressupost (en Lluc, 16/10/2026): la sala acabada no es mou. La secció comença una pantalla abans, sota les
+   portes, amb el fons ja fix; quan les portes marxen, a l'esquerra hi ha l'explicació i el full entra per la dreta. */
+.sala-moviment .contracte-seccio { margin-top: -100svh; z-index: 6; }
+.sala-moviment .fase-contracte { min-height: 300svh; }
+.contracte-fixe {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 34rem); align-items: center; justify-items: stretch;
+  column-gap: clamp(2rem, 6vw, 6rem); row-gap: 1.25rem; max-width: var(--ample); margin-inline: auto;
+}
+.contracte-fixe .contracte { justify-self: end; }
+.contracte-explica { color: var(--blanc); }
+.contracte-explica h2 { max-width: 14ch; font-size: clamp(2.1rem, 1.3rem + 2.4vw, 3.4rem); line-height: 1; letter-spacing: -0.03em; text-wrap: balance; text-shadow: var(--ombra-text); }
+.contracte-explica p { max-width: 30rem; margin-top: 1rem; font: 500 1.15rem/1.5 var(--f-titol); text-shadow: var(--ombra-text-petit); }
+.contracte-explica .botons { margin-top: 1.5rem; }
+.contracte-explica .btn { box-shadow: 0 10px 30px -8px rgb(0 0 0 / .5); }
+.sala-moviment .contracte-fixe { max-width: none; padding-inline: max(var(--gutter), (100% - var(--ample)) / 2 + var(--gutter)); }
+@media (max-width: 899px) {
+  .contracte-fixe { grid-template-columns: 1fr; }
+  .contracte-fixe .contracte { justify-self: center; }
+  .contracte-explica h2 { font-size: 1.75rem; max-width: none; }
+  .contracte-explica p { font-size: 1rem; margin-top: .5rem; }
+  .sala-moviment .contracte-explica p + p, .sala-moviment .contracte-explica .botons { display: none; }
+}
+
+/* El mateix al final del contracte: la sala acabada no es mou fins que «Qué reformamos» l'ha tapada del tot */
+.contracte-espai { display: none; }
+.sala-moviment .contracte-espai { display: block; height: 100svh; }
+.sala-moviment .contracte-seccio + .plano { position: relative; z-index: 8; margin-top: -100svh; box-shadow: 0 -30px 60px -20px rgb(var(--sala-fosc) / .35); }
+
+/* Portes encara més grans (en Lluc, 16/10/2026: «segueixen sent molt petites»): més amples, gairebé tota la pantalla */
+.portes-in { max-width: none; }
+.portes-parell { grid-template-columns: repeat(2, minmax(0, 40rem)); gap: clamp(1.25rem, 4vw, 4rem); }
+.porta { justify-items: stretch; }
+.porta-nom { justify-self: center; }
+.porta-marc { width: min(100%, calc(72svh * 4 / 5)); height: auto; aspect-ratio: 4 / 5; justify-self: center; border-width: 1rem; }
+@media (max-width: 520px) {
+  .portes-parell { grid-template-columns: 1fr; gap: 2rem; }
+  .porta-marc { width: 100%; height: auto; aspect-ratio: 4 / 5; border-width: .75rem; }
+}

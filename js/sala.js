@@ -1,12 +1,12 @@
 /* =========================================================================
    COTA CERO — escena de la sala (home). PLA-ESCENES.md.
    Sense GSAP o amb moviment reduït no fa res: el CSS ja ensenya el hero sobre
-   la sala acabada i la llista de fases amb foto. Aquí només s'hi afegeix:
+   la sala acabada i la llista de passos. Aquí només s'hi afegeix:
    - Lenis (scroll suavitzat) lligat al rellotge de GSAP;
-   - el zoom dins de la «o» de Cero (SVG amb els contorns reals de la lletra);
-   - la sala fixa que es reforma: cada fase escombra l'estat nou de dalt a baix
-     amb el nivell làser, lligat a l'scroll (només transform i opacity);
-   - la regla que diu en quina fase ets.
+   - el zoom dins de la «o» de Cero (SVG amb els contorns reals de la lletra) cap a la sala en runes;
+   - els passos (16/10/2026): un fons blanc fix on la línia i els 7 passos apareixen d'esquerra a dreta;
+     quan el blanc puja, a sota hi ha la sala acabada;
+   - el contracte i el carril de projectes.
    ========================================================================= */
 (function () {
   'use strict';
@@ -34,15 +34,11 @@
 
   var escenari = sala.querySelector('.sala-escenari');
   var fotos = sala.querySelector('.sala-fotos');
-  var capes = gsap.utils.toArray('.sala-capa', sala);
-  var laser = sala.querySelector('.sala-laser');
+  var capaFinal = sala.querySelector('.sala-capa[data-fase="6"]');   // la sala acabada
   var svg = sala.querySelector(".zoom-o");
   var g = sala.querySelector('.zoom-o-g');
   var hero = sala.querySelector('.sala-hero');
-  var regla = gsap.utils.toArray('.sala-regla li', sala);
-  var reglaLlista = sala.querySelector('.sala-regla');
-  var fases = gsap.utils.toArray('.fase[data-fase]', sala);
-  var obertura = sala.querySelector('.fase-obertura');
+  var passos = sala.querySelector('.obra');
 
   /* ── Zoom dins de la «o» ───────────────────────────────────────────────
      Centre i radi del forat en unitats del viewBox (PLA-eines/sortida/contorn-o.json).
@@ -121,8 +117,8 @@
   intro.eventCallback('onComplete', function () { alliberaScroll(); pintaHero(); });
 
   /* ── La sala es reforma: cada fase escombra el seu estat de dalt a baix ── */
-  capes.forEach(function (capa) { gsap.set(capa, { yPercent: -100 }); gsap.set(capa.firstElementChild, { yPercent: 100 }); });
-  var alcada = function () { return escenari.clientHeight; };
+  /* ── Amb moviment, la sala comença en runes: l'acabada s'ensenya quan el blanc dels passos la tapa ── */
+  gsap.set(capaFinal, { autoAlpha: 0 });
 
   /* ── Els ScrollTrigger es munten després del primer pintat (Lighthouse: la seva mesura era una tasca llarga
      a l'arrencada i endarreria el titular). Durant la intro l'scroll està aturat: ningú no els troba a faltar.
@@ -133,69 +129,57 @@
   setTimeout(arrenca, 300);
 
   function muntaEscena() {
-    heroFora = ScrollTrigger.create({ trigger: obertura, start: 'top 95%', end: 'top 55%', onUpdate: pintaHero, onRefresh: pintaHero });
-    gsap.fromTo(reglaLlista, { opacity: 0 }, {
-      opacity: 1, ease: 'none', immediateRender: false,
-      scrollTrigger: { trigger: obertura, start: 'top 70%', end: 'top 30%', scrub: true }
-    });
+    heroFora = ScrollTrigger.create({ trigger: passos, start: 'top 95%', end: 'top 55%', onUpdate: pintaHero, onRefresh: pintaHero });
 
-    fases.forEach(function (fase) {
-      var n = Number(fase.getAttribute('data-fase'));
-      // La regla: quina fase tens davant
-      ScrollTrigger.create({
-        trigger: fase, start: 'top 60%', end: 'bottom 60%',
-        onToggle: function (self) { if (self.isActive) regla.forEach(function (li, i) { li.classList.toggle('activa', i === n); }); }
-      });
-      if (n === 0) return;
-      var capa = capes[n - 1];
-      gsap.timeline({
-        scrollTrigger: {
-          trigger: fase, start: 'top 88%', end: 'top 30%', scrub: true, invalidateOnRefresh: true,
-          onToggle: function (self) { gsap.to(laser, { opacity: self.isActive ? 1 : 0, duration: 0.2, overwrite: 'auto' }); }
-        }
-      })
-        .to(capa, { yPercent: 0, ease: 'none' }, 0)
-        .to(capa.firstElementChild, { yPercent: 0, ease: 'none' }, 0)
-        .fromTo(laser, { y: 0 }, { y: alcada, ease: 'none', immediateRender: false }, 0);
+    /* ── Els passos (en Lluc, 16/10/2026): el fons blanc tapa la sala en runes i s'hi queda fix; la línia es
+       dibuixa d'esquerra a dreta (de dalt a baix al mòbil) i cada pas apareix quan la línia hi arriba. Mentre el
+       blanc tapa la sala, la sala passa a l'estat acabat: quan el blanc puja, el que hi ha a sota ja és la reforma feta. ── */
+    var llista = passos.querySelector('.obra-llista');
+    var pas = gsap.utils.toArray('.obra-pas', passos);
+    var vertical = function () { return innerWidth < 900; };
+    gsap.set(pas, { autoAlpha: 0.08, y: 14 });
+    var tlPassos = gsap.timeline({
+      scrollTrigger: { trigger: passos, start: 'top top', end: 'bottom bottom', scrub: true, invalidateOnRefresh: true },
+      defaults: { ease: 'none' }
     });
-
-
-    /* ── Profunditat (en Lluc, 15/10/2026): el text va sense targeta, directament sobre la foto ──
-       La sala avança a poc a poc mentre passen les fases (com una càmera que entra a l'habitació) i, dins de
-       cada fase, el text es mou en capes: el títol, més a prop, puja més de pressa que la resta. Només transform. */
-    gsap.fromTo(sala.querySelector('.sala-camera'), { scale: 1, yPercent: 0 }, {
-      scale: 1.08, yPercent: -1.5, ease: 'none',
-      scrollTrigger: { trigger: sala.querySelector('.sala-fases'), start: 'top bottom', end: 'bottom bottom', scrub: true }
+    tlPassos.fromTo(llista, { '--linia': 0 }, { '--linia': 1, duration: 1 }, 0);
+    pas.forEach(function (p, i) {
+      tlPassos.to(p, { autoAlpha: 1, y: 0, duration: 0.08, ease: 'power2.out' }, 0.02 + i * (0.9 / pas.length));
     });
-    // Un sol ScrollTrigger per targeta (abans n'hi havia un per peça, una trentena, tots amb el mateix tram)
-    var CAPA = { H2: 56, H3: 56, P: 26 };
-    gsap.utils.toArray('.fase-targeta', sala).forEach(function (targeta) {
-      var tl = gsap.timeline({ scrollTrigger: { trigger: targeta, start: 'top bottom', end: 'bottom top', scrub: true } });
-      gsap.utils.toArray(targeta.children).forEach(function (peca) {
-        var d = peca.classList.contains('fase-quan') ? 40 : (CAPA[peca.tagName] || 14);
-        if (peca.classList.contains('fase-tens') || peca.classList.contains('fase-nota')) d = 14;
-        tl.fromTo(peca, { y: d }, { y: -d, ease: 'none' }, 0);
-      });
+    tlPassos.to({}, { duration: 0.15 });   // tots junts, quiets, una estona abans que el blanc pugi
+    ScrollTrigger.create({
+      trigger: passos, start: 'top top',
+      onEnter: function () { gsap.set(capaFinal, { autoAlpha: 1 }); },
+      onLeaveBack: function () { gsap.set(capaFinal, { autoAlpha: 0 }); }
+    });
+    // Mentre la sala en runes és a la vista, la càmera hi avança una mica (com entrar a l'habitació)
+    gsap.fromTo(sala.querySelector('.sala-camera'), { scale: 1 }, {
+      scale: 1.06, ease: 'none',
+      scrollTrigger: { trigger: passos, start: 'top bottom', end: 'top top', scrub: true }
     });
 
     /* ── Contracte: el full puja, les partides apareixen, la firma es dibuixa i cau el segell ── */
-    var contracte = sala.querySelector('.fase-contracte');
+    var contracte = document.querySelector('.fase-contracte');   // des del 16/10, fora de la sala (secció pròpia)
     if (contracte) {
       var full = contracte.querySelector('.contracte');
       var partides = contracte.querySelectorAll('.contracte-partides li, .contracte-total, .contracte-clausula');
       var traç = contracte.querySelector('.contracte-firma path');
       var segell = contracte.querySelector('.contracte-segell');
-      var botoContracte = contracte.querySelector('.botons');
+      var explica = contracte.querySelector('.contracte-explica');
       gsap.set(traç, { strokeDasharray: 1, strokeDashoffset: 1 });
       gsap.set(partides, { opacity: 0, y: 14 });
       gsap.set(segell, { opacity: 0, scale: 1.8 });
-      gsap.set(botoContracte, { opacity: 0, y: 20 });
-      gsap.timeline({ scrollTrigger: { trigger: contracte, start: 'top 80%', end: 'bottom bottom', scrub: true }, defaults: { ease: 'none' } })
-        .fromTo(full, { yPercent: 70, rotate: -2.5, opacity: 0 }, { yPercent: 0, rotate: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }, 0)
-        .to(partides, { opacity: 1, y: 0, stagger: 0.04, duration: 0.08 }, 0.25)
-        .to(traç, { strokeDashoffset: 0, duration: 0.2 }, 0.55)
-        .to(segell, { opacity: 0.88, scale: 1, duration: 0.05, ease: 'power4.in' }, 0.76)
-        .to(botoContracte, { opacity: 1, y: 0, duration: 0.1 }, 0.86);
+      // En Lluc (16/10/2026): la sala acabada no es mou; quan les portes marxen, l'explicació apareix a l'esquerra
+      // i el full entra des de la dreta. Comença quan les portes ja deixen veure la sala.
+      gsap.timeline({
+        scrollTrigger: { trigger: '.portes', start: 'bottom 45%', endTrigger: contracte, end: 'bottom bottom', scrub: true },
+        defaults: { ease: 'none' }
+      })
+        .fromTo(explica, { autoAlpha: 0, x: -40 }, { autoAlpha: 1, x: 0, duration: 0.16, ease: 'power2.out' }, 0)
+        .fromTo(full, { x: function () { return innerWidth * 0.6; }, rotate: 4, autoAlpha: 0 }, { x: 0, rotate: 0, autoAlpha: 1, duration: 0.26, ease: 'power2.out' }, 0.06)
+        .to(partides, { opacity: 1, y: 0, stagger: 0.04, duration: 0.08 }, 0.32)
+        .to(traç, { strokeDashoffset: 0, duration: 0.2 }, 0.6)
+        .to(segell, { opacity: 0.88, scale: 1, duration: 0.05, ease: 'power4.in' }, 0.82);
     }
 
     /* ── Carril de projectes: les fotos van de dreta a esquerra i les del mig creixen ── */
