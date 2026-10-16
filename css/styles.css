@@ -12,9 +12,9 @@
   --grafit-2:    #2E3337;
   --cota:        #5F6661;
   --linia:       #C4C8C1;
-  --cinta:       #2A4BD7;
-  --cinta-fosc:  #1F3AAE;
-  --cinta-clar:  #CBD4F8;
+  --cinta:       #8A5A2B;   /* 16/10/2026: el blau passa a fusta (en Lluc). AA sobre guix i blanc */
+  --cinta-fosc:  #6B4420;
+  --cinta-clar:  #E2B98A;   /* crema (= --mel), sobre fosc i sobre fotos */
   --blanc:       #FFFFFF;
   --error:       #A3291F;
   --whatsapp:    #1F8F4E;
@@ -98,8 +98,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   transition: background-color .2s, color .2s, border-color .2s;
 }
 .btn:disabled { opacity: .6; cursor: progress; }
-.btn-principal { background: var(--cinta); color: var(--blanc); }
-.btn-principal:hover { background: var(--cinta-fosc); }
+.btn-principal { background: var(--mel); color: var(--nit); }   /* el crema de les seccions fosques, a tot arreu (en Lluc, 16/10/2026) */
+.btn-principal:hover { background: #D6A774; }
 .btn-linia { border-color: var(--grafit); color: var(--grafit); background: transparent; }
 .btn-linia:hover { background: var(--grafit); color: var(--guix); }
 .fosc .btn-principal { background: var(--cinta-clar); color: var(--grafit); }
@@ -481,6 +481,7 @@ fieldset.camp { border: 0; margin: 0; padding: 0; }
 .fosc-calid .btn-principal { background: var(--mel); color: var(--nit); }
 .fosc-calid .btn-principal:hover { background: var(--blanc); }
 .fosc-calid :focus-visible { outline-color: var(--mel); }
+.fosc-calid .projecte-tipus { color: var(--mel); }
 
 /* Foto de contingut: proporció fixa, sense salts de maquetació */
 .foto { display: block; width: 100%; aspect-ratio: var(--ratio, 4 / 3); object-fit: cover; border-radius: var(--radi); background: var(--vegetal); }
