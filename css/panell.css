@@ -36,7 +36,16 @@
   transition: background-color .25s, color .25s;
 }
 .pn-modes button:hover { background: color-mix(in srgb, var(--blanc) 60%, transparent); }
-.pn-modes button[aria-selected="true"] { background: var(--grafit); color: var(--guix); }
+.pn-modes button[aria-pressed="true"] { background: var(--grafit); color: var(--guix); }
+
+/* ── Només una habitació (?tipo=cocina|bano, des de cocinas.html i banos.html): sense res del pis ── */
+:root:not([data-sol]) .pn-modes,
+[data-sol] .pn-pis, [data-sol] .pn-editor-cap, [data-sol] .pn-dins,
+[data-sol] .pn-torna, [data-sol] .pn-etiquetes, [data-sol] .pn-cap-zona { display: none; }
+[data-sol] .pn-editor { border-top: 0; padding-top: 0; }
+[data-titol-sol] { display: none; }
+:root:not([data-sol]) [data-titol-sol=""],
+[data-sol="cocina"] [data-titol-sol="cocina"], [data-sol="bano"] [data-titol-sol="bano"] { display: inline; }
 .pn-modes button:focus-visible { outline: 2px solid var(--cinta); outline-offset: 2px; }
 
 .pn-estat, .pn-pista {

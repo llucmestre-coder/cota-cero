@@ -51,6 +51,8 @@ const FORM_DE = { salon: 'estancia', pasillo: 'estancia', dorm: 'estancia', coci
 const RANG = { salon: [14, 40, .5], dorm: [7, 20, .5], cocina: [6, 30, 1], bano: [4, 12, .5] };
 const forms = Object.fromEntries($$('.pn-opcions').map(f => [f.dataset.per, f]));
 const st = { dorm: 2, banos: 1, zones: new Map(), activa: null, vista: 'pis' };
+/* 'cocina' o 'bano' quan el panell és d'una sola habitació (l'script del <head> ho marca a <html>); si no, null */
+const unaSola = () => document.documentElement.dataset.sol || null;
 
 function opcionsInicials(tipus, n) {
   if (tipus === 'cocina') return { m2: 9, forma: 'lineal', frente: 'blanco', encimera: 'roble', suelo: 'porcelanico', paquete: 'esencial' };
@@ -132,7 +134,7 @@ function eur(n) {
 function preuZona(z) {
   const clau = FORM_DE[z.tipus], P = PREUS[clau], o = z.opts, m2 = o.m2;
   let total = m2 * P.obra, setm;
-  const detalls = [];
+  const detalls = [], parts = [[`${I18N.t('Obra')} · ${fmtNum(m2)} m²`, m2 * P.obra]];
   if (clau === 'estancia') {
     total += (P['suelo/m2'][o.suelo] || 0) * m2 + (P['paredes/m2'][o.paredes] || 0) * m2;
     detalls.push(`${nomGrup(clau, 'suelo')}: ${nomValor(clau, 'suelo', o.suelo)}`, `${nomGrup(clau, 'paredes')}: ${nomValor(clau, 'paredes', o.paredes)}`);
@@ -143,12 +145,14 @@ function preuZona(z) {
     for (const [k, taula] of Object.entries(P)) {
       if (k === 'setmanes' || k === 'obra') continue;
       const [nom, perM2] = k.split('/');
-      total += (taula[o[nom]] || 0) * (perM2 ? m2 : 1);
+      const preu = (taula[o[nom]] || 0) * (perM2 ? m2 : 1);
+      total += preu;
       detalls.push(nomValor(clau, nom, o[nom]));
+      if (preu) parts.push([nom === 'paquete' ? nomValor(clau, nom, o[nom]) : `${nomGrup(clau, nom)}: ${nomValor(clau, nom, o[nom])}`, preu]);
     }
     setm = P.setmanes[o.paquete] + (m2 > (clau === 'cocina' ? 18 : 8) ? 1 : 0);
   }
-  return { total: Math.round(total), detalls, setm };
+  return { total: Math.round(total), detalls, setm, parts };
 }
 function calcula() {
   const triades = [...st.zones.values()].filter(z => z.on);
@@ -187,8 +191,9 @@ function pintaPanell() {
     });
   }
   // Partides i total
-  $('[data-partides]').innerHTML = r.linies.length
-    ? r.linies.map(([t, n]) => `<li><span>${t}</span><span>${eur(n)}</span></li>`).join('')
+  const files = unaSola() && r.linies.length ? r.linies[0][2].parts : r.linies.map(([t, n]) => [t, n]);
+  $('[data-partides]').innerHTML = files.length
+    ? files.map(([t, n]) => `<li><span>${t}</span><span>${eur(n)}</span></li>`).join('')
     : `<li><span>${I18N.t('Todavía no has elegido ninguna zona.')}</span><span></span></li>`;
   animaTotal(r.total);
   pintaEntrega(r.setmanes);
@@ -1343,6 +1348,8 @@ function resumDisseny() {
   const totes = r.triades.length === st.zones.size;
   const modeNom = totes ? I18N.t('Todo el piso') : r.triades.map(nomZona).join(', ');
   const m2 = r.triades.reduce((a, z) => a + z.opts.m2, 0);
+  const una = unaSola() && r.triades[0];
+  if (una) return { mode: unaSola(), modeNom: nomZona(una), files, linies: r.linies.map(l => [l[0], l[1]]), total: r.total, v: { m2, paquete: una.opts.paquete } };
   return { mode: 'integral', modeNom, files, linies: r.linies.map(l => [l[0], l[1]]), total: r.total, v: { m2, paquete: '' } };
 }
 
@@ -1369,7 +1376,7 @@ function capturaMaqueta(w = 1600, h = 1000) {
   g.drawImage(renderer.domElement, 0, 0, w, h);
   const v3 = new THREE.Vector3();
   g.textAlign = 'center'; g.textBaseline = 'middle';
-  for (const e of etiquetes) {
+  for (const e of st.vista === 'pis' ? etiquetes : []) {   // dins de la cuina o el bany, les del pis no hi pinten res
     v3.copy(e.pos).project(camera);
     const x = (v3.x + 1) / 2 * w, y = (1 - v3.y) / 2 * h;
     const nom = e.el.firstChild.textContent, sub = ($('small', e.el) || {}).textContent || '';
@@ -1623,10 +1630,9 @@ async function carrega3D() {
   if (!iniciaWebGL()) return;
   muntaPla(true);
   ombraPer(Math.max(plaObj.W, plaObj.D) + 2);
-  // Des de «Diseña tu cocina/baño» (?tipo=cocina|bano) s'entra directament a la vista de dins d'aquella habitació,
-  // no al pis sencer (en Lluc, 16/10/2026). «Volver al piso» hi continua portant.
-  const z = st.activa && st.zones.get(st.activa);
-  const dins = z && (entrada === 'cocina' || entrada === 'bano') && FORM_DE[z.tipus] === entrada;
+  // Des de «Diseña tu cocina/baño» (?tipo=cocina|bano) el panell és només d'aquella habitació: la maqueta
+  // en ensenya l'interior i el pis no surt mai (en Lluc, 16/10/2026).
+  const dins = !!unaSola();
   if (!dins) posa(vista('pis', Math.max(plaObj.W, plaObj.D)), QUIET ? 0 : 1600);
   aplicaMaterials();
   if (st.activa) obreEditor(st.activa);
@@ -1720,9 +1726,22 @@ document.addEventListener('idioma-canviat', () => {
   brut = true;
 });
 
-// Entrada des de les pàgines de servei: ?tipo=cocina|bano|casa (o #cocina...)
+/* ── Només una habitació: el selector Cocina | Baño de damunt la maqueta ── */
+function triaSol(tipus) {
+  document.documentElement.dataset.sol = tipus;
+  const id = tipus === 'cocina' ? 'cocina' : 'bano1';
+  for (const z of st.zones.values()) z.on = z.id === id;
+  obreEditor(id);
+  $$('[data-sol-boto]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.solBoto === tipus)));
+  const url = new URL(location.href); url.searchParams.set('tipo', tipus); url.hash = '';
+  history.replaceState(null, '', url);
+  if (renderer) { aplicaMaterials(); obreInterior(); }
+  refresca();
+}
+$$('[data-sol-boto]').forEach(b => b.addEventListener('click', () => { if (b.dataset.solBoto !== unaSola()) triaSol(b.dataset.solBoto); }));
+
+// Entrada des de les pàgines de servei: ?tipo=cocina|bano (l'script del <head> ja ho ha marcat a <html>), ?tipo=casa
 const entrada = location.hash.slice(1) || new URLSearchParams(location.search).get('tipo');
-if (entrada === 'cocina') tocaZona('cocina');
-else if (entrada === 'bano') tocaZona('bano1');
+if (unaSola()) { triaSol(unaSola()); $('.pn-pista').textContent = I18N.t('Arrastra para girarla'); }
 else if (entrada === 'casa' || entrada === 'integral') { for (const z of st.zones.values()) z.on = true; refresca(); }
 else pintaPanell();
