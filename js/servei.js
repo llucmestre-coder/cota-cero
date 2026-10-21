@@ -246,8 +246,8 @@
   if (foto.complete && foto.naturalWidth) llegeixFoto(); else foto.addEventListener('load', llegeixFoto);
 
   var lin = function (c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
-  var LUM_GRAFIT = 0.019;   // luminància relativa de --grafit (#22262A)
-  var textosTinta = gsap.utils.toArray('.ruta-hero .molla, .ruta-hero h1, .ruta-hero .hero-sub, .ruta-hero .botons, .ruta-parades h2, .ruta-parades h3, .ruta-parades p, .cota-nom', ruta);
+  var LUM_GRAFIT = 0.0094;  // luminància relativa de --text (#16191B)
+  var textosTinta = gsap.utils.toArray('.cota-nom', ruta);   // la resta del text va en blanc amb vel (21/10/2026)
   function tinta(cam) {
     if (!pixels) return;
     var esc = escenari.getBoundingClientRect(), c = coberta;
@@ -275,7 +275,8 @@
 
   /* ── Profunditat del text (com a la home): sense fons, cada línia puja a una velocitat; el títol,
      més a prop, va més de pressa. Només transform. ── */
-  var CAPA = { H2: 56, H3: 56, P: 26 };
+  // Al mòbil, menys diferència: amb 56/26 el títol trepitjava el paràgraf en entrar (jutge, 21/10/2026)
+  var CAPA = matchMedia('(max-width: 960px)').matches ? { H2: 22, H3: 22, P: 12 } : { H2: 56, H3: 56, P: 26 };
   gsap.utils.toArray('.ruta-obertura, .parada, .ruta-final', ruta).forEach(function (bloc) {
     gsap.utils.toArray(bloc.children).forEach(function (peca) {
       var d = CAPA[peca.tagName] || 14;

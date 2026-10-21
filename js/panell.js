@@ -454,7 +454,7 @@ async function pintaMostres() {
     banera: '<rect x="8" y="6" width="84" height="26" rx="10"/><line x1="92" y1="6" x2="92" y2="30" stroke-width="2.5"/>',
   };
   $$('.pn-dib').forEach(el => {
-    el.innerHTML = `<svg viewBox="0 0 128 56" aria-hidden="true" fill="#22262A" stroke="#22262A" stroke-width="1.5"><rect x="2" y="2" width="124" height="52" fill="none" stroke="#C4C8C1"/>${dib[el.dataset.dib]}</svg>`;
+    el.innerHTML = `<svg viewBox="0 0 128 56" aria-hidden="true" fill="#16191B" stroke="#16191B" stroke-width="1.5"><rect x="2" y="2" width="124" height="52" fill="none" stroke="#C4C8CC"/>${dib[el.dataset.dib]}</svg>`;
   });
 }
 
@@ -496,7 +496,7 @@ function preparaMaterials() {
   mat('rajola', { map: tex('az#ECEAE4', .6, azulejo('#ECEAE4')), roughness: .3 });
   mat('moble', { map: tex('robleV', .8), roughness: .55 });
   mat('terraBany', { map: tex('rajolaTerra', .8), roughness: .4 });
-  M.cota = new THREE.MeshBasicMaterial({ color: 0x8A5A2B });
+  M.cota = new THREE.MeshBasicMaterial({ color: 0x622F26 });
 }
 
 /* UV en metres: cada cara de la caixa rep les seves mides reals, així
@@ -1371,7 +1371,7 @@ function capturaMaqueta(w = 1600, h = 1000) {
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const g = c.getContext('2d');
   const fons = g.createRadialGradient(w * .4, h * .3, 0, w * .4, h * .3, w * .9);
-  fons.addColorStop(0, '#F3F4F1'); fons.addColorStop(1, '#DADDD6');
+  fons.addColorStop(0, '#F9FAFC'); fons.addColorStop(1, '#DBDEE1');
   g.fillStyle = fons; g.fillRect(0, 0, w, h);
   g.drawImage(renderer.domElement, 0, 0, w, h);
   const v3 = new THREE.Vector3();
@@ -1384,11 +1384,11 @@ function capturaMaqueta(w = 1600, h = 1000) {
     g.font = `600 ${cota ? 20 : 22}px "Bricolage Grotesque", Arial, sans-serif`;
     const amp = Math.max(g.measureText(nom).width, sub ? g.measureText(sub).width : 0) + 22;
     const alt = sub ? 54 : 32;
-    g.fillStyle = cota ? '#8A5A2B' : 'rgba(255,255,255,.88)';
+    g.fillStyle = cota ? '#622F26' : 'rgba(255,255,255,.88)';
     g.beginPath(); g.roundRect(x - amp / 2, y - alt / 2, amp, alt, 6); g.fill();
-    g.fillStyle = cota ? '#FFFFFF' : '#22262A';
+    g.fillStyle = cota ? '#FFFFFF' : '#16191B';
     g.fillText(nom, x, sub ? y - 10 : y);
-    if (sub) { g.font = '500 18px "Bricolage Grotesque", Arial, sans-serif'; g.fillStyle = '#5F6661'; g.fillText(sub, x, y + 13); }
+    if (sub) { g.font = '500 18px "Bricolage Grotesque", Arial, sans-serif'; g.fillStyle = '#52565A'; g.fillText(sub, x, y + 13); }
   }
   camera.position.copy(posAbans);
   renderer.setPixelRatio(pr); renderer.setSize(abans.x, abans.y, false);
@@ -1433,22 +1433,22 @@ function fesPdf(r, jpeg, correu) {
   const W = 595.28, H = 841.89, M = 44, amp = W - 2 * M;
   const ops = [];
   const color = hex => { const n = parseInt(hex.slice(1), 16); return [(n >> 16) / 255, (n >> 8 & 255) / 255, (n & 255) / 255].map(v => v.toFixed(3)).join(' '); };
-  const text = (s, x, y, mida, { negreta = false, col = '#22262A', dreta = false } = {}) => {
+  const text = (s, x, y, mida, { negreta = false, col = '#16191B', dreta = false } = {}) => {
     const xx = dreta ? x - amplada(s, mida, negreta) : x;
     ops.push(`BT ${color(col)} rg /${negreta ? 'F2' : 'F1'} ${mida} Tf ${xx.toFixed(2)} ${y.toFixed(2)} Td ${cadenaPdf(s)} Tj ET`);
   };
-  const linia = (x1, y1, x2, y2, col = '#C4C8C1', g = .6) => ops.push(`${color(col)} RG ${g} w ${x1} ${y1} m ${x2} ${y2} l S`);
+  const linia = (x1, y1, x2, y2, col = '#C4C8CC', g = .6) => ops.push(`${color(col)} RG ${g} w ${x1} ${y1} m ${x2} ${y2} l S`);
 
   // Capçalera
   text('Cota Cero Reformas', M, H - 50, 12, { negreta: true });
-  text('cota-cero.pages.dev  ·  600 000 000', W - M, H - 50, 9, { col: '#5F6661', dreta: true });
+  text('cota-cero.pages.dev  ·  600 000 000', W - M, H - 50, 9, { col: '#52565A', dreta: true });
   linia(M, H - 62, W - M, H - 62);
   // Títol
   const titol = trenca(`${I18N.t('Tu reforma')}: ${r.modeNom}`, 22, amp, true).slice(0, 2);
   titol.forEach((l, i) => text(l, M, H - 96 - i * 26, 22, { negreta: true }));
   const extra = (titol.length - 1) * 26;
   const avui = new Intl.DateTimeFormat(dataLang(), { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
-  text(`${I18N.t('Diseñada el {dia}', { dia: avui })}${correu ? '  ·  ' + correu : ''}`, M, H - 114 - extra, 9.5, { col: '#5F6661' });
+  text(`${I18N.t('Diseñada el {dia}', { dia: avui })}${correu ? '  ·  ' + correu : ''}`, M, H - 114 - extra, 9.5, { col: '#52565A' });
   // Imatge
   let y = H - 128 - extra;
   let ih = 0;
@@ -1468,7 +1468,7 @@ function fesPdf(r, jpeg, correu) {
   let ye = y;
   text(I18N.t('Lo que has elegido'), M, ye, 11, { negreta: true }); ye -= 20;
   for (const [nom, valor] of r.files) {
-    text(nom, M, ye, 8.5, { col: '#5F6661' }); ye -= 12.5;
+    text(nom, M, ye, 8.5, { col: '#52565A' }); ye -= 12.5;
     for (const l of trenca(valor, 10.5, ampCol, true)) { text(l, M, ye, 10.5, { negreta: true }); ye -= 13.5; }
     ye -= 5;
   }
@@ -1480,14 +1480,14 @@ function fesPdf(r, jpeg, correu) {
     ls.forEach((l, i) => { text(l, cx2, yd - i * 12, 9.5); });
     text(n ? eur(n) : I18N.t('Incluido'), W - M, yd, 9.5, { negreta: true, dreta: true });
     yd -= ls.length * 12 + 4;
-    linia(cx2, yd + 1, W - M, yd + 1, '#DADDD6', .5); yd -= 13;
+    linia(cx2, yd + 1, W - M, yd + 1, '#DBDEE1', .5); yd -= 13;
   }
   yd -= 6;
-  text($('.pn-preu-etiqueta').textContent.trim(), cx2, yd, 9, { col: '#5F6661' }); yd -= 30;
-  text(eur(r.total), cx2, yd, 28, { negreta: true, col: '#8A5A2B' });
+  text($('.pn-preu-etiqueta').textContent.trim(), cx2, yd, 9, { col: '#52565A' }); yd -= 30;
+  text(eur(r.total), cx2, yd, 28, { negreta: true, col: '#622F26' });
   // Peu
   linia(M, 74, W - M, 74);
-  trenca(I18N.t('Lo que no está en esta lista no se cobra. Antes de firmar venimos a tu casa a medir, y si todo cuadra, firmamos este precio.'), 8.5, amp).forEach((l, i) => text(l, M, 60 - i * 11, 8.5, { col: '#5F6661' }));
+  trenca(I18N.t('Lo que no está en esta lista no se cobra. Antes de firmar venimos a tu casa a medir, y si todo cuadra, firmamos este precio.'), 8.5, amp).forEach((l, i) => text(l, M, 60 - i * 11, 8.5, { col: '#52565A' }));
 
   // Muntatge dels objectes
   const parts = [], offsets = [];
