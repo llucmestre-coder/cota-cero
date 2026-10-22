@@ -39,7 +39,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const files = Array.isArray(d.files) ? d.files.slice(0, 20).map((f) => [net(f && f[0], 80), net(f && f[1], 160)]) : [];
   const resum = files.map((f) => f[0] + ': ' + f[1]).join(' | ').slice(0, 1500);
 
-  // Lead (D1). Al panell el preu és tancat: mínim = màxim.
+  // Lead (D1). Es desa el total del panell (mínim = màxim); la forquilla que veu l'usuari (−5 % / +10 %) surt d'aquest total.
   try {
     await env.LEADS.prepare(
       'INSERT INTO leads (correu, idioma, tipo, m2, inclou, acabats, inici, minim, maxim) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
