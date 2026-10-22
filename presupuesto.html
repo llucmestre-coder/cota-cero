@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Diseña tu reforma · Cota Cero Reformas</title>
-  <meta name="description" content="Elige cocina, baño o piso entero, cambia acabados y metros en una maqueta 3D y mira el precio cerrado mientras eliges.">
+  <meta name="description" content="Elige cocina, baño o piso entero, cambia acabados, luces y metros en una maqueta 3D y mira el precio orientativo mientras eliges.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Diseña tu reforma · Cota Cero Reformas">
-  <meta property="og:description" content="Elige cocina, baño o piso entero, cambia acabados y metros en una maqueta 3D y mira el precio cerrado mientras eliges.">
+  <meta property="og:description" content="Elige cocina, baño o piso entero, cambia acabados, luces y metros en una maqueta 3D y mira el precio orientativo mientras eliges.">
   <meta property="og:image" content="https://cota-cero.pages.dev/assets/img/srv-integral.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <!-- Web de demostració: no s'indexa (PLA.md §Honestedat). -->
@@ -17,28 +17,107 @@
   <link rel="stylesheet" href="css/fonts.css?v=20261021c">
   <link rel="stylesheet" href="css/styles.css?v=20261021c">
   <link rel="preload" href="assets/fonts/BricolageGrotesque-0.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/panell.css?v=20261021cb">
+  <link rel="stylesheet" href="css/panell.css?v=20261021p">
   <script src="js/i18n.js?v=20261021c"></script>
   <!-- Des de cocinas.html i banos.html (?tipo=cocina|bano): el panell és només d'aquella habitació (en Lluc, 16/10/2026).
        Es marca abans de pintar perquè no surti el bloc del pis ni un moment. -->
   <script>(function () { var m = location.search.match(/[?&]tipo=(cocina|bano)(?![a-z])/) || location.hash.match(/^#(cocina|bano)$/); if (m) document.documentElement.dataset.sol = m[1]; })();</script>
   <script type="importmap">{ "imports": { "three": "./assets/js/three/three.module.min.js" } }</script>
 </head>
+<!-- Distribució de la peça 16 (en Lluc, 21/10/2026): el 3D a pantalla sencera, la targeta de preu flotant
+     a dalt a l'esquerra, els controls de llum i vista sobre el 3D i el panell flotant a la dreta. -->
 <body class="pg-panell">
   <a class="salta" href="#contingut">Saltar al contenido</a>
 
-  <header class="cap">
-    <div class="wrap cap-in">
-      <a class="marca" href="index.html" aria-label="Cota Cero Reformas, inicio">
-        <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 5a11 11 0 0 1 11 11H16z" fill="currentColor"/><path d="M16 16v11A11 11 0 0 1 5 16z" fill="currentColor"/><path d="M1 16h30" stroke="currentColor" stroke-width="2"/></svg>
-        Cota Cero
-      </a>
-      <nav class="nav" id="nav" aria-label="Principal">
-        <a href="reformas-integrales.html">Reformas integrales</a>
-        <a href="cocinas.html">Cocinas</a>
-        <a href="banos.html">Baños</a>
-        <a href="contacto.html">Contacto</a>
-      </nav>
+  <main id="contingut" class="pn" data-mode="cocina">
+    <!-- ═══ VISOR 3D: darrere de tot ═══ -->
+    <section class="pn-visor" aria-label="Vista 3D de tu reforma">
+      <canvas class="pn-canvas" aria-hidden="true"></canvas>
+      <div class="pn-etiquetes" aria-hidden="true"></div>
+      <p class="pn-estat" data-estat="carrega">Montando la maqueta…</p>
+
+      <div class="pn-controls">
+        <div class="pn-pastilla" role="group" aria-label="Luz">
+          <button type="button" data-llum="dia" aria-pressed="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>Día</span>
+          </button>
+          <button type="button" data-llum="nit" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15A8 8 0 0 1 9 4a8 8 0 1 0 11 11Z" fill="currentColor"/></svg>
+            <span>Noche</span>
+          </button>
+        </div>
+        <div class="pn-pastilla" data-interior-ctrl>
+          <button type="button" class="pn-abans" data-abans aria-pressed="false" hidden title="Mantén pulsado para ver cómo estaba">Antes</button>
+          <button type="button" class="pn-ico" data-gir aria-pressed="false" aria-label="Girar sola">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <button type="button" class="pn-ico" data-reinicia aria-label="Volver a la vista inicial">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v4h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="pn-baix">
+        <button type="button" class="pn-boto-3d pn-torna" data-torna hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z" fill="currentColor"/></svg>
+          Volver al piso
+        </button>
+        <button type="button" class="pn-boto-3d" data-tota hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z" fill="currentColor"/></svg>
+          <span data-tota-sol="cocina">Ver toda la cocina</span><span data-tota-sol="bano">Ver todo el baño</span>
+        </button>
+        <p class="pn-pista">Toca una zona para elegirla. Arrastra para girar el piso.</p>
+      </div>
+    </section>
+
+    <!-- ═══ PREU: targeta flotant (al mòbil, barra fixa a baix que s'obre) ═══ -->
+    <aside class="pn-preu" aria-label="Precio orientativo" data-preu>
+      <div class="pn-preu-cap">
+        <span class="pn-viu">Estimación en directo</span>
+        <span class="pn-cinta" data-gama>Gama básica</span>
+      </div>
+      <div class="pn-preu-fila">
+        <div class="pn-preu-xifra">
+          <output class="pn-forquilla" data-total aria-live="polite">—</output>
+          <p class="pn-xip" data-xip hidden></p>
+        </div>
+        <button type="button" class="pn-preu-obre" data-preu-obre aria-expanded="false" aria-label="Ver el desglose y descargar el PDF">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="pn-wa pn-wa-mini" data-whatsapp aria-label="Hablar por WhatsApp">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></svg>
+        </button>
+      </div>
+      <div class="pn-preu-mes">
+        <p class="pn-nota-preu">Orientativo, IVA incluido. El precio final, después de la visita.</p>
+        <details class="pn-desg" data-desg>
+          <summary>Ver el desglose</summary>
+          <ul data-partides></ul>
+        </details>
+        <div class="pn-crida">
+          <p class="pn-crida-text">¿Te encaja? Te lo mandamos o lo hablamos.</p>
+          <p class="pn-cap-zona" data-cap-zona>Elige al menos una zona para ver el precio.</p>
+          <div class="pn-accions">
+            <button type="button" class="btn btn-principal" data-obre-pdf>Descargar PDF</button>
+            <button type="button" class="btn pn-wa" data-whatsapp>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></svg>
+              WhatsApp
+            </button>
+          </div>
+          <p class="pn-error" data-error-wa role="alert" hidden>No hemos podido abrir WhatsApp. Llámanos al <a href="tel:+34600000000">600 000 000</a>.</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══ PANELL: flotant a la dreta ═══ -->
+    <section class="pn-panell" aria-labelledby="pn-titol">
+      <!-- Capçalera mínima (en Lluc, 21/10/2026): el logotip i l'idioma; el 3D ocupa la resta -->
+      <header class="pn-cap">
+        <a class="marca" href="index.html" aria-label="Cota Cero Reformas, inicio">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 5a11 11 0 0 1 11 11H16z" fill="currentColor"/><path d="M16 16v11A11 11 0 0 1 5 16z" fill="currentColor"/><path d="M1 16h30" stroke="currentColor" stroke-width="2"/></svg>
+          Cota Cero
+        </a>
       <!-- Desplegable d'idioma (plantilla: recursos-comuns/tria-idioma.html).
            NOMÉS existeix si el JS ha arrencat: js/i18n.js posa `te-js` a
            l'<html> des del <head>. Un control mort val menys que cap control. -->
@@ -58,37 +137,19 @@
           <li><button type="button" data-idioma-opcio="en" lang="en">English</button></li>
         </ul>
       </div>
-      <a class="cap-tel" href="tel:+34600000000">600 000 000</a>
-      <button class="nav-obre" type="button" aria-expanded="false" aria-controls="nav"><span></span><span class="visually-hidden">Menú</span></button>
-    </div>
-  </header>
+      </header>
 
-  <main id="contingut" class="pn" data-mode="cocina">
-    <!-- ═══ VISOR 3D ═══ -->
-    <section class="pn-visor" aria-label="Vista 3D de tu reforma">
-      <button type="button" class="pn-torna" data-torna hidden>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z" fill="currentColor"/></svg>
-        Volver al piso
-      </button>
-      <div class="pn-modes" role="group" aria-label="Qué reformamos">
-        <button type="button" data-sol-boto="cocina" aria-pressed="false">Cocina</button>
-        <button type="button" data-sol-boto="bano" aria-pressed="false">Baño</button>
-      </div>
-      <canvas class="pn-canvas" aria-hidden="true"></canvas>
-      <div class="pn-etiquetes" aria-hidden="true"></div>
-      <p class="pn-estat" data-estat="carrega">Montando la maqueta…</p>
-      <p class="pn-pista">Toca una zona para elegirla. Arrastra para girar el piso.</p>
-    </section>
-
-    <!-- ═══ PANELL ═══ -->
-    <section class="pn-panell" aria-labelledby="pn-titol">
       <div class="pn-cos">
+        <div class="pn-modes" role="group" aria-label="Qué reformamos">
+          <button type="button" data-sol-boto="cocina" aria-pressed="false">Cocina</button>
+          <button type="button" data-sol-boto="bano" aria-pressed="false">Baño</button>
+        </div>
         <h1 id="pn-titol">
-          <span data-titol-sol="">Diseña tu reforma y mira lo que cuesta mientras eliges.</span>
-          <span data-titol-sol="cocina">Diseña tu cocina y mira lo que cuesta mientras eliges.</span>
-          <span data-titol-sol="bano">Diseña tu baño y mira lo que cuesta mientras eliges.</span>
+          <span data-titol-sol="">Diseña tu reforma</span>
+          <span data-titol-sol="cocina">Diseña tu cocina</span>
+          <span data-titol-sol="bano">Diseña tu baño</span>
         </h1>
-        <p class="pn-intro">Cada cambio mueve el precio. Antes de firmar venimos a medir, y si todo cuadra, firmamos este precio.</p>
+        <p class="pn-intro">Toca cualquier cosa en la maqueta o elige una parte abajo. Cada cambio mueve el precio.</p>
 
         <!-- ── El pis: quantes estances i quines es reformen ── -->
         <section class="pn-grup pn-pis" aria-labelledby="pn-pis-titol">
@@ -123,103 +184,283 @@
             <h2 id="pn-editor-nom" class="pn-titol-grup" data-editor-nom>Cocina</h2>
             <label class="pn-interruptor"><input type="checkbox" data-incloure checked><span>Reformar esta zona</span></label>
           </div>
-          <button type="button" class="btn btn-linia pn-dins" data-dins hidden>
+          <button type="button" class="btn btn-principal pn-dins" data-dins hidden>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/></svg>
             Verla por dentro
           </button>
 
-        <!-- ── Cocina ── -->
+        <!-- ── Cocina: la mida, tres estils i les parts (només la triada és oberta). Els preus de cada
+             opció els escriu el JS a partir de PREUS; data-grup = un dels quatre grups (21/10/2026). ── -->
         <form class="pn-opcions" data-per="cocina" aria-label="Opciones de la cocina" hidden>
-          <fieldset class="pn-grup">
+          <fieldset class="pn-grup pn-mida">
             <legend>Superficie <output data-tria="cocina.m2"></output></legend>
             <input class="pn-rang" type="range" name="m2" min="6" max="30" step="1" value="12" aria-label="Metros cuadrados de la cocina">
             <div class="pn-rang-escala" aria-hidden="true"><span>6 m²</span><span>30 m²</span></div>
             <p class="pn-avis" data-avis aria-live="polite" hidden></p>
           </fieldset>
-          <fieldset class="pn-grup">
-            <legend>Distribución <output data-tria="cocina.forma"></output></legend>
-            <div class="pn-targetes">
-              <label class="pn-targeta"><input type="radio" name="forma" value="lineal" checked><span class="pn-dib" data-dib="lineal"></span><b>Lineal</b><small>Una pared</small></label>
-              <label class="pn-targeta"><input type="radio" name="forma" value="l"><span class="pn-dib" data-dib="l"></span><b>En L</b><small>Dos paredes</small></label>
-              <label class="pn-targeta"><input type="radio" name="forma" value="isla"><span class="pn-dib" data-dib="isla"></span><b>Con isla</b><small>Para comer en ella</small></label>
+          <div class="pn-grup pn-estils">
+            <p class="pn-titol-grup">Empieza por un estilo</p>
+            <div class="pn-estils-fila">
+              <button type="button" class="pn-estil" data-estil="norte" aria-pressed="false"><span class="pn-tires"><i style="--m:#E7E3DA"></i><i style="--m:#B98652"></i><i style="--m:#ECEAE5"></i></span><b>Luz de norte</b><small>Blanco y roble</small></button>
+              <button type="button" class="pn-estil" data-estil="pueblo" aria-pressed="false"><span class="pn-tires"><i style="--m:#8F9B86"></i><i style="--m:#E9E1D2"></i><i style="--m:#B08D57"></i></span><b>Casa de pueblo</b><small>Salvia y latón</small></button>
+              <button type="button" class="pn-estil" data-estil="piedra" aria-pressed="false"><span class="pn-tires"><i style="--m:#3A3C3F"></i><i style="--m:#1F2123"></i><i style="--m:#9C7A4E"></i></span><b>Noche de piedra</b><small>Grafito y piedra</small></button>
             </div>
-          </fieldset>
-          <fieldset class="pn-grup">
-            <legend>Muebles <output data-tria="cocina.frente"></output></legend>
-            <div class="pn-mostres">
-              <label class="pn-mostra" style="--m:#E7E3DA"><input type="radio" name="frente" value="blanco" checked><span class="visually-hidden">Blanco roto</span></label>
-              <label class="pn-mostra" style="--m:#8F9B86"><input type="radio" name="frente" value="salvia"><span class="visually-hidden">Verde salvia</span></label>
-              <label class="pn-mostra" style="--m:#2B3446"><input type="radio" name="frente" value="noche"><span class="visually-hidden">Azul noche</span></label>
-              <label class="pn-mostra" style="--m:#3A3C3F"><input type="radio" name="frente" value="grafito"><span class="visually-hidden">Grafito</span></label>
-              <label class="pn-mostra pn-mostra-fusta"><input type="radio" name="frente" value="roble"><span class="visually-hidden">Roble</span></label>
-            </div>
-          </fieldset>
-          <fieldset class="pn-grup">
-            <legend>Encimera <output data-tria="cocina.encimera"></output></legend>
-            <div class="pn-targetes">
-              <label class="pn-targeta"><input type="radio" name="encimera" value="roble" checked><span class="pn-mat" data-mat="roble"></span><b>Roble macizo</b><small>Incluida</small></label>
-              <label class="pn-targeta"><input type="radio" name="encimera" value="cuarzo"><span class="pn-mat" data-mat="cuarzo"></span><b>Cuarzo blanco</b><small>+1.450 €</small></label>
-              <label class="pn-targeta"><input type="radio" name="encimera" value="marmol"><span class="pn-mat" data-mat="marmol"></span><b>Mármol negro</b><small>+2.900 €</small></label>
-            </div>
-          </fieldset>
-          <fieldset class="pn-grup">
-            <legend>Suelo <output data-tria="cocina.suelo"></output></legend>
-            <div class="pn-targetes">
-              <label class="pn-targeta"><input type="radio" name="suelo" value="porcelanico" checked><span class="pn-mat" data-mat="porcelanico"></span><b>Porcelánico</b><small>Incluido</small></label>
-              <label class="pn-targeta"><input type="radio" name="suelo" value="espiga"><span class="pn-mat" data-mat="espiga"></span><b>Roble en espiga</b><small>+95 €/m²</small></label>
-              <label class="pn-targeta"><input type="radio" name="suelo" value="microcemento"><span class="pn-mat" data-mat="microcemento"></span><b>Microcemento</b><small>+75 €/m²</small></label>
-            </div>
-          </fieldset>
-          <fieldset class="pn-grup">
-            <legend>Qué hacemos nosotros</legend>
-            <div class="pn-paquets">
-              <label class="pn-paquet"><input type="radio" name="paquete" value="esencial" checked><b>Muebles y encimera</b><small>Montados, con fregadero y grifo.</small></label>
-              <label class="pn-paquet"><input type="radio" name="paquete" value="completa"><b>Y la instalación</b><small>Además, luz y agua nuevas con boletín.</small></label>
-              <label class="pn-paquet"><input type="radio" name="paquete" value="llave"><b>Llave en mano</b><small>Además, electrodomésticos y pintura.</small></label>
-            </div>
-          </fieldset>
+          </div>
+          <div class="pn-grup pn-parts">
+            <p class="pn-titol-grup">Las partes <span>Toca una para cambiarla</span></p>
+            <div class="pn-graella" data-graella></div>
+            <ul class="pn-llegenda" aria-hidden="true">
+              <li data-grup="mob">Muebles y encimera</li><li data-grup="llum">Luces</li><li data-grup="terra">Suelo y paredes</li><li data-grup="aig">Grifo y electrodomésticos</li>
+            </ul>
+
+            <fieldset class="pn-part" data-part="forma" data-grup="mob" hidden>
+              <legend>Distribución</legend>
+              <p class="pn-part-sub">Dónde van los muebles. La isla pide 16 m².</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="forma" value="lineal" checked><span class="pn-dib" data-dib="lineal"></span><b>Lineal</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="forma" value="l"><span class="pn-dib" data-dib="l"></span><b>En L</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="forma" value="isla"><span class="pn-dib" data-dib="isla"></span><b>Con isla</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="mobles" data-grup="mob" hidden>
+              <legend>Muebles</legend>
+              <p class="pn-part-sub">Frentes, cascos y montaje. Los ves cambiar en la maqueta.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-sub"><p class="pn-sub-titol">Color del frente</p>
+                <div class="pn-targetes">
+                  <label class="pn-targeta"><input type="radio" name="frente" value="blanco" checked><span class="pn-color" style="--m:#E7E3DA"></span><b>Blanco roto</b><small data-preu></small></label>
+                  <label class="pn-targeta"><input type="radio" name="frente" value="salvia"><span class="pn-color" style="--m:#8F9B86"></span><b>Verde salvia</b><small data-preu></small></label>
+                  <label class="pn-targeta"><input type="radio" name="frente" value="noche"><span class="pn-color" style="--m:#2B3446"></span><b>Azul noche</b><small data-preu></small></label>
+                  <label class="pn-targeta"><input type="radio" name="frente" value="grafito"><span class="pn-color" style="--m:#3A3C3F"></span><b>Grafito</b><small data-preu></small></label>
+                  <label class="pn-targeta"><input type="radio" name="frente" value="roble"><span class="pn-color pn-color-fusta"></span><b>Roble</b><small data-preu></small></label>
+                </div>
+              </div>
+              <div class="pn-sub"><p class="pn-sub-titol">Acabado</p>
+                <div class="pn-targetes">
+                  <label class="pn-targeta"><input type="radio" name="acabado" value="mate" checked><span class="pn-color" style="--m:#DDD8CE"></span><b>Mate</b><small data-preu></small></label>
+                  <label class="pn-targeta"><input type="radio" name="acabado" value="satinado"><span class="pn-color" style="--m:linear-gradient(135deg,#FFFFFF,#DDD8CE 65%)"></span><b>Satinado</b><small data-preu></small></label>
+                  <label class="pn-targeta"><input type="radio" name="acabado" value="ranurado"><span class="pn-color" style="--m:repeating-linear-gradient(90deg,#DDD8CE 0 7px,#BDB7AB 7px 8px)"></span><b>Ranurado</b><small data-preu></small></label>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="taulell" data-grup="mob" hidden>
+              <legend>Encimera</legend>
+              <p class="pn-part-sub">Tres centímetros de grosor, cortada y colocada en obra.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="encimera" value="roble" checked><span class="pn-mat" data-mat="roble"></span><b>Roble macizo</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="encimera" value="cuarzo"><span class="pn-mat" data-mat="cuarzo"></span><b>Cuarzo blanco</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="encimera" value="marmol"><span class="pn-mat" data-mat="marmol"></span><b>Mármol negro</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="tirador" data-grup="mob" hidden>
+              <legend>Tiradores</legend>
+              <p class="pn-part-sub">Para todos los muebles, altos y bajos.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="tiradores" value="negro" checked><span class="pn-color" style="--m:linear-gradient(#ECEAE5 0 44%,#1C1D1E 44% 56%,#ECEAE5 56%)"></span><b>Barra negra</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="tiradores" value="laton"><span class="pn-color" style="--m:linear-gradient(#ECEAE5 0 44%,#B08D57 44% 56%,#ECEAE5 56%)"></span><b>Barra de latón</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="tiradores" value="gola"><span class="pn-color" style="--m:linear-gradient(#ECEAE5 0 18%,#9A968E 18% 26%,#ECEAE5 26%)"></span><b>Sin tirador, con gola</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="frontal" data-grup="terra" hidden>
+              <legend>Frontal</legend>
+              <p class="pn-part-sub">La pared entre la encimera y los muebles altos.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="frontal" value="pintura" checked><span class="pn-color" style="--m:#E8E6E0"></span><b>Pintura lavable</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="frontal" value="metro"><span class="pn-mat" data-mat="metro"></span><b>Azulejo metro</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="frontal" value="porcelanico"><span class="pn-mat" data-mat="cuarzo"></span><b>Porcelánico en una pieza</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="terra" data-grup="terra" hidden>
+              <legend>Suelo</legend>
+              <p class="pn-part-sub">Quitamos el que hay y nivelamos antes de poner el nuevo.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="suelo" value="porcelanico" checked><span class="pn-mat" data-mat="porcelanico"></span><b>Porcelánico</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="suelo" value="espiga"><span class="pn-mat" data-mat="espiga"></span><b>Roble en espiga</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="suelo" value="microcemento"><span class="pn-mat" data-mat="microcemento"></span><b>Microcemento</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="parets" data-grup="terra" hidden>
+              <legend>Paredes</legend>
+              <p class="pn-part-sub">Dos manos de pintura plástica en toda la cocina.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="paredes" value="blanco" checked><span class="pn-color" style="--m:#E8E6E0"></span><b>Blanco</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="paredes" value="arena"><span class="pn-color" style="--m:#D8CBB5"></span><b>Arena</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="paredes" value="humo"><span class="pn-color" style="--m:#A9ADAE"></span><b>Gris humo</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="llum" data-grup="llum" hidden>
+              <legend>Luces</legend>
+              <p class="pn-part-sub">De noche las ves encendidas.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-sub"><p class="pn-sub-titol">Lámparas</p>
+                <div class="pn-targetes">
+                  <label class="pn-targeta"><input type="radio" name="lamparas" value="focos" checked><span class="pn-color" style="--m:radial-gradient(circle at 50% 30%,#FFF4E0 0 14%,#ECEAE5 15%)"></span><b>Focos de techo</b><small data-preu></small></label>
+                  <label class="pn-targeta"><input type="radio" name="lamparas" value="laton"><span class="pn-color" style="--m:radial-gradient(ellipse 40% 50% at 50% 70%,#B08D57 0 60%,#ECEAE5 62%)"></span><b>Colgantes de latón</b><small data-preu></small></label>
+                  <label class="pn-targeta"><input type="radio" name="lamparas" value="cristal"><span class="pn-color" style="--m:radial-gradient(circle at 50% 62%,#FFF4E0 0 16%,#D9E2E4 17% 38%,#ECEAE5 40%)"></span><b>Colgantes de cristal</b><small data-preu></small></label>
+                </div>
+              </div>
+              <div class="pn-sub"><p class="pn-sub-titol">Bajo los muebles altos</p>
+                <div class="pn-targetes pn-targetes-2">
+                  <label class="pn-targeta"><input type="radio" name="led" value="no" checked><span class="pn-color" style="--m:linear-gradient(#ECEAE5 0 40%,#C9C5BC 40% 46%,#ECEAE5 46%)"></span><b>Sin luz</b><small data-preu></small></label>
+                  <label class="pn-targeta"><input type="radio" name="led" value="si"><span class="pn-color" style="--m:linear-gradient(#ECEAE5 0 40%,#FFE2B0 40% 46%,#FFF4E0 46% 60%,#ECEAE5 70%)"></span><b>Tira LED cálida</b><small data-preu></small></label>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="aixeta" data-grup="aig" hidden>
+              <legend>Grifo y fregadero</legend>
+              <p class="pn-part-sub">Fregadero bajo encimera y grifo de caño alto.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="grifo" value="cromo" checked><span class="pn-color" style="--m:linear-gradient(135deg,#F2F3F4,#9DA2A6 55%,#E2E4E6)"></span><b>Cromo</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="grifo" value="negro"><span class="pn-color" style="--m:#1C1D1E"></span><b>Negro mate</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="grifo" value="laton"><span class="pn-color" style="--m:linear-gradient(135deg,#D9BE8A,#B08D57 55%,#CDB07A)"></span><b>Latón cepillado</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="electro" data-grup="aig" hidden>
+              <legend>Electrodomésticos</legend>
+              <p class="pn-part-sub">Horno, placa, campana y nevera, colocados y conectados.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes pn-targetes-2">
+                <label class="pn-targeta"><input type="radio" name="electro" value="ninguno" checked><span class="pn-color pn-color-buit"></span><b>Los pones tú</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="electro" value="inox"><span class="pn-color" style="--m:linear-gradient(135deg,#E4E6E8,#9DA2A6 55%,#D2D5D8)"></span><b>Acero inoxidable</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="electro" value="negro"><span class="pn-color" style="--m:linear-gradient(135deg,#3A3C3F,#16191B)"></span><b>Cristal negro</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="electro" value="integrados"><span class="pn-color" style="--m:repeating-linear-gradient(90deg,#E7E3DA 0 22px,#CFCAC0 22px 23px)"></span><b>Integrados en los muebles</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="obra" hidden>
+              <legend>Obra y fecha</legend>
+              <p class="pn-part-sub">Lo que hacemos nosotros y cuándo empezamos.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-paquets">
+                <label class="pn-paquet"><input type="radio" name="paquete" value="esencial" checked><b>Muebles y encimera <span data-preu></span></b><small>Montados, con fregadero y grifo.</small></label>
+                <label class="pn-paquet"><input type="radio" name="paquete" value="completa"><b>Y la instalación <span data-preu></span></b><small>Además, luz y agua nuevas con boletín.</small></label>
+                <label class="pn-paquet"><input type="radio" name="paquete" value="llave"><b>Llave en mano <span data-preu></span></b><small>Además, pintura, remates y limpieza final.</small></label>
+              </div>
+              <div data-lloc-setmanes></div>
+            </fieldset>
+          </div>
         </form>
 
         <!-- ── Baño ── -->
         <form class="pn-opcions" data-per="bano" aria-label="Opciones del baño" hidden>
-          <fieldset class="pn-grup">
+          <fieldset class="pn-grup pn-mida">
             <legend>Superficie <output data-tria="bano.m2"></output></legend>
             <input class="pn-rang" type="range" name="m2" min="4" max="12" step="0.5" value="5" aria-label="Metros cuadrados del baño">
             <div class="pn-rang-escala" aria-hidden="true"><span>4 m²</span><span>12 m²</span></div>
             <p class="pn-avis" data-avis aria-live="polite" hidden></p>
           </fieldset>
-          <fieldset class="pn-grup">
-            <legend>Para ducharte <output data-tria="bano.tipo"></output></legend>
-            <div class="pn-targetes pn-targetes-2">
-              <label class="pn-targeta"><input type="radio" name="tipo" value="ducha" checked><span class="pn-dib" data-dib="ducha"></span><b>Ducha a ras de suelo</b><small>Sin escalón</small></label>
-              <label class="pn-targeta"><input type="radio" name="tipo" value="banera"><span class="pn-dib" data-dib="banera"></span><b>Bañera</b><small>Con mampara</small></label>
+          <div class="pn-grup pn-estils">
+            <p class="pn-titol-grup">Empieza por un estilo</p>
+            <div class="pn-estils-fila">
+              <button type="button" class="pn-estil" data-estil="norte" aria-pressed="false"><span class="pn-tires"><i style="--m:#ECEAE4"></i><i style="--m:#B98652"></i><i style="--m:#D9D6CF"></i></span><b>Luz de norte</b><small>Blanco y roble</small></button>
+              <button type="button" class="pn-estil" data-estil="pueblo" aria-pressed="false"><span class="pn-tires"><i style="--m:#9DB4A6"></i><i style="--m:#ECEAE4"></i><i style="--m:#B08D57"></i></span><b>Casa de pueblo</b><small>Salvia y latón</small></button>
+              <button type="button" class="pn-estil" data-estil="piedra" aria-pressed="false"><span class="pn-tires"><i style="--m:#3A3C3F"></i><i style="--m:#8E8A82"></i><i style="--m:#1C1D1E"></i></span><b>Noche de piedra</b><small>Grafito y piedra</small></button>
             </div>
-          </fieldset>
-          <fieldset class="pn-grup">
-            <legend>Paredes <output data-tria="bano.pared"></output></legend>
-            <div class="pn-mostres">
-              <label class="pn-mostra" style="--m:#ECEAE4"><input type="radio" name="pared" value="blanco" checked><span class="visually-hidden">Azulejo blanco mate</span></label>
-              <label class="pn-mostra" style="--m:#9DB4A6"><input type="radio" name="pared" value="verde"><span class="visually-hidden">Verde agua</span></label>
-              <label class="pn-mostra" style="--m:#2C4C9A"><input type="radio" name="pared" value="cobalto"><span class="visually-hidden">Azul cobalto</span></label>
-              <label class="pn-mostra" style="--m:#A7A6A0"><input type="radio" name="pared" value="micro"><span class="visually-hidden">Microcemento gris</span></label>
-            </div>
-          </fieldset>
-          <fieldset class="pn-grup">
-            <legend>Mueble del lavabo <output data-tria="bano.mueble"></output></legend>
-            <div class="pn-mostres">
-              <label class="pn-mostra pn-mostra-fusta"><input type="radio" name="mueble" value="roble" checked><span class="visually-hidden">Roble</span></label>
-              <label class="pn-mostra" style="--m:#ECEAE4"><input type="radio" name="mueble" value="blanco"><span class="visually-hidden">Blanco</span></label>
-              <label class="pn-mostra" style="--m:#3A3C3F"><input type="radio" name="mueble" value="grafito"><span class="visually-hidden">Grafito</span></label>
-            </div>
-          </fieldset>
-          <fieldset class="pn-grup">
-            <legend>Qué hacemos nosotros</legend>
-            <div class="pn-paquets">
-              <label class="pn-paquet"><input type="radio" name="paquete" value="esencial" checked><b>Alicatado y sanitarios</b><small>Paredes, suelo, plato o bañera, inodoro y lavabo.</small></label>
-              <label class="pn-paquet"><input type="radio" name="paquete" value="completa"><b>Y la fontanería</b><small>Además, tuberías nuevas y mampara a medida.</small></label>
-              <label class="pn-paquet"><input type="radio" name="paquete" value="llave"><b>Llave en mano</b><small>Además, toallero eléctrico y luz nueva.</small></label>
-            </div>
-          </fieldset>
+          </div>
+          <div class="pn-grup pn-parts">
+            <p class="pn-titol-grup">Las partes <span>Toca una para cambiarla</span></p>
+            <div class="pn-graella" data-graella></div>
+            <ul class="pn-llegenda" aria-hidden="true">
+              <li data-grup="mob">Muebles y encimera</li><li data-grup="llum">Luces</li><li data-grup="terra">Suelo y paredes</li><li data-grup="aig">Grifo y electrodomésticos</li>
+            </ul>
+
+            <fieldset class="pn-part" data-part="dutxa" data-grup="aig" hidden>
+              <legend>Ducha o bañera</legend>
+              <p class="pn-part-sub">La bañera pide 5 m².</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes pn-targetes-2">
+                <label class="pn-targeta"><input type="radio" name="tipo" value="ducha" checked><span class="pn-dib" data-dib="ducha"></span><b>Ducha a ras de suelo</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="tipo" value="banera"><span class="pn-dib" data-dib="banera"></span><b>Bañera con mampara</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="moble" data-grup="mob" hidden>
+              <legend>Mueble y lavabo</legend>
+              <p class="pn-part-sub">Mueble suspendido con lavabo de cerámica encima.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="mueble" value="roble" checked><span class="pn-color pn-color-fusta"></span><b>Roble</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="mueble" value="blanco"><span class="pn-color" style="--m:#ECEAE4"></span><b>Blanco</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="mueble" value="grafito"><span class="pn-color" style="--m:#3A3C3F"></span><b>Grafito</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="mirall" data-grup="mob" hidden>
+              <legend>Espejo</legend>
+              <p class="pn-part-sub">Encima del lavabo.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="espejo" value="redondo" checked><span class="pn-color" style="--m:radial-gradient(circle,#DCE2E4 0 52%,#B08D57 54% 60%,#ECEAE5 62%)"></span><b>Redondo de latón</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="espejo" value="luz"><span class="pn-color" style="--m:linear-gradient(#ECEAE5 0 12%,#FFF4E0 12% 18%,#DCE2E4 18% 82%,#FFF4E0 82% 88%,#ECEAE5 88%)"></span><b>Con luz</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="espejo" value="armario"><span class="pn-color" style="--m:linear-gradient(90deg,#DCE2E4 0 49%,#9DA2A6 49% 51%,#DCE2E4 51%)"></span><b>Armario con espejo</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="vater" data-grup="aig" hidden>
+              <legend>Inodoro</legend>
+              <p class="pn-part-sub">Suspendido, con la cisterna dentro de la pared.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes pn-targetes-2">
+                <label class="pn-targeta"><input type="radio" name="inodoro" value="blanco" checked><span class="pn-color" style="--m:#F6F6F3"></span><b>Blanco</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="inodoro" value="negro"><span class="pn-color" style="--m:#2A2C2E"></span><b>Negro mate</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="aixeta" data-grup="aig" hidden>
+              <legend>Grifería</legend>
+              <p class="pn-part-sub">Lavabo y ducha, a juego.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="griferia" value="cromo" checked><span class="pn-color" style="--m:linear-gradient(135deg,#F2F3F4,#9DA2A6 55%,#E2E4E6)"></span><b>Cromo</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="griferia" value="negro"><span class="pn-color" style="--m:#1C1D1E"></span><b>Negro mate</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="griferia" value="laton"><span class="pn-color" style="--m:linear-gradient(135deg,#D9BE8A,#B08D57 55%,#CDB07A)"></span><b>Latón cepillado</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="terra" data-grup="terra" hidden>
+              <legend>Suelo</legend>
+              <p class="pn-part-sub">Antideslizante, también dentro de la ducha.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="sueloB" value="rajola" checked><span class="pn-mat" data-mat="rajolaTerra"></span><b>Baldosa clara</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="sueloB" value="micro"><span class="pn-mat" data-mat="microcemento"></span><b>Microcemento</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="sueloB" value="piedra"><span class="pn-mat" data-mat="pedra"></span><b>Piedra natural</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="parets" data-grup="terra" hidden>
+              <legend>Azulejo</legend>
+              <p class="pn-part-sub">Paredes de la ducha y del resto del baño, hasta el techo.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="pared" value="blanco" checked><span class="pn-color" style="--m:#ECEAE4"></span><b>Blanco mate</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="pared" value="verde"><span class="pn-color" style="--m:#9DB4A6"></span><b>Verde agua</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="pared" value="cobalto"><span class="pn-color" style="--m:#2C4C9A"></span><b>Azul cobalto</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="pared" value="micro"><span class="pn-color" style="--m:#A7A6A0"></span><b>Microcemento gris</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="llum" data-grup="llum" hidden>
+              <legend>Luces</legend>
+              <p class="pn-part-sub">De noche las ves encendidas.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-targetes">
+                <label class="pn-targeta"><input type="radio" name="luces" value="focos" checked><span class="pn-color" style="--m:radial-gradient(circle at 50% 30%,#FFF4E0 0 14%,#ECEAE5 15%)"></span><b>Focos de techo</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="luces" value="apliques"><span class="pn-color" style="--m:radial-gradient(ellipse 18% 40% at 25% 50%,#FFF4E0 0 60%,transparent 62%),radial-gradient(ellipse 18% 40% at 75% 50%,#FFF4E0 0 60%,#ECEAE5 62%)"></span><b>Apliques junto al espejo</b><small data-preu></small></label>
+                <label class="pn-targeta"><input type="radio" name="luces" value="led"><span class="pn-color" style="--m:linear-gradient(#ECEAE5 0 30%,#FFE2B0 30% 36%,#FFF4E0 36% 50%,#ECEAE5 60%)"></span><b>Tira LED en la ducha</b><small data-preu></small></label>
+              </div>
+            </fieldset>
+            <fieldset class="pn-part" data-part="obra" hidden>
+              <legend>Obra y fecha</legend>
+              <p class="pn-part-sub">Lo que hacemos nosotros y cuándo empezamos.</p>
+              <p class="pn-part-preu" data-part-preu></p>
+              <div class="pn-paquets">
+                <label class="pn-paquet"><input type="radio" name="paquete" value="esencial" checked><b>Alicatado y sanitarios <span data-preu></span></b><small>Paredes, suelo, plato o bañera, inodoro y lavabo.</small></label>
+                <label class="pn-paquet"><input type="radio" name="paquete" value="completa"><b>Y la fontanería <span data-preu></span></b><small>Además, tuberías nuevas y mampara a medida.</small></label>
+                <label class="pn-paquet"><input type="radio" name="paquete" value="llave"><b>Llave en mano <span data-preu></span></b><small>Además, toallero eléctrico y luz nueva.</small></label>
+              </div>
+              <div data-lloc-setmanes></div>
+            </fieldset>
+          </div>
         </form>
 
         <!-- ── Dormitorio, salón o pasillo ── -->
@@ -257,35 +498,21 @@
         </form>
         </section>
 
-        <!-- ── Comú: quan comencem ── -->
+        <!-- ── Comú: quan comencem (a la cuina i al bany, el JS el posa dins de «Obra y fecha») ── -->
         <fieldset class="pn-grup pn-setmanes">
           <legend>Cuándo empezamos <output data-tria="setmana"></output></legend>
           <div class="pn-dies" data-setmanes></div>
-          <p class="pn-entrega">Te la entregamos la <strong>semana del <span data-entrega>…</span></strong>. Va en el contrato.</p>
+          <p class="pn-entrega">Calculamos entregártela la <strong class="pn-cinta">semana del <span data-entrega>…</span></strong>.</p>
         </fieldset>
-
-        <details class="pn-partides">
-          <summary>Ver las partidas</summary>
-          <ul data-partides></ul>
-        </details>
       </div>
 
-      <!-- ── Preu fix a baix ── -->
-      <div class="pn-preu">
-        <div class="pn-preu-xifra">
-          <span class="pn-preu-etiqueta">Precio cerrado, IVA incluido</span>
-          <output class="pn-preu-total" data-total aria-live="polite">—</output>
-        </div>
-        <p class="pn-cap-zona" data-cap-zona>Elige al menos una zona para ver el precio.</p>
-        <div class="pn-accions">
-          <button type="button" class="btn btn-linia" data-obre-pdf>Descargar PDF</button>
-          <button type="button" class="btn pn-wa" data-whatsapp>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></svg>
-            Hablar por WhatsApp
-          </button>
-        </div>
-        <p class="pn-error" data-error-wa role="alert" hidden>No hemos podido abrir WhatsApp. Llámanos al <a href="tel:+34600000000">600 000 000</a>.</p>
-      </div>
+      <footer class="pn-peu">
+        <span>© 2026 Cota Cero Reformas</span>
+        <a href="aviso-legal.html">Aviso legal</a>
+        <a href="politica-privacidad.html">Privacidad</a>
+        <a href="politica-cookies.html">Cookies</a>
+        <a href="https://ductik.com/">Demo de Ductik</a>
+      </footer>
     </section>
   </main>
 
@@ -306,19 +533,9 @@
     </form>
   </dialog>
 
-  <footer class="peu peu-mini">
-    <div class="wrap peu-baix">
-      <span>© 2026 Cota Cero Reformas</span>
-      <a href="aviso-legal.html">Aviso legal</a>
-      <a href="politica-privacidad.html">Privacidad</a>
-      <a href="politica-cookies.html">Cookies</a>
-      <a class="peu-ductik" href="https://ductik.com/">Demo de Ductik</a>
-    </div>
-  </footer>
-
-  <script src="js/traduccions.js?v=20261021cb" defer></script>
+  <script src="js/traduccions.js?v=20261021p" defer></script>
   <script src="js/main.js?v=20261021c" defer></script>
   <!-- Mòdul: s'executa després de traduccions.js (I18N ja llest) -->
-  <script type="module" src="js/panell.js?v=20261021cc"></script>
+  <script type="module" src="js/panell.js?v=20261021p"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════
-   PANELL «Diseña tu reforma» — el pis en maqueta 3D (Three.js) i el
-   preu tancat. S'entra veient el pis apagat: es toquen les zones que
+   PANELL «Diseña tu reforma» — el pis en maqueta 3D (Three.js) i una
+   forquilla de preu orientativa (peça 16, en Lluc 21/10/2026). S'entra veient el pis apagat: es toquen les zones que
    es volen reformar (a la maqueta o a la llista) i s'encenen; cada
    zona té el seu editor (m², acabats). La cuina i el bany es poden
    veure per dins. El preu i el panell funcionen encara que WebGL falli.
@@ -20,20 +20,34 @@ const MOBIL = matchMedia('(max-width: 860px)').matches;
 /* ═══ 1. PREUS (euros, IVA inclòs) ═══════════════════════════════ */
 const PREUS = {
   // `obra` és €/m²; les claus amb `/m2` es multipliquen pels m² de la zona.
+  // Cada clau és el `name` d'un camp; la part i el grup surten del <fieldset data-part data-grup> on és.
   cocina: {
     obra: 210,
     forma: { lineal: 5800, l: 7400, isla: 9900 },
     frente: { roble: 900 },
+    acabado: { satinado: 350, ranurado: 780 },
     encimera: { cuarzo: 1450, marmol: 2900 },
+    tiradores: { laton: 120, gola: 450 },
+    frontal: { metro: 380, porcelanico: 520 },
     'suelo/m2': { espiga: 95, microcemento: 75 },
-    paquete: { completa: 2300, llave: 4100 },
+    paredes: { arena: 180, humo: 180 },
+    lamparas: { laton: 260, cristal: 340 },
+    led: { si: 240 },
+    grifo: { negro: 140, laton: 290 },
+    electro: { inox: 1900, negro: 2100, integrados: 2600 },
+    paquete: { completa: 2300, llave: 2600 },
     setmanes: { esencial: 3, completa: 3, llave: 4 },
   },
   bano: {
     obra: 380,
     tipo: { ducha: 3400, banera: 3000 },
-    'pared/m2': { verde: 90, cobalto: 90, micro: 160 },
     mueble: { roble: 350 },
+    espejo: { luz: 220, armario: 380 },
+    inodoro: { negro: 240 },
+    griferia: { negro: 160, laton: 340 },
+    'sueloB/m2': { micro: 65, piedra: 85 },
+    'pared/m2': { verde: 90, cobalto: 90, micro: 160 },
+    luces: { apliques: 190, led: 260 },
     paquete: { completa: 1400, llave: 2300 },
     setmanes: { esencial: 2, completa: 2, llave: 3 },
   },
@@ -46,17 +60,34 @@ const PREUS = {
   },
 };
 
+/* Tres estils d'un clic (noms d'en Lluc, 21/10/2026: «Luz de norte · Casa de pueblo · Noche de piedra») */
+const ESTILS = {
+  cocina: {
+    norte: { frente: 'blanco', acabado: 'mate', tiradores: 'negro', encimera: 'roble', frontal: 'metro', suelo: 'porcelanico', paredes: 'blanco', lamparas: 'cristal', grifo: 'cromo' },
+    pueblo: { frente: 'salvia', acabado: 'ranurado', tiradores: 'laton', encimera: 'cuarzo', frontal: 'metro', suelo: 'espiga', paredes: 'arena', lamparas: 'laton', grifo: 'laton' },
+    piedra: { frente: 'grafito', acabado: 'mate', tiradores: 'gola', encimera: 'marmol', frontal: 'porcelanico', suelo: 'microcemento', paredes: 'humo', lamparas: 'laton', grifo: 'negro' },
+  },
+  bano: {
+    norte: { mueble: 'roble', espejo: 'redondo', griferia: 'cromo', sueloB: 'rajola', pared: 'blanco', luces: 'focos' },
+    pueblo: { mueble: 'blanco', espejo: 'redondo', griferia: 'laton', sueloB: 'rajola', pared: 'verde', luces: 'apliques' },
+    piedra: { mueble: 'grafito', espejo: 'luz', griferia: 'negro', sueloB: 'piedra', pared: 'micro', luces: 'led' },
+  },
+};
+/* Forquilla (21/10/2026): del total −5 % al +10 %, arrodonit a 100 €. Gama segons el preu per m². */
+const FORQ = [.95, 1.10];
+const GAMES = { cocina: [900, 1300], bano: [1200, 1700], estancia: [150, 260] };
+
 /* ═══ 2. EL PIS: zones, m² i opcions ═════════════════════════════ */
 const FORM_DE = { salon: 'estancia', pasillo: 'estancia', dorm: 'estancia', cocina: 'cocina', bano: 'bano' };
 const RANG = { salon: [14, 40, .5], dorm: [7, 20, .5], cocina: [6, 30, 1], bano: [4, 12, .5] };
 const forms = Object.fromEntries($$('.pn-opcions').map(f => [f.dataset.per, f]));
-const st = { dorm: 2, banos: 1, zones: new Map(), activa: null, vista: 'pis' };
+const st = { dorm: 2, banos: 1, zones: new Map(), activa: null, vista: 'pis', llum: 'dia', abans: false, gir: false };
 /* 'cocina' o 'bano' quan el panell és d'una sola habitació (l'script del <head> ho marca a <html>); si no, null */
 const unaSola = () => document.documentElement.dataset.sol || null;
 
 function opcionsInicials(tipus, n) {
-  if (tipus === 'cocina') return { m2: 9, forma: 'lineal', frente: 'blanco', encimera: 'roble', suelo: 'porcelanico', paquete: 'esencial' };
-  if (tipus === 'bano') return { m2: 5, tipo: 'ducha', pared: 'blanco', mueble: 'roble', paquete: 'esencial' };
+  if (tipus === 'cocina') return { m2: 9, forma: 'lineal', ...ESTILS.cocina.norte, led: 'no', electro: 'ninguno', paquete: 'esencial' };
+  if (tipus === 'bano') return { m2: 5, tipo: 'ducha', ...ESTILS.bano.norte, inodoro: 'blanco', paquete: 'esencial' };
   const m2 = tipus === 'salon' ? 20 : tipus === 'dorm' ? (n === 1 ? 13 : 10) : 8;
   return { m2, suelo: 'porcelanico', paredes: 'pintar', armario: false, ventanas: false };
 }
@@ -114,10 +145,13 @@ function nomValor(clau, nom, valor) {
   const inp = $(`input[name="${nom}"][value="${valor}"]`, forms[clau]) || $(`input[name="${nom}"]`, forms[clau]);
   if (!inp) return '';
   const lab = inp.closest('label');
-  return ($('b', lab) || $('.visually-hidden', lab) || lab).textContent.trim();
+  const el = $('b', lab) || $('.visually-hidden', lab) || lab;
+  return (el.firstChild && el.firstChild.nodeType === 3 ? el.firstChild : el).textContent.trim();   // sense el preu de dins
 }
 function nomGrup(clau, nom) {
   const inp = $(`input[name="${nom}"]`, forms[clau]);
+  const sub = inp && $('.pn-sub-titol', inp.closest('.pn-sub') || document.createElement('i'));
+  if (sub) return sub.textContent.trim();
   const lg = inp && $('legend', inp.closest('fieldset'));
   return lg ? lg.firstChild.textContent.trim() : '';
 }
@@ -134,7 +168,7 @@ function eur(n) {
 function preuZona(z) {
   const clau = FORM_DE[z.tipus], P = PREUS[clau], o = z.opts, m2 = o.m2;
   let total = m2 * P.obra, setm;
-  const detalls = [], parts = [[`${I18N.t('Obra')} · ${fmtNum(m2)} m²`, m2 * P.obra]];
+  const detalls = [], parts = [[`${I18N.t('Obra')} · ${fmtNum(m2)} m²`, m2 * P.obra]], grups = { obra: m2 * P.obra };
   if (clau === 'estancia') {
     total += (P['suelo/m2'][o.suelo] || 0) * m2 + (P['paredes/m2'][o.paredes] || 0) * m2;
     detalls.push(`${nomGrup(clau, 'suelo')}: ${nomValor(clau, 'suelo', o.suelo)}`, `${nomGrup(clau, 'paredes')}: ${nomValor(clau, 'paredes', o.paredes)}`);
@@ -147,12 +181,62 @@ function preuZona(z) {
       const [nom, perM2] = k.split('/');
       const preu = (taula[o[nom]] || 0) * (perM2 ? m2 : 1);
       total += preu;
+      const g = lloc(clau, nom).grup;
+      grups[g] = (grups[g] || 0) + preu;
       detalls.push(nomValor(clau, nom, o[nom]));
       if (preu) parts.push([nom === 'paquete' ? nomValor(clau, nom, o[nom]) : `${nomGrup(clau, nom)}: ${nomValor(clau, nom, o[nom])}`, preu]);
     }
     setm = P.setmanes[o.paquete] + (m2 > (clau === 'cocina' ? 18 : 8) ? 1 : 0);
   }
-  return { total: Math.round(total), detalls, setm, parts };
+  return { total: Math.round(total), detalls, setm, parts, grups };
+}
+/* La part (data-part) i el grup (data-grup) de cada camp, segons on és a l'HTML */
+const LLOCS = {};
+function lloc(clau, nom) {
+  const k = clau + '.' + nom;
+  if (LLOCS[k]) return LLOCS[k];
+  const f = $(`input[name="${nom}"]`, forms[clau])?.closest('[data-part]');
+  return (LLOCS[k] = { part: f ? f.dataset.part : null, grup: f?.dataset.grup || 'obra' });
+}
+/* Preu d'una part de la cuina o el bany (la que és oberta al panell) */
+function preuPart(z, part) {
+  const clau = FORM_DE[z.tipus], P = PREUS[clau], o = z.opts;
+  let n = part === 'obra' ? o.m2 * P.obra : 0;
+  for (const [k, taula] of Object.entries(P)) {
+    const [nom, perM2] = k.split('/');
+    if (k !== 'setmanes' && k !== 'obra' && lloc(clau, nom).part === part) n += (taula[o[nom]] || 0) * (perM2 ? o.m2 : 1);
+  }
+  return n;
+}
+/* Forquilla: límits arrodonits a 100 € */
+function lims(n, pas = 100) { return [Math.round(n * FORQ[0] / pas) * pas, Math.round(n * FORQ[1] / pas) * pas]; }
+function xifra(n) { return eur(n).replace(/\s?€/, ''); }
+function rang(n) {
+  if (!n) return I18N.t('Incluido');
+  const [a, b] = lims(n, n < 3000 ? 10 : 100);
+  return document.documentElement.lang === 'en' ? `${eur(a)}–${eur(b)}` : `${xifra(a)} – ${eur(b)}`;
+}
+function forquilla(n) {
+  const [a, b] = lims(n);
+  return I18N.t('de {min} a {max}', { min: document.documentElement.lang === 'en' ? eur(a) : xifra(a), max: eur(b) });
+}
+function signe(d) { return (d > 0 ? '+' : '−') + eur(Math.abs(d)); }
+/* Desglossament: per grups si és una sola habitació, per estances si és el pis */
+function nomsGrup() {
+  return { mob: I18N.t('Muebles y encimera'), llum: I18N.t('Luces'), terra: I18N.t('Suelo y paredes'), aig: I18N.t('Grifo y electrodomésticos'), obra: I18N.t('Obra y montaje') };
+}
+function desglossa(r) {
+  if (r.linies.length === 1 && FORM_DE[r.linies[0][3].tipus] !== 'estancia') {
+    const g = r.linies[0][2].grups, noms = nomsGrup();
+    return ['mob', 'llum', 'terra', 'aig', 'obra'].map(k => [noms[k], g[k] || 0]);
+  }
+  return r.linies.map(([t, n]) => [t, n]);
+}
+function gama(r) {
+  const m2 = r.triades.reduce((a, z) => a + z.opts.m2, 0);
+  const clau = r.triades.length === 1 ? FORM_DE[r.triades[0].tipus] : 'estancia';
+  const [g1, g2] = GAMES[clau], k = m2 ? r.total / m2 : 0;
+  return k < g1 ? I18N.t('Gama básica') : k < g2 ? I18N.t('Gama media') : I18N.t('Gama alta');
 }
 function calcula() {
   const triades = [...st.zones.values()].filter(z => z.on);
@@ -190,11 +274,17 @@ function pintaPanell() {
       o.textContent = nom === 'm2' ? fmtNum(z.opts.m2) + ' m²' : nomValor(clau, nom, z.opts[nom]);
     });
   }
-  // Partides i total
-  const files = unaSola() && r.linies.length ? r.linies[0][2].parts : r.linies.map(([t, n]) => [t, n]);
+  if (z && FORM_DE[z.tipus] !== 'estancia') pintaParts(z);
+  // Desglossament, gama, últim canvi i forquilla
+  const files = desglossa(r);
   $('[data-partides]').innerHTML = files.length
-    ? files.map(([t, n]) => `<li><span>${t}</span><span>${eur(n)}</span></li>`).join('')
+    ? files.map(([t, n]) => `<li><span>${t}</span><span>${rang(n)}</span></li>`).join('')
     : `<li><span>${I18N.t('Todavía no has elegido ninguna zona.')}</span><span></span></li>`;
+  $('[data-gama]').textContent = r.triades.length ? gama(r) : '';
+  $('[data-gama]').hidden = !r.triades.length;
+  const xip = $('[data-xip]');
+  xip.hidden = !ultimCanvi || !ultimCanvi.delta || !r.triades.length;
+  if (!xip.hidden) xip.innerHTML = `<span class="pn-xip-et">${I18N.t('Último cambio')}:</span> <b>${signe(ultimCanvi.delta)}</b> · ${ultimCanvi.nom}`;
   animaTotal(r.total);
   pintaEntrega(r.setmanes);
   $$('[data-obre-pdf], [data-whatsapp]').forEach(b => { b.disabled = !r.triades.length; });
@@ -203,23 +293,90 @@ function pintaPanell() {
   return r;
 }
 
+let ultimCanvi = null;   // { delta, nom }: el xip de la targeta de preu
 function animaTotal(nou) {
   const vell = totalVist ?? nou;
   totalVist = nou;
+  const mostra = n => { elTotal.textContent = n ? forquilla(n) : '—'; };
   if (vell !== nou) {
     elTotal.classList.toggle('puja', nou > vell);
     clearTimeout(animaTotal.t);
     animaTotal.t = setTimeout(() => elTotal.classList.remove('puja'), 700);
   }
-  if (QUIET || vell === nou) { elTotal.textContent = eur(nou); return; }
+  if (QUIET || vell === nou || !vell || !nou) { mostra(nou); return; }
   const t0 = performance.now(), dur = 420;
   cancelAnimationFrame(animaTotal.raf);
   const pas = t => {
     const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-    elTotal.textContent = eur(Math.round((vell + (nou - vell) * e) / 10) * 10);
-    if (k < 1) animaTotal.raf = requestAnimationFrame(pas); else elTotal.textContent = eur(nou);
+    mostra(vell + (nou - vell) * e);
+    if (k < 1) animaTotal.raf = requestAnimationFrame(pas); else mostra(nou);
   };
   animaTotal.raf = requestAnimationFrame(pas);
+}
+
+/* ── Parts de la cuina i el bany: graella d'icones i només la part triada oberta ── */
+const ICONES = {
+  forma: '<path d="M3 6h18v4H3zM7 14h10v4H7z"/>', mobles: '<rect x="4" y="4" width="16" height="16" rx="1"/><path d="M12 4v16M9 11v2M15 11v2"/>',
+  taulell: '<path d="M2 9h20v3H2zM4 12v8M20 12v8"/>', tirador: '<rect x="5" y="4" width="14" height="16" rx="1"/><path d="M8 10h8"/>',
+  frontal: '<rect x="3" y="5" width="18" height="14"/><path d="M3 12h18M9 5v7M15 12v7"/>', terra: '<path d="M2 19 8 8h8l6 11zM5 14h14M10 8l-2 11M14 8l2 11"/>',
+  parets: '<path d="M3 4h18v16H3zM3 9h18M3 14h18M9 4v5M15 9v5M9 14v6"/>', llum: '<path d="M12 2v6M7 13a5 5 0 0 1 10 0zM10 16a2 2 0 0 0 4 0"/>',
+  aixeta: '<path d="M6 21v-9a4 4 0 0 1 4-4h4M14 6v4M12 6h4M17 13v2"/>', electro: '<rect x="5" y="3" width="14" height="18" rx="1"/><path d="M5 9h14M9 6h2M9 13v4"/>',
+  dutxa: '<path d="M8 21V7a3 3 0 0 1 6 0M11 10h6M12 14v1M15 14v1M18 14v1M13 18v1M16 18v1"/>', moble: '<rect x="4" y="9" width="16" height="11" rx="1"/><path d="M4 14h16M8 6h8M12 4v2"/>',
+  mirall: '<rect x="7" y="3" width="10" height="13" rx="5"/><path d="M12 16v5M9 21h6"/>', vater: '<path d="M7 3h6v7H7zM5 10h12a4 4 0 0 1-4 5H9l1 6"/>',
+  obra: '<path d="M3 20h18M5 20V9l7-5 7 5v11M10 20v-6h4v6"/>',
+};
+const PART_INICIAL = { cocina: 'mobles', bano: 'parets' };
+const partOberta = {};
+function construeixGraella(clau) {
+  const f = forms[clau];
+  $('[data-graella]', f).innerHTML = $$('[data-part]', f).map(fs => {
+    const p = fs.dataset.part;
+    return `<button type="button" class="pn-peca" data-peca="${p}"${fs.dataset.grup ? ` data-grup="${fs.dataset.grup}"` : ''} aria-pressed="false">`
+      + `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONES[p] || ''}</svg>${$('legend', fs).textContent.trim().replace(/\S{13,}/g, w => w.slice(0, 7) + '­' + w.slice(7))}</button>`;   // guionet discrecional a les paraules llargues
+  }).join('');
+  obrePart(clau, partOberta[clau] || PART_INICIAL[clau], false);
+}
+function obrePart(clau, part, enfoca = true) {
+  const f = forms[clau];
+  if (!$(`[data-part="${part}"]`, f)) return;
+  partOberta[clau] = part;
+  $$('[data-part]', f).forEach(fs => { fs.hidden = fs.dataset.part !== part; });
+  $$('[data-peca]', f).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.peca === part)));
+  colocaSetmanes();
+  if (enfoca) { enfocaPart(part); portaALaVista($(`[data-part="${part}"]`, f)); }
+}
+/* «Cuándo empezamos»: a la cuina i el bany, dins de «Obra y fecha»; al pis, al final del panell */
+const elSetmanes = $('.pn-setmanes');
+function colocaSetmanes() {
+  const z = st.activa && st.zones.get(st.activa), clau = z && FORM_DE[z.tipus];
+  const dins = unaSola() && clau && clau !== 'estancia' && $('[data-lloc-setmanes]', forms[clau]);
+  const on = dins || $('.pn-cos');
+  if (elSetmanes.parentNode !== on) on.appendChild(elSetmanes);
+}
+/* El preu de cada opció, escrit a partir de PREUS (així sempre quadra amb el càlcul) */
+function pintaPreusOpcions() {
+  for (const clau of ['cocina', 'bano']) {
+    for (const [k, taula] of Object.entries(PREUS[clau])) {
+      if (k === 'setmanes' || k === 'obra') continue;
+      const [nom, perM2] = k.split('/'), base = ['forma', 'tipo'].includes(nom) ? Math.min(...Object.values(taula)) : 0;
+      for (const inp of $$(`input[name="${nom}"]`, forms[clau])) {
+        const el = $('[data-preu]', inp.closest('label'));
+        if (!el) continue;
+        const n = (taula[inp.value] || 0) - base;
+        el.textContent = n ? `+${eur(n)}${perM2 ? '/m²' : ''}` : I18N.t('Incluido');
+      }
+    }
+  }
+}
+function pintaParts(z) {
+  const clau = FORM_DE[z.tipus], f = forms[clau];
+  for (const fs of $$('[data-part]', f)) {
+    $('[data-part-preu]', fs).innerHTML = `<span>${I18N.t('Precio de esta parte')}</span><b>${(n => n ? rang(n) : I18N.t('Incluido en el precio base'))(preuPart(z, fs.dataset.part))}</b>`;
+  }
+  for (const b of $$('[data-estil]', f)) {
+    const e = ESTILS[clau][b.dataset.estil];
+    b.setAttribute('aria-pressed', String(Object.entries(e).every(([k, v]) => z.opts[k] === v)));
+  }
 }
 
 /* ── Setmanes d'inici: dilluns a partir de d'aquí a dues setmanes ── */
@@ -291,8 +448,9 @@ function obreEditor(id) {
     $('[data-camp="armario"]', f).hidden = z.tipus !== 'dorm';
     $('[data-camp="ventanas"]', f).hidden = !finestresZona(z);
     $('[data-camp="extres"]', f).hidden = z.tipus === 'pasillo';
-  } else ajustaMinims(clau, false);
+  } else { ajustaMinims(clau, false); construeixGraella(clau); }
   $('[data-dins]').hidden = clau === 'estancia';
+  colocaSetmanes();
 }
 
 
@@ -398,6 +556,36 @@ const DIBUIX = {
     }
     g.fillStyle = '#A9A194'; for (let i = 0; i <= n; i++) { g.fillRect(i * t - 1, 0, 2, s); g.fillRect(0, i * t - 1, s, 2); }
   },
+  metro: (g, s, r) => {           // azulejo metro 7,5 × 15 cm, a trencajunts, amb el cantell bisellat
+    const w = s / 4, h = s / 8;
+    g.fillStyle = '#CFCBC3'; g.fillRect(0, 0, s, s);
+    for (let j = 0; j < 8; j++) for (let i = -1; i < 5; i++) {
+      const x = i * w + (j % 2 ? w / 2 : 0), y = j * h;
+      const gr = g.createLinearGradient(x, y, x, y + h);
+      gr.addColorStop(0, '#FBFAF7'); gr.addColorStop(.8, to('#EFEDE8', .04, r)); gr.addColorStop(1, '#D6D3CB');
+      g.fillStyle = gr; g.fillRect(x + 2, y + 2, w - 4, h - 4);
+    }
+  },
+  pedra: (g, s, r) => {           // pedra natural, peces de 60 cm
+    const t = s / 2;
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) {
+      g.fillStyle = to('#9C978D', .08, r); g.fillRect(i * t, j * t, t, t);
+      for (let k = 0; k < 1400; k++) { g.fillStyle = `rgba(${r() > .5 ? '230,226,216' : '60,56,50'},${r() * .12})`; const d = 1 + r() * 5; g.fillRect(i * t + r() * t, j * t + r() * t, d, d); }
+    }
+    g.fillStyle = '#7E7A72'; for (let i = 0; i <= 2; i++) { g.fillRect(i * t - 1.5, 0, 3, s); g.fillRect(0, i * t - 1.5, s, 3); }
+  },
+  gra: (g, s, r) => {             // pintura lacada: un gra molt fi (es multiplica pel color)
+    g.fillStyle = '#F4F4F2'; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < 9000; i++) { g.fillStyle = `rgba(${r() > .5 ? '255,255,255' : '150,148,144'},${r() * .18})`; g.fillRect(r() * s, r() * s, 1.5, 1.5); }
+  },
+  estuc: (g, s, r) => {           // paret pintada: taques suaus de corró
+    g.fillStyle = '#F2F1EE'; g.fillRect(0, 0, s, s);
+    for (let i = 0; i < 220; i++) { const x = r() * s, y = r() * s, rad = 20 + r() * 70, gr = g.createRadialGradient(x, y, 0, x, y, rad); const c = r() > .5 ? '255,255,255' : '170,166,158'; gr.addColorStop(0, `rgba(${c},${r() * .12})`); gr.addColorStop(1, `rgba(${c},0)`); g.fillStyle = gr; g.fillRect(x - rad, y - rad, rad * 2, rad * 2); }
+  },
+  ranures: (g, s) => {            // relleu del frontal ranurat (bumpMap)
+    g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, s, s);
+    g.fillStyle = '#555555'; for (let i = 0; i < 16; i++) g.fillRect(i * s / 16, 0, 5, s);
+  },
   rajolaTerra: (g, s, r) => {     // terra de bany, peça petita clara
     const n = 4, t = s / n;
     for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { g.fillStyle = to('#D9D6CF', .05, r); g.fillRect(i * t, j * t, t, t); }
@@ -413,7 +601,7 @@ function azulejo(color) {          // rajola vertical 7,5 × 15 cm, artesana
       gr.addColorStop(0, to(color, .16, r)); gr.addColorStop(1, to(color, .16, r));
       g.fillStyle = gr; g.fillRect(x, y, w, h);
     }
-    g.fillStyle = 'rgba(230,228,222,.9)';
+    g.fillStyle = 'rgba(168,164,156,.95)';
     for (let i = 0; i <= cols; i++) g.fillRect(i * w - 1.5, 0, 3, s);
     for (let j = 0; j <= files; j++) g.fillRect(0, j * h - 1.5, s, 3);
   });
@@ -441,8 +629,9 @@ async function pintaMostres() {
   const mini = c => { px.drawImage(c, 0, 0, 192, 192); return petit.toDataURL('image/jpeg', .82); };
   const respira = () => new Promise(r => (window.requestIdleCallback ? requestIdleCallback(r, { timeout: 300 }) : setTimeout(r, 16)));
   for (const el of $$('.pn-mat')) {
-    if (!LLENÇ[el.dataset.mat]) await respira();
-    el.style.backgroundImage = `url(${mini(llenc(el.dataset.mat, 512, DIBUIX[el.dataset.mat]))})`;
+    // Mostres dibuixades petites (192 px, ~1/7 del cost): els llenços de 512 només els fa la maqueta quan cal
+    await respira();
+    el.style.backgroundImage = `url(${mini(llenc(el.dataset.mat + '@m', 192, DIBUIX[el.dataset.mat]))})`;
   }
   await respira();
   document.documentElement.style.setProperty('--fusta', `url(${mini(llenc('robleV', 512, DIBUIX.robleV))})`);
@@ -462,7 +651,7 @@ async function pintaMostres() {
 const visor = $('.pn-visor');
 const canvas = $('.pn-canvas');
 const elEstat = $('.pn-estat');
-let renderer, scene, camera, controls, sol, brut = true;
+let renderer, scene, camera, controls, sol, brut = true, pinta = false;
 
 
 const M = {};                       // materials compartits
@@ -482,21 +671,35 @@ function preparaMaterials() {
   mat('marc', { color: 0xF5F4F0, roughness: .6 });
   mat('led', { color: 0xFFF1D6, emissive: 0xFFE2B0, emissiveIntensity: 0 });
   mat('fusta', { map: tex('roble', 1.2), roughness: .55 });
-  mat('ceramica', { color: 0xF6F6F3, roughness: .18 });
-  mat('vidre', { color: 0xDDE8E8, roughness: .05, transparent: true, opacity: .22, depthWrite: false });
-  mat('mirall', { color: 0xDCE2E4, roughness: .04, metalness: 1 });
+  mat('ceramica', { color: 0xF6F6F3, roughness: .18 });          // amb vernís (vernisBany) només quan s'obre el bany
+  mat('pica', { color: 0xF6F6F3, roughness: .18, side: THREE.DoubleSide });
+  mat('vidre', { color: 0xCFE0E2, roughness: .03, metalness: .1, transparent: true, opacity: .3, depthWrite: false });
+  mat('mirall', { color: 0xF2F5F6, roughness: .02, metalness: 1 });
   mat('llauto', { color: 0xB08D57, roughness: .3, metalness: 1 });
   mat('tela', { color: 0xCBC5BA, roughness: 1 });
   mat('llencol', { color: 0xEDEAE3, roughness: .95 });
   mat('manta', { color: 0x8F9B86, roughness: 1 });
   mat('catifa', { color: 0xD9D3C7, roughness: 1 });
   mat('test', { color: 0xC9B8A0, roughness: .85 });
-  mat('fulla', { color: 0x5D7255, roughness: .8, flatShading: true });
+  mat('fulla', { color: 0x5D7255, roughness: .75 });
   mat('bombeta', { color: 0xFFF4E0, emissive: 0xFFE7BF, emissiveIntensity: 1.6 });
   mat('rajola', { map: tex('az#ECEAE4', .6, azulejo('#ECEAE4')), roughness: .3 });
   mat('moble', { map: tex('robleV', .8), roughness: .55 });
   mat('terraBany', { map: tex('rajolaTerra', .8), roughness: .4 });
   M.cota = new THREE.MeshBasicMaterial({ color: 0x622F26 });
+  // Peça 16: parets de dins (es pinten), frontal, forn, electrodomèstics, aixetes i detalls
+  mat('paretInt', { color: 0xE8E6E0, roughness: .92 });
+  mat('frontal', { color: 0xE8E6E0, roughness: .85 });
+  mat('forn', { color: 0x141516, roughness: .08, metalness: .3 });
+  mat('electro', { color: 0xB9BCBE, roughness: .3, metalness: 1 });
+  mat('aixeta', { color: 0xC9CDD0, roughness: .14, metalness: 1 });
+  mat('metall', { color: 0x1C1D1E, roughness: .35, metalness: .6 });
+  mat('vidreLlum', { color: 0x4E453D, roughness: .2, metalness: .1, transparent: true, opacity: .92, emissive: 0xFFC982, emissiveIntensity: 0 });   // vidre fumat
+  mat('tovallola', { color: 0xE9E4DA, roughness: 1 });
+  mat('catifaB', { color: 0xB9B3A6, roughness: 1 });
+  mat('llimona', { color: 0xE2BE3F, roughness: .5 });
+  mat('wc', { color: 0xF6F6F3, roughness: .18, side: THREE.DoubleSide });
+  mat('aiguaBany', { color: 0xE4E7E6, roughness: .15 });
 }
 
 /* UV en metres: cada cara de la caixa rep les seves mides reals, així
@@ -518,73 +721,105 @@ function cilindre(rt, rb, h, material, x, y, z, pare, seg = 28) {
   m.position.set(x, y + h / 2, z); m.castShadow = m.receiveShadow = true; pare.add(m); return m;
 }
 /* Paret de maqueta: tallada, amb la secció en grafit a dalt */
-function paret(w, h, d, x, y, z, pare) {
-  const m = caixa(w, h, d, M.paret, x, y, z, pare);
-  m.material = [M.paret, M.paret, M.tall, M.paret, M.paret, M.paret];
+function paret(w, h, d, x, y, z, pare, mp = M.paret) {
+  const m = caixa(w, h, d, mp, x, y, z, pare);
+  m.material = [mp, mp, M.tall, mp, mp, mp];
   return m;
 }
 
-/* ── Peces de cuina (en local: la tirada va per +x, el frontal mira a +z) ── */
-function tiradaBaixa(tipus) {
+/* ── Peces de cuina (en local: la tirada va per +x, el frontal mira a +z) ──
+   Cada malla porta la seva part (userData.part): clicar-la obre la part al panell (peça 16). Les peces
+   que són opcions noves (llums, campana, forn) porten userData.nou: amb «Antes» s'amaguen. */
+function marca(obj, part, nou) { obj.traverse(o => { o.userData.part = part; if (nou) o.userData.nou = true; }); return obj; }
+let OPC = {};   // opcions de l'habitació que es munta (les llegeixen les peces)
+function tirador(x, y, z, pare, vertical, llarg = .26) {   // barra rodona separada del frontal amb dos peus
+  const g = new THREE.Group();
+  const b = new THREE.Mesh(new THREE.CylinderGeometry(.0065, .0065, llarg, 12), M.tirador);
+  if (!vertical) b.rotation.z = Math.PI / 2;
+  b.position.z = .028; b.castShadow = true; g.add(b);
+  for (const k of [-1, 1]) {
+    const p = new THREE.Mesh(new THREE.CylinderGeometry(.004, .004, .028, 8), M.tirador);
+    p.rotation.x = Math.PI / 2; p.position.set(vertical ? 0 : k * (llarg / 2 - .02), vertical ? k * (llarg / 2 - .02) : 0, .014); g.add(p);
+  }
+  g.position.set(x, y, z); pare.add(marca(g, 'tirador')); return g;
+}
+function tiradaBaixa(tipus, ambFrontal) {
   const g = new THREE.Group(); let x = 0;
-  const tiradors = [];
+  const electro = OPC.electro && OPC.electro !== 'ninguno';
   for (const t of tipus) {
     const w = .6, cx = x + w / 2;
-    caixa(w - .004, .1, .5, M.socol, cx, 0, .25, g);
-    caixa(w - .004, .76, .56, M.cos, cx, .1, .28, g);
-    if (t === 'calaixos') {
+    marca(caixa(w - .004, .1, .5, M.socol, cx, 0, .25, g), 'mobles');
+    marca(caixa(w - .004, .76, .56, M.cos, cx, .1, .28, g), 'mobles');
+    if (t === 'placa' && electro) {             // forn sota la placa, amb un calaix a sota
+      marca(caixa(w - .008, .2, .02, M.frente, cx, .102, .57, g), 'mobles');
+      tirador(cx, .256, .58, g);
+      marca(caixa(w - .02, .5, .02, M.forn, cx, .32, .575, g), 'electro', true);
+      marca(caixa(w - .1, .015, .025, M.electro, cx, .78, .6, g), 'electro', true);
+    } else if (t === 'calaixos') {
       [0, 1, 2].forEach(i => {
-        caixa(w - .008, .245, .02, M.frente, cx, .102 + i * .253, .57, g);
-        tiradors.push(caixa(.3, .012, .016, M.tirador, cx, .102 + i * .253 + .205, .588, g));
+        marca(caixa(w - .008, .245, .02, M.frente, cx, .102 + i * .253, .57, g), 'mobles');
+        tirador(cx, .102 + i * .253 + .211, .58, g);
       });
     } else {
-      caixa(w - .008, .755, .02, M.frente, cx, .102, .57, g);
-      tiradors.push(caixa(.3, .012, .016, M.tirador, cx, .79, .588, g));
+      marca(caixa(w - .008, .755, .02, M.frente, cx, .102, .57, g), 'mobles');
+      tirador(cx, .796, .58, g);
     }
-    if (t === 'placa') caixa(.56, .008, .5, M.vitro, cx, .9, .3, g);
+    if (t === 'placa') marca(caixa(.56, .008, .5, M.vitro, cx, .9, .3, g), 'electro');
     if (t === 'pica') {
-      caixa(.5, .006, .4, M.inox, cx, .9, .3, g);
-      cilindre(.014, .014, .34, M.tirador, cx, .9, .08, g);
-      const b = caixa(.02, .02, .2, M.tirador, cx, 1.22, .17, g); b.rotation.x = .25;
+      marca(caixa(.5, .006, .4, M.inox, cx, .9, .3, g), 'aixeta');
+      marca(cilindre(.014, .014, .34, M.aixeta, cx, .9, .08, g), 'aixeta');
+      const b = marca(caixa(.02, .02, .2, M.aixeta, cx, 1.22, .17, g), 'aixeta'); b.rotation.x = .25;
     }
     x += w;
   }
-  caixa(x + .02, .04, .63, M.encimera, x / 2, .86, .305, g);
+  marca(caixa(x + .02, .04, .63, M.encimera, x / 2, .86, .305, g), 'taulell');
+  if (ambFrontal) marca(caixa(x, .58, .012, M.frontal, x / 2, .9, .006, g, false), 'frontal');
   g.userData.llarg = x;
   return g;
 }
-function tiradaAlta(n) {
+function tiradaAlta(n, placa) {
   const g = new THREE.Group();
   for (let i = 0; i < n; i++) {
     const cx = i * .6 + .3;
-    caixa(.596, .72, .33, M.cos, cx, 1.48, .165, g);
-    caixa(.592, .716, .02, M.frente, cx, 1.482, .34, g);
+    marca(caixa(.596, .72, .33, M.cos, cx, 1.48, .165, g), 'mobles');
+    marca(caixa(.592, .716, .02, M.frente, cx, 1.482, .34, g), 'mobles');
+    tirador(cx, 1.526, .35, g);
   }
-  caixa(n * .6, .012, .02, M.led, n * .6 / 2, 1.466, .29, g, false);   // tira de llum (amb la instal·lació)
+  marca(caixa(n * .6, .012, .02, M.led, n * .6 / 2, 1.466, .29, g, false), 'llum');   // tira de llum sota els mobles
+  if (placa != null && placa < n && OPC.electro && OPC.electro !== 'ninguno' && OPC.electro !== 'integrados') {
+    marca(caixa(.58, .045, .34, M.electro, placa * .6 + .3, 1.43, .2, g), 'electro', true);   // campana extraïble
+  }
   return g;
 }
 function columna() {
-  const g = new THREE.Group();
-  caixa(.596, .1, .5, M.socol, .3, 0, .25, g);
-  caixa(.596, 2.1, .58, M.cos, .3, .1, .29, g);
-  caixa(.592, 1.25, .02, M.frente, .3, .102, .59, g);
-  caixa(.592, .84, .02, M.frente, .3, 1.362, .59, g);
-  caixa(.012, .5, .016, M.tirador, .54, .75, .608, g);
-  caixa(.012, .3, .016, M.tirador, .54, 1.42, .608, g);
+  const g = new THREE.Group(), nevera = ['inox', 'negro'].includes(OPC.electro);
+  const fr = nevera ? M.electro : M.frente, part = OPC.electro && OPC.electro !== 'ninguno' ? 'electro' : 'mobles';
+  marca(caixa(.596, .1, .5, M.socol, .3, 0, .25, g), part);
+  marca(caixa(.596, 2.1, .58, M.cos, .3, .1, .29, g), part);
+  marca(caixa(.592, 1.25, .02, fr, .3, .102, .59, g), part);
+  marca(caixa(.592, .84, .02, fr, .3, 1.362, .59, g), part);
+  const t1 = tirador(.54, 1.0, .6, g, true, .5), t2 = tirador(.54, 1.57, .6, g, true, .3);
+  if (nevera) for (const t of [t1, t2]) t.traverse(o => { if (o.isMesh) o.material = M.inox; o.userData.part = 'electro'; });
   return g;
 }
+/* Llum penjant: de llautó (campana) o de vidre (globus) */
 function penjant(x, z, pare, alt = 1.8) {
-  cilindre(.004, .004, 2.62 - alt, M.tirador, x, alt + .17, z, pare, 6).castShadow = false;
-  const p = cilindre(.05, .17, .18, M.tirador, x, alt, z, pare);
-  p.material = M.tirador;
-  const b = new THREE.Mesh(new THREE.SphereGeometry(.045, 12, 8), M.bombeta);
-  b.position.set(x, alt + .02, z); pare.add(b);
+  if (OPC.lamparas === 'focos') return;
+  const g = new THREE.Group();
+  cilindre(.004, .004, 2.62 - alt, M.metall, 0, alt + .17, 0, g, 6).castShadow = false;
+  if (OPC.lamparas === 'cristal') {        // globus de vidre fumat amb casquet de llautó
+    const gl = new THREE.Mesh(new THREE.SphereGeometry(.12, 28, 18), M.vidreLlum); gl.position.y = alt + .05; g.add(gl);
+    cilindre(.035, .035, .05, M.llauto, 0, alt + .15, 0, g, 16);
+  } else { cilindre(.05, .17, .18, M.llauto, 0, alt, 0, g); cilindre(.05, .05, .03, M.llauto, 0, alt + .18, 0, g, 16); }
+  const b = new THREE.Mesh(new THREE.SphereGeometry(.04, 12, 8), M.bombeta);
+  b.position.set(0, alt + .03, 0); g.add(b);
+  g.position.set(x, 0, z); pare.add(marca(g, 'llum', true));
 }
 function planta(x, z, pare, esc = 1) {
   cilindre(.16 * esc, .12 * esc, .32 * esc, M.test, x, 0, z, pare);
   const r = aleatori(Math.round(x * 100 + z * 10));
   for (let i = 0; i < 7; i++) {
-    const f = new THREE.Mesh(new THREE.IcosahedronGeometry((.12 + r() * .1) * esc, 0), M.fulla);
+    const f = new THREE.Mesh(new THREE.IcosahedronGeometry((.12 + r() * .1) * esc, 3), M.fulla);
     f.position.set(x + (r() - .5) * .3 * esc, (.42 + r() * .45) * esc, z + (r() - .5) * .3 * esc);
     f.rotation.set(r() * 3, r() * 3, r() * 3); f.castShadow = true; pare.add(f);
   }
@@ -593,8 +828,18 @@ function cadira(x, z, rot, pare) {
   const g = new THREE.Group();
   caixa(.42, .03, .42, M.fusta, 0, .44, 0, g);
   caixa(.42, .4, .03, M.fusta, 0, .47, -.2, g);
-  [[-.18, -.18], [.18, -.18], [-.18, .18], [.18, .18]].forEach(([a, b]) => cilindre(.015, .015, .44, M.tirador, a, 0, b, g, 8));
+  [[-.18, -.18], [.18, -.18], [-.18, .18], [.18, .18]].forEach(([a, b]) => cilindre(.015, .015, .44, M.metall, a, 0, b, g, 8));
   g.position.set(x, 0, z); g.rotation.y = rot; pare.add(g);
+}
+/* Detalls que fan la cuina habitada: un bol amb llimones i una post de tallar */
+function detallsTaulell(x, z, pare) {
+  const bol = cilindre(.13, .08, .07, M.ceramica, x, .9, z, pare, 24);
+  [[0, 0], [.05, .03], [-.04, .04]].forEach(([a, b], i) => {
+    const l = new THREE.Mesh(new THREE.SphereGeometry(.04, 14, 10), M.llimona);
+    l.scale.set(1.15, 1, 1); l.position.set(x + a, .98 + (i ? .01 : .02), z + b); l.castShadow = true; pare.add(l);
+  });
+  const post = caixa(.32, .42, .022, M.fusta, x + .42, .9, z - .2, pare); post.rotation.x = -.18;
+  return bol;
 }
 
 /* ── Escena: cuina (la mida surt dels m²; els mobles fan 60 cm i hi caben els que hi caben) ── */
@@ -608,40 +853,46 @@ function finestraCuina(W) {
 }
 function escenaCuina(v) {
   const g = new THREE.Group(), mi = midesCuina(v.m2), { W, D, H, T } = mi, x0 = -W / 2, z0 = -D / 2;
-  const terra = caixa(W, .03, D, M.terra, 0, -.03, 0, g); terra.castShadow = false;
-  paret(T, H, D + T, x0 - T / 2, 0, -T / 2, g);
+  marca(caixa(W, .03, D, M.terra, 0, -.03, 0, g), 'terra').castShadow = false;
+  const P = M.paretInt;
+  marca(paret(T, H, D + T, x0 - T / 2, 0, -T / 2, g, P), 'parets');
   const { wx1, wx2, wy1, wy2 } = finestraCuina(W), zb = z0 - T / 2;
-  paret(wx1 - x0 + T, H, T, (x0 - T + wx1) / 2, 0, zb, g);
-  paret(W / 2 - wx2, H, T, (wx2 + W / 2) / 2, 0, zb, g);
-  paret(wx2 - wx1, wy1, T, (wx1 + wx2) / 2, 0, zb, g);
-  paret(wx2 - wx1, H - wy2, T, (wx1 + wx2) / 2, wy2, zb, g);
+  marca(paret(wx1 - x0 + T, H, T, (x0 - T + wx1) / 2, 0, zb, g, P), 'parets');
+  marca(paret(W / 2 - wx2, H, T, (wx2 + W / 2) / 2, 0, zb, g, P), 'parets');
+  marca(paret(wx2 - wx1, wy1, T, (wx1 + wx2) / 2, 0, zb, g, P), 'parets');
+  marca(paret(wx2 - wx1, H - wy2, T, (wx1 + wx2) / 2, wy2, zb, g, P), 'parets');
   caixa(wx2 - wx1, wy2 - wy1, .02, M.finestra, (wx1 + wx2) / 2, wy1, z0 - T * .7, g, false);
   caixa(.04, wy2 - wy1, .06, M.marc, (wx1 + wx2) / 2, wy1, z0 - .05, g);
   caixa(wx2 - wx1 + .08, .03, .16, M.marc, (wx1 + wx2) / 2, wy1 - .03, z0 + .02, g);
   const mobles = new THREE.Group(); g.add(mobles);
   g.userData = { mobles, mides: mi, mida: Math.max(W, D) };
-  muntaCuina(mobles, v.forma, mi);
+  muntaCuina(mobles, v, mi);
   return g;
 }
 /* Tipus de cada mòdul d'una tirada: la pica a sota la finestra, la placa separada */
 function tipusTirada(n, pica, placa) {
   return Array.from({ length: n }, (_, i) => i === pica ? 'pica' : i === placa ? 'placa' : i % 2 ? 'porta' : 'calaixos');
 }
-function muntaCuina(m, forma, { W, D }) {
+function muntaCuina(m, v, { W, D }) {
+  OPC = v;
+  const forma = v.forma;
   const x0 = -W / 2, z0 = -D / 2, { wx1, wx2 } = finestraCuina(W), wc = (wx1 + wx2) / 2;
   const limita = (i, n) => Math.max(0, Math.min(n - 1, i));
+  let llumsFets = false, bolX;
   if (forma === 'l') {
     const n = Math.max(3, Math.floor((W - .05) / .6));
     const nl = Math.max(1, Math.floor((D - 1.3) / .6));
     const pica = limita(Math.round((wc - x0 - .3) / .6), n);
     const placaAlFons = nl < 2;
-    const b = tiradaBaixa(tipusTirada(n, pica, placaAlFons ? limita(pica - 2, n) : -1)); b.position.set(x0, 0, z0); m.add(b);
+    const placa = placaAlFons ? limita(pica - 2, n) : -1;
+    const b = tiradaBaixa(tipusTirada(n, pica, placa), true); b.position.set(x0, 0, z0); m.add(b);
     const na = Math.floor((wx1 - .1 - x0 - .35) / .6);
-    if (na > 0) { const a = tiradaAlta(na); a.position.set(x0 + .35, 0, z0); m.add(a); }
+    if (na > 0) { const a = tiradaAlta(na, placa >= 0 ? Math.round((placa * .6 - .35) / .6) : null); a.position.set(x0 + .35, 0, z0); m.add(a); }
     const zFi = z0 + .6 + nl * .6;
-    const e = tiradaBaixa(tipusTirada(nl, -1, placaAlFons ? -1 : 1)); e.rotation.y = Math.PI / 2; e.position.set(x0, 0, zFi); m.add(e);
-    const ea = tiradaAlta(nl); ea.rotation.y = Math.PI / 2; ea.position.set(x0, 0, zFi); m.add(ea);
+    const e = tiradaBaixa(tipusTirada(nl, -1, placaAlFons ? -1 : 1), true); e.rotation.y = Math.PI / 2; e.position.set(x0, 0, zFi); m.add(e);
+    const ea = tiradaAlta(nl, placaAlFons ? null : 1); ea.rotation.y = Math.PI / 2; ea.position.set(x0, 0, zFi); m.add(ea);
     if (D / 2 - zFi >= .65) { const c = columna(); c.rotation.y = Math.PI / 2; c.position.set(x0, 0, zFi + .6); m.add(c); }
+    bolX = x0 + Math.min(n - 1, pica + 1) * .6 + .1;
   } else {
     const col = W >= 3.4;
     const xs = x0 + (col ? .6 : 0);
@@ -649,36 +900,40 @@ function muntaCuina(m, forma, { W, D }) {
     const n = Math.max(3, Math.min(9, Math.floor((W / 2 - xs - .05) / .6)));
     const pica = limita(Math.round((wc - xs - .3) / .6), n);
     const placa = pica >= 2 ? pica - 2 : limita(pica + 2, n) === pica ? (pica + 1) % n : limita(pica + 2, n);
-    const b = tiradaBaixa(tipusTirada(n, pica, placa)); b.position.set(xs, 0, z0); m.add(b);
+    const b = tiradaBaixa(tipusTirada(n, pica, placa), true); b.position.set(xs, 0, z0); m.add(b);
     const na = Math.floor((wx1 - .1 - xs) / .6);
-    if (na > 0) { const a = tiradaAlta(na); a.position.set(xs, 0, z0); m.add(a); }
+    if (na > 0) { const a = tiradaAlta(na, placa); a.position.set(xs, 0, z0); m.add(a); }
+    bolX = xs + (placa < pica ? placa + 1 : Math.max(0, placa - 1)) * .6 + .15;
   }
+  detallsTaulell(bolX, z0 + .3, m);
   let taula = null;
   if (forma === 'isla') {
     const ni = Math.min(4, Math.max(2, Math.floor((W - 1.6) / .6))), len = ni * .6;
     const il = tiradaBaixa(Array.from({ length: ni }, (_, i) => i % 2 ? 'porta' : 'calaixos'));
     il.children[il.children.length - 1].visible = false;          // el taulell de l'illa és més fondo
-    caixa(len + .1, .04, .98, M.encimera, len / 2, .86, .15, il);
-    caixa(len, .86, .02, M.frente, len / 2, 0, -.01, il);         // costat dels tamborets, del color dels mobles
+    marca(caixa(len + .1, .04, .98, M.encimera, len / 2, .86, .15, il), 'taulell');
+    marca(caixa(len, .86, .02, M.frente, len / 2, 0, -.01, il), 'mobles');   // costat dels tamborets, del color dels mobles
     const px = len / 2, pz = z0 + 2.22;
     il.rotation.y = Math.PI; il.position.set(px, 0, pz); m.add(il);
     const k = ni - 1;
     for (let i = 0; i < k; i++) {
       const x = (i - (k - 1) / 2) * .72;
       cilindre(.17, .17, .05, M.fusta, x, .62, pz + .7, m);
-      cilindre(.018, .018, .62, M.tirador, x, 0, pz + .7, m, 8);
-      cilindre(.16, .16, .015, M.tirador, x, 0, pz + .7, m);
+      cilindre(.018, .018, .62, M.metall, x, 0, pz + .7, m, 8);
+      cilindre(.16, .16, .015, M.metall, x, 0, pz + .7, m);
     }
     penjant(-len / 4, pz - .1, m); penjant(len / 4, pz - .1, m);
+    llumsFets = true;
   } else if (D >= 2.9 && W >= 3.3) {
     const tx = W / 2 - 1.0, tz = D / 2 - 1.0;
     cilindre(.45, .45, .035, M.fusta, tx, .72, tz, m, 48);
-    cilindre(.05, .05, .72, M.tirador, tx, 0, tz, m, 12);
-    cilindre(.22, .25, .02, M.tirador, tx, 0, tz, m);
+    cilindre(.05, .05, .72, M.metall, tx, 0, tz, m, 12);
+    cilindre(.22, .25, .02, M.metall, tx, 0, tz, m);
     cadira(tx, tz + .65, Math.PI, m); cadira(tx + .65, tz, -Math.PI / 2, m);
     penjant(tx, tz, m, 1.55);
-    taula = true;
+    taula = true; llumsFets = true;
   }
+  if (!llumsFets) { penjant(-W * .12, z0 + .95, m, 1.8); penjant(W * .18, z0 + .95, m, 1.8); }
   if (forma === 'l') { if (taula || W > 3.2) planta(W / 2 - .35, D / 2 - .35, m); }
   else planta(x0 + .35, D / 2 - .35, m);
 }
@@ -690,65 +945,111 @@ function midesBany(m2) {
 }
 function escenaBany(v) {
   const g = new THREE.Group(), mi = midesBany(v.m2), { W, D, H, T } = mi, x0 = -W / 2, z0 = -D / 2;
-  const terra = caixa(W, .03, D, M.terraBany, 0, -.03, 0, g); terra.castShadow = false;
+  marca(caixa(W, .03, D, M.terraBany, 0, -.03, 0, g), 'terra').castShadow = false;
   // Paret: obra + rajola per dins
-  paret(T, H, D + T, x0 - T / 2, 0, -T / 2, g);
-  paret(W + T, H, T, -T / 2, 0, z0 - T / 2, g);
-  caixa(.01, H - .002, D, M.rajola, x0 + .005, 0, 0, g, false);
-  caixa(W, H - .002, .01, M.rajola, 0, 0, z0 + .005, g, false);
+  marca(paret(T, H, D + T, x0 - T / 2, 0, -T / 2, g, M.paretInt), 'parets');
+  marca(paret(W + T, H, T, -T / 2, 0, z0 - T / 2, g, M.paretInt), 'parets');
+  marca(caixa(.01, H - .002, D, M.rajola, x0 + .005, 0, 0, g, false), 'parets');
+  marca(caixa(W, H - .002, .01, M.rajola, 0, 0, z0 + .005, g, false), 'parets');
   const peces = new THREE.Group(); g.add(peces);
   g.userData = { peces, mides: mi, mida: Math.max(W, D) };
   muntaBany(peces, v, mi);
   return g;
 }
 function muntaBany(p, v, { W, D }) {
+  OPC = v;
   const x0 = -W / 2, z0 = -D / 2, banera = v.tipo === 'banera';
   let fiX, fonsZ;                     // fins on arriba la dutxa o la banyera
+  const dutxa = new THREE.Group(); p.add(dutxa);
   if (banera) {
     const len = Math.min(1.7, W - 1.0), fons = .72;
-    caixa(len, .55, fons, M.ceramica, x0 + len / 2, 0, z0 + fons / 2, p);
-    caixa(len - .14, .01, fons - .14, new THREE.MeshStandardMaterial({ color: 0xE4E7E6, roughness: .15 }), x0 + len / 2, .545, z0 + fons / 2, p, false);
-    caixa(.02, 1.4, .7, M.vidre, x0 + len - .01, .56, z0 + .35, p, false);
-    caixa(.025, .025, .7, M.tirador, x0 + len - .01, 1.95, z0 + .35, p);
-    cilindre(.012, .012, .7, M.tirador, x0 + .2, .9, z0 + .03, p, 8);
-    caixa(.12, .02, .12, M.tirador, x0 + .2, 1.6, z0 + .08, p);
+    caixa(len, .55, fons, M.ceramica, x0 + len / 2, 0, z0 + fons / 2, dutxa);
+    caixa(len - .14, .01, fons - .14, M.aiguaBany, x0 + len / 2, .545, z0 + fons / 2, dutxa, false);
+    caixa(.02, 1.4, .7, M.vidre, x0 + len - .01, .56, z0 + .35, dutxa, false);
+    caixa(.025, .025, .7, M.aixeta, x0 + len - .01, 1.95, z0 + .35, dutxa);
+    marca(cilindre(.012, .012, .7, M.aixeta, x0 + .2, .9, z0 + .03, p, 8), 'aixeta');
+    marca(caixa(.12, .02, .12, M.aixeta, x0 + .2, 1.6, z0 + .08, p), 'aixeta');
     fiX = x0 + len; fonsZ = z0 + fons;
   } else {
     const s = Math.max(.7, Math.min(1.0, D - .9, W * .42));
-    caixa(s, .006, s, new THREE.MeshStandardMaterial({ color: 0x8E8D88, roughness: .5 }), x0 + s / 2, 0, z0 + s / 2, p, false);
-    caixa(s * .7, .004, .05, M.inox, x0 + s / 2, .006, z0 + s - .1, p, false);
-    caixa(.02, 2.0, s * .9, M.vidre, x0 + s, 0, z0 + s * .45, p, false);
-    caixa(.025, .025, s * .9, M.tirador, x0 + s, 2.0, z0 + s * .45, p);
-    cilindre(.012, .012, 1.0, M.tirador, x0 + s / 2, 1.1, z0 + .03, p, 8);
-    cilindre(.13, .13, .015, M.tirador, x0 + s / 2, 2.1, z0 + .15, p);
-    caixa(.02, .02, .14, M.tirador, x0 + s / 2, 2.1, z0 + .08, p);
+    caixa(s - .08, .02, s - .08, M.plat, x0 + s / 2, 0, z0 + s / 2, dutxa, false);          // plat, amb una vora més alta
+    for (const [w, d, x, z] of [[s, .04, x0 + s / 2, z0 + .02], [s, .04, x0 + s / 2, z0 + s - .02], [.04, s, x0 + .02, z0 + s / 2], [.04, s, x0 + s - .02, z0 + s / 2]]) caixa(w, .035, d, M.ceramica, x, 0, z, dutxa, false);
+    caixa(.012, 2.0, .02, M.aixeta, x0 + s, 0, z0 + s * .9 - .01, dutxa);     // perfil de la mampara
+    caixa(s * .7, .004, .05, M.inox, x0 + s / 2, .021, z0 + s - .1, dutxa, false);     // desguàs lineal
+    caixa(.02, 2.0, s * .9, M.vidre, x0 + s, 0, z0 + s * .45, dutxa, false);
+    caixa(.025, .025, s * .9, M.aixeta, x0 + s, 2.0, z0 + s * .45, dutxa);
+    marca(cilindre(.012, .012, 1.0, M.aixeta, x0 + s / 2, 1.1, z0 + .03, p, 8), 'aixeta');
+    marca(cilindre(.13, .13, .015, M.aixeta, x0 + s / 2, 2.1, z0 + .15, p), 'aixeta');
+    marca(caixa(.02, .02, .14, M.aixeta, x0 + s / 2, 2.1, z0 + .08, p), 'aixeta');
+    if (v.luces === 'led') {          // fornícula amb tira de llum a la paret de la dutxa
+      caixa(s * .6, .32, .015, M.paretInt, x0 + s / 2, 1.15, z0 + .012, dutxa, false);
+      marca(caixa(s * .6, .012, .02, M.led, x0 + s / 2, 1.46, z0 + .03, p, false), 'llum', true);
+    }
     fiX = x0 + s; fonsZ = z0 + s;
   }
+  marca(dutxa, 'dutxa');
   // Lavabo suspès, a l'altra punta de la paret del fons
   const vw = Math.max(.5, Math.min(.9, W / 2 - fiX - .2)), xl = W / 2 - .1 - vw / 2, rm = Math.min(.34, vw / 2 - .02);
-  caixa(vw, .42, .46, M.moble, xl, .42, z0 + .23, p);
-  caixa(vw + .02, .06, .48, M.ceramica, xl, .84, z0 + .24, p);
-  cilindre(.012, .012, .2, M.tirador, xl, .9, z0 + .06, p, 8);
-  caixa(.02, .02, .12, M.tirador, xl, 1.08, z0 + .11, p);
-  const mirall = new THREE.Mesh(new THREE.CylinderGeometry(rm, rm, .015, 48), M.mirall);
-  mirall.rotation.x = Math.PI / 2; mirall.position.set(xl, 1.6, z0 + .012); p.add(mirall);
-  const vora = new THREE.Mesh(new THREE.TorusGeometry(rm + .005, .012, 8, 64), M.llauto);
-  vora.position.set(xl, 1.6, z0 + .02); p.add(vora);
+  marca(caixa(vw, .42, .46, M.moble, xl, .42, z0 + .23, p), 'moble');
+  marca(caixa(vw + .02, .03, .48, M.fusta, xl, .84, z0 + .24, p), 'moble');
+  const bol = new THREE.Mesh(new THREE.LatheGeometry([[0, 0], [.13, 0], [.19, .03], [.205, .12], [.19, .125], [.172, .045], [.11, .02], [0, .018]].map(([x, y]) => new THREE.Vector2(x, y)), 40), M.pica);
+  bol.scale.set(Math.min(1, vw / .5), 1, .82); bol.position.set(xl, .87, z0 + .27); bol.castShadow = bol.receiveShadow = true; p.add(marca(bol, 'moble'));
+  marca(cilindre(.012, .012, .006, M.inox, xl, .888, z0 + .27, p, 16), 'moble');      // desguàs
+  marca(cilindre(.012, .012, .3, M.aixeta, xl, .87, z0 + .05, p, 12), 'aixeta');
+  const broc = marca(caixa(.018, .018, .15, M.aixeta, xl, 1.15, z0 + .12, p), 'aixeta'); broc.rotation.x = .12;
+  cilindre(.035, .035, .14, M.test, xl + vw / 2 - .1, .9, z0 + .1, p, 16);    // sabó i un gerro petit
+  const tb = new THREE.Group();     // tovalloler de barra amb una tovallola, a la paret del costat del lavabo
+  caixa(.02, .02, .45, M.aixeta, 0, 1.12, 0, tb); caixa(.05, .5, .38, M.tovallola, -.03, .64, 0, tb);
+  {   // a la paret del fons entre la dutxa i el lavabo si hi cap; si no, a la de l'esquerra, passat l'inodor
+    const g1 = fiX + .05, g2 = xl - vw / 2 - .05, ze = fonsZ + 1.05;
+    if (g2 - g1 >= .45) { tb.rotation.y = -Math.PI / 2; tb.position.set((g1 + g2) / 2, 0, z0 + .03); p.add(marca(tb, 'aixeta')); }
+    else if (ze + .25 < D / 2) { tb.rotation.y = Math.PI; tb.position.set(x0 + .03, 0, ze); p.add(marca(tb, 'aixeta')); }
+  }
+  caixa(.7, .012, .45, M.catifaB, fiX + .45, 0, fonsZ + .32, p, false);
+  // Mirall: rodó de llautó, amb llum o armari
+  const mi = new THREE.Group();
+  if (v.espejo === 'luz') {
+    caixa(rm * 2, .8, .02, M.mirall, xl, 1.22, z0 + .012, mi);
+    marca(caixa(rm * 2 + .03, .015, .025, M.bombeta, xl, 2.03, z0 + .02, mi, false), 'mirall', true);
+    marca(caixa(rm * 2 + .03, .015, .025, M.bombeta, xl, 1.2, z0 + .02, mi, false), 'mirall', true);
+  } else if (v.espejo === 'armario') {
+    caixa(Math.min(vw, .8), .7, .14, M.moble, xl, 1.25, z0 + .07, mi);
+    caixa(Math.min(vw, .8) - .01, .69, .01, M.mirall, xl, 1.255, z0 + .145, mi);
+  } else {
+    const mirall = new THREE.Mesh(new THREE.CylinderGeometry(rm, rm, .015, 48), M.mirall);
+    mirall.rotation.x = Math.PI / 2; mirall.position.set(xl, 1.6, z0 + .012); mi.add(mirall);
+    const vora = new THREE.Mesh(new THREE.TorusGeometry(rm + .005, .012, 8, 64), M.llauto);
+    vora.position.set(xl, 1.6, z0 + .02); mi.add(vora);
+  }
+  p.add(marca(mi, 'mirall'));
+  if (v.luces === 'apliques') {       // dos apliques de llautó als costats del mirall
+    for (const dx of [-1, 1]) {
+      const a = new THREE.Group();
+      caixa(.03, .03, .1, M.llauto, 0, 0, .05, a);
+      const gl = new THREE.Mesh(new THREE.CylinderGeometry(.045, .045, .16, 20), M.vidreLlum); gl.position.set(0, .02, .12); a.add(gl);
+      const b = new THREE.Mesh(new THREE.SphereGeometry(.03, 10, 8), M.bombeta); b.position.set(0, .02, .12); a.add(b);
+      a.position.set(xl + dx * (rm + .14), 1.62, z0); p.add(marca(a, 'llum', true));
+    }
+  }
   // Inodor suspès, a la paret de l'esquerra, davant de la dutxa o la banyera
   const zw = fonsZ + .45;
   const wc = new THREE.Group();
-  const cos = new THREE.Mesh(new THREE.CylinderGeometry(.19, .16, .36, 32), M.ceramica);
-  cos.scale.set(1, 1, 1.4); cos.position.set(0, .4, .3); cos.castShadow = true; wc.add(cos);
-  caixa(.38, .03, .5, M.ceramica, 0, .58, .29, wc);
-  caixa(.24, .16, .01, M.ceramica, 0, 1.05, .015, wc);
-  wc.rotation.y = Math.PI / 2; wc.position.set(x0, 0, zw); p.add(wc);
+  const tassa = new THREE.Mesh(new THREE.LatheGeometry([[0, .28], [.1, .28], [.17, .32], [.2, .4], [.205, .48], [.185, .485], [.16, .43], [.07, .37], [0, .36]].map(([x, y]) => new THREE.Vector2(x, y)), 40), M.wc);
+  tassa.scale.set(1, 1, 1.32); tassa.position.z = .33; tassa.castShadow = tassa.receiveShadow = true; wc.add(tassa);
+  caixa(.3, .2, .16, M.wc, 0, .3, .08, wc);                                     // part que entra a la paret
+  const seient = new THREE.Mesh(new THREE.TorusGeometry(.155, .024, 12, 40), M.wc);
+  seient.rotation.x = Math.PI / 2; seient.scale.set(1, 1.3, .7); seient.position.set(0, .5, .34); seient.castShadow = true; wc.add(seient);
+  caixa(.24, .16, .012, M.aixeta, 0, 1.0, .006, wc);                            // polsador
+  for (const dx of [-.05, .05]) { const b = cilindre(.035, .035, .006, M.wc, dx, 0, 0, wc, 20); b.rotation.x = Math.PI / 2; b.position.set(dx, 1.08, .014); }
+  wc.rotation.y = Math.PI / 2; wc.position.set(x0, 0, zw); p.add(marca(wc, 'vater'));
   if (v.paquete === 'llave') {      // tovalloler elèctric, on hi hagi paret lliure
     const tv = new THREE.Group();
-    for (let i = 0; i < 7; i++) caixa(.5, .02, .02, M.tirador, 0, .62 + i * .12, .06, tv);
-    caixa(.02, .84, .02, M.tirador, -.25, .56, .06, tv); caixa(.02, .84, .02, M.tirador, .25, .56, .06, tv);
+    for (let i = 0; i < 7; i++) caixa(.5, .02, .02, M.aixeta, 0, .62 + i * .12, .06, tv);
+    caixa(.02, .84, .02, M.aixeta, -.25, .56, .06, tv); caixa(.02, .84, .02, M.aixeta, .25, .56, .06, tv);
+    caixa(.42, .5, .03, M.tela, 0, .8, .09, tv);     // una tovallola penjada
     const g1 = fiX + .05, g2 = xl - vw / 2 - .05;
-    if (g2 - g1 >= .55) { tv.position.set((g1 + g2) / 2, 0, z0); p.add(tv); }
-    else if (D / 2 - (zw + .3) >= .6) { tv.rotation.y = Math.PI / 2; tv.position.set(x0, 0, (zw + .3 + D / 2) / 2); p.add(tv); }
+    if (g2 - g1 >= .55) { tv.position.set((g1 + g2) / 2, 0, z0); p.add(marca(tv, 'obra')); }
+    else if (D / 2 - (zw + .3) >= .6) { tv.rotation.y = Math.PI / 2; tv.position.set(x0, 0, (zw + .3 + D / 2) / 2); p.add(marca(tv, 'obra')); }
   }
 }
 
@@ -890,11 +1191,11 @@ function mobleSalo() {
   [-.5, .5].forEach(x => caixaR(.95, .12, .66, .06, M.coixi, x, .42, .06, sofa));
   sofa.rotation.y = -Math.PI / 2;
   const catifa = caixa(1.6, .015, 2.2, M.catifa, 0, 0, 0, g, false);
-  const tauleta = new THREE.Group(); cilindre(.36, .36, .04, M.fusta, 0, .34, 0, tauleta, 40); cilindre(.05, .05, .34, M.tirador, 0, 0, 0, tauleta, 10);
+  const tauleta = new THREE.Group(); cilindre(.36, .36, .04, M.fusta, 0, .34, 0, tauleta, 40); cilindre(.05, .05, .34, M.metall, 0, 0, 0, tauleta, 10);
   const tv = new THREE.Group(); caixaR(.42, .45, 1.6, .03, M.fusta, 0, 0, 0, tv); caixa(.06, .45, 1.1, M.vitro, -.1, .45, 0, tv);
   const taula = new THREE.Group();
   caixaR(.9, .04, 1.5, .015, M.fusta, 0, .72, 0, taula);
-  [[-.35, -.6], [.35, -.6], [-.35, .6], [.35, .6]].forEach(([a, b]) => cilindre(.02, .02, .72, M.tirador, a, 0, b, taula, 8));
+  [[-.35, -.6], [.35, -.6], [-.35, .6], [.35, .6]].forEach(([a, b]) => cilindre(.02, .02, .72, M.metall, a, 0, b, taula, 8));
   cadira(-.65, -.35, Math.PI / 2, taula); cadira(-.65, .35, Math.PI / 2, taula);
   cadira(.65, -.35, -Math.PI / 2, taula); cadira(.65, .35, -Math.PI / 2, taula);
   const plt = new THREE.Group(); planta(0, 0, plt, .9);
@@ -1109,7 +1410,7 @@ function creix(obj, dur = 650) {          // «s'aixeca» des del terra
 }
 
 /* ── Càmera ── */
-function vista(quina, mida = 0, asp = visor.clientWidth / Math.max(1, visor.clientHeight)) {
+function vista(quina, mida = 0, asp = aspUtil()) {
   const f = Math.pow(Math.max(1, 1.45 / asp), .75);
   if (quina === 'cocina') return { t: new THREE.Vector3(.05, .8, -.1), r: (mida * 1.3 + 2.4) * f, pol: 1.06, az: .6 };
   if (quina === 'bano') return { t: new THREE.Vector3(0, 1.0, -.1), r: (mida * 1.35 + 2.2) * f, pol: 1.08, az: .6 };
@@ -1135,34 +1436,68 @@ function ombraPer(mida) {
 }
 
 /* ── Materials segons les opcions de cada zona ── */
+const COLORS_FRENTE = { blanco: 0xE7E3DA, salvia: 0x8F9B86, noche: 0x2B3446, grafito: 0x3A3C3F };
+const ACABATS = { mate: .62, satinado: .26, ranurado: .55 };
+const TIRADORS = { negro: [0x1C1D1E, .6, .35], laton: [0xB08D57, 1, .3], gola: [0x1C1D1E, .6, .35] };
+const AIXETES = { cromo: [0xC9CDD0, 1, .14], negro: [0x1C1D1E, .35, .45], laton: [0xB08D57, 1, .28] };
+const ELECTRO = { inox: [0xB9BCBE, 1, .3], negro: [0x141516, .3, .12], integrados: [0x141516, .3, .12], ninguno: [0x141516, .3, .12] };
+const PINTURA = { blanco: 0xE8E6E0, arena: 0xD8CBB5, humo: 0xA9ADAE };
+const TERRES_BANY = { rajola: ['rajolaTerra', .8, .4], micro: ['microcemento', 2, .55], piedra: ['pedra', 1.2, .5] };
+function posaMap(m, t, rug, bump = 0) {
+  m.map = t; m.bumpMap = bump && !MOBIL ? t : null; m.bumpScale = bump; m.color.set(0xffffff);   // relleu només a l'escriptori
+  if (rug != null) m.roughness = rug;
+  m.needsUpdate = true;
+}
+function metall(m, [c, met, rug]) { m.color.set(c); m.metalness = met; m.roughness = rug; }
 function allibera(obj) { obj.traverse(o => { if (o.geometry && o.geometry !== GEO) o.geometry.dispose(); }); }
 function aplicaMaterials() {
   if (!renderer) return;
+  st.abans = false; $('[data-abans]').setAttribute('aria-pressed', 'false');
+  if (interior) interior.traverse(o => { if (o.userData.nou) o.visible = true; });
   for (const z of st.zones.values()) {
-    const mt = materialsZona(z), o = z.opts;
+    const mt = materialsZona(z), o = z.opts, aqui = !!interior && st.vista === z.tipus;   // el que només es veu per dins
     if (z.tipus === 'cocina') {
-      const colors = { blanco: 0xE7E3DA, salvia: 0x8F9B86, noche: 0x2B3446, grafito: 0x3A3C3F };
-      if (o.frente === 'roble') { if (M.frente.map !== tex('robleV', .8)) { M.frente.map = tex('robleV', .8); M.frente.color.set(0xffffff); M.frente.needsUpdate = true; } }
-      else { if (M.frente.map) { M.frente.map = null; M.frente.needsUpdate = true; } if (M.frente.color.getHex() !== colors[o.frente]) tweenColor(M.frente, colors[o.frente]); }
-      const fosc = o.frente !== 'blanco' && o.frente !== 'roble';
-      M.tirador.color.set(fosc ? 0xB08D57 : 0x1C1D1E); M.tirador.metalness = fosc ? 1 : .6;
+      const fusta = o.frente === 'roble', ran = o.acabado === 'ranurado';
+      M.frente.map = fusta ? tex('robleV', .8) : aqui ? tex('gra', .5) : null;   // el gra només es veu per dins
+      M.frente.bumpMap = ran ? tex('ranures', .6) : fusta && !MOBIL ? tex('robleV', .8) : null;
+      M.frente.bumpScale = ran ? 2.5 : .5;
+      M.frente.roughness = ACABATS[o.acabado] ?? .62;
+      if (fusta) M.frente.color.set(0xffffff); else if (M.frente.color.getHex() !== COLORS_FRENTE[o.frente]) tweenColor(M.frente, COLORS_FRENTE[o.frente]);
+      M.frente.needsUpdate = true;
+      metall(M.tirador, TIRADORS[o.tiradores] || TIRADORS.negro);
+      M.tirador.visible = o.tiradores !== 'gola';
       const enc = { roble: ['roble', 1.2, .5], cuarzo: ['cuarzo', 1, .22], marmol: ['marmol', 1.6, .12] }[o.encimera];
-      M.encimera.map = tex(enc[0], enc[1]); M.encimera.roughness = enc[2]; M.encimera.needsUpdate = true;
+      posaMap(M.encimera, tex(enc[0], enc[1]), enc[2], enc[0] === 'roble' ? .4 : 0);
       const ter = TERRES[o.suelo] || TERRES.porcelanico;
-      M.terra.map = tex(ter[0], ter[1]); M.terra.roughness = ter[2]; M.terra.needsUpdate = true;
+      posaMap(M.terra, tex(ter[0], ter[1]), ter[2], .35);
       mt.terra.map = tex(ter[0], ter[1]); mt.terra.roughness = ter[2];
-      M.led.emissiveIntensity = o.paquete === 'esencial' ? 0 : 2.2;
+      if (aqui) {
+        M.paretInt.color.set(PINTURA[o.paredes] || PINTURA.blanco); M.paretInt.map = tex('estuc', 1.2); M.paretInt.needsUpdate = true;
+        if (o.frontal === 'metro') posaMap(M.frontal, tex('metro', .6), .22, .6);
+        else if (o.frontal === 'porcelanico') posaMap(M.frontal, tex('cuarzo', 1.2), .16);
+        else { M.frontal.map = M.frontal.bumpMap = null; M.frontal.color.set(PINTURA[o.paredes] || PINTURA.blanco); M.frontal.roughness = .85; M.frontal.needsUpdate = true; }
+        metall(M.aixeta, AIXETES[o.grifo] || AIXETES.cromo);
+        metall(M.electro, ELECTRO[o.electro] || ELECTRO.inox);
+        M.led.userData.on = o.led === 'si';
+      }
     } else if (z.tipus === 'bano') {
       if (st.activa === z.id || !st.activa || z.n === 1) {     // els banys comparteixen materials: mana el que s'edita
         const az = { blanco: '#ECEAE4', verde: '#9DB4A6', cobalto: '#2C4C9A' }[o.pared];
-        M.rajola.map = o.pared === 'micro' ? tex('microcemento', 1.6) : tex('az' + az, .6, azulejo(az));
-        M.rajola.roughness = o.pared === 'micro' ? .6 : .28; M.rajola.needsUpdate = true;
-        M.terraBany.map = o.pared === 'micro' ? tex('microcemento', 2) : tex('rajolaTerra', .8); M.terraBany.needsUpdate = true;
-        if (o.mueble === 'roble') { M.moble.map = tex('robleV', .8); M.moble.color.set(0xffffff); }
-        else { M.moble.map = null; M.moble.color.set(o.mueble === 'blanco' ? 0xECEAE4 : 0x3A3C3F); }
-        M.moble.needsUpdate = true;
+        if (o.pared === 'micro') posaMap(M.rajola, tex('microcemento', 1.6), .6);
+        else posaMap(M.rajola, tex('az' + az, .6, azulejo(az)), .22, 1.2);
+        const tb = TERRES_BANY[o.sueloB] || TERRES_BANY.rajola;
+        posaMap(M.terraBany, tex(tb[0], tb[1]), tb[2], .35);
+        if (o.mueble === 'roble') posaMap(M.moble, tex('robleV', .5), .5, 1);
+        else { M.moble.map = M.moble.bumpMap = null; M.moble.color.set(o.mueble === 'blanco' ? 0xECEAE4 : 0x3A3C3F); M.moble.needsUpdate = true; }
+        M.wc.color.set(o.inodoro === 'negro' ? 0x2A2C2E : 0xF6F6F3); M.wc.roughness = o.inodoro === 'negro' ? .4 : .18;
+        if (aqui) {
+          M.paretInt.color.set(PINTURA.blanco);
+          metall(M.aixeta, AIXETES[o.griferia] || AIXETES.cromo);
+          M.led.userData.on = o.luces === 'led';
+        }
       }
-      mt.terra.map = o.pared === 'micro' ? tex('microcemento', 2) : tex('rajolaTerra', .8);
+      const tb = TERRES_BANY[o.sueloB] || TERRES_BANY.rajola;
+      mt.terra.map = tex(tb[0], tb[1]);
     } else {
       const ter = TERRES[o.suelo] || TERRES.porcelanico;
       mt.terra.map = tex(ter[0], ter[1]); mt.terra.roughness = ter[2];
@@ -1171,31 +1506,186 @@ function aplicaMaterials() {
     mt.terra.needsUpdate = true;
   }
   if (plaAra) plaAra._brut = true;     // els mobles (armari, illa, banyera) depenen de les opcions
+  aplicaLlum();
+}
+
+/* ── Dia i nit (peça 16): de nit, el sol baixa i s'encenen els llums de dins (penjants, apliques, LED) ── */
+const LLUM = { dia: { sol: 3.0, hemi: .5, env: .55, exp: .95 }, nit: { sol: .1, hemi: .05, env: .08, exp: 1.1 } };
+let hemi, entorn, llumsInt = [];
+function aplicaLlum() {
+  $('.pn').dataset.llum = st.llum;
+  if (!renderer) return;
+  const nit = st.llum === 'nit', L = LLUM[st.llum];
+  sol.intensity = L.sol; sol.color.set(nit ? 0x9DB0D6 : 0xFFEFD8);
+  hemi.intensity = L.hemi; scene.environmentIntensity = L.env; renderer.toneMappingExposure = L.exp;
+  M.finestra.color.set(nit ? 0x23324A : 0xE8EEF2); M.finestra.emissive.set(nit ? 0x1A263A : 0xEAF1F6);
+  const ledOn = !!M.led.userData.on && !st.abans;
+  M.led.emissiveIntensity = ledOn ? (nit ? 3.2 : .6) : 0;
+  M.bombeta.emissiveIntensity = st.abans || !nit ? 0 : 3.4;
+  M.vidreLlum.emissiveIntensity = nit && !st.abans ? .9 : 0;
+  for (const m of [M.aixeta, M.inox, M.llauto, M.tirador, M.electro]) m.envMapIntensity = nit ? .35 : 1;
+  // Tres llums puntuals fixes (sense canviar-ne el nombre: res de recompilar shaders); de nit van on hi ha bombetes
+  const punts = [];
+  // Es creen la primera vegada que es fa de nit: de dia no cal compilar-los a cada material
+  if (nit && !llumsInt.length) llumsInt = [0, 1, 2].map(() => { const l = new THREE.PointLight(0xFFD9A0, 0, 0, 2); scene.add(l); return l; });
+  if (interior && nit && !st.abans) {
+    interior.updateMatrixWorld();
+    interior.traverse(o => {
+      if (!o.isMesh || !o.parent.visible || !(o.material === M.bombeta || (o.material === M.led && ledOn))) return;
+      const p = o.getWorldPosition(new THREE.Vector3());
+      punts.push(o.material === M.led ? p.add(new THREE.Vector3(0, -.1, 0)) : p.add(new THREE.Vector3(0, -.12, 0)));
+    });
+    if (!punts.length) { const s = interior.userData.mides; punts.push(new THREE.Vector3(-s.W * .15, 2.3, 0), new THREE.Vector3(s.W * .2, 2.3, -s.D * .15)); }
+  }
+  const pas = Math.max(1, punts.length / llumsInt.length);
+  llumsInt.forEach((l, i) => {
+    const p = punts[Math.floor(i * pas)];
+    l.intensity = p && i < punts.length ? (punts.length > 2 ? 2 : 2.8) : 0;
+    if (p) l.position.copy(p);
+  });
+  reflexMirall(nit);   // al final: el mirall ja veu els llums de nit encesos
   brut = true;
 }
 
+let cubCam = null;
+function reflexMirall(nit) {
+  if (MOBIL || !interior || st.vista !== 'bano') { M.mirall.envMap = entorn; M.mirall.envMapIntensity = nit ? .35 : 1; return; }
+  if (!cubCam) { cubCam = new THREE.CubeCamera(.05, 30, new THREE.WebGLCubeRenderTarget(256)); scene.add(cubCam); }
+  const miralls = [];
+  interior.updateMatrixWorld();
+  interior.traverse(o => { if (o.isMesh && o.material === M.mirall) miralls.push(o); });
+  if (!miralls.length) return;
+  miralls[0].getWorldPosition(cubCam.position); cubCam.position.z += .12;
+  miralls.forEach(m => { m.visible = false; });
+  // La maqueta està tallada: per a la foto del mirall es tanquen un moment les dues parets que falten (i el sostre),
+  // així el mirall reflecteix rajola i llum, no el buit.
+  const { W, D, H } = interior.userData.mides, tanca = new THREE.Group();
+  caixa(W, H, .01, M.rajola, 0, 0, D / 2, tanca, false); caixa(.01, H, D, M.rajola, W / 2, 0, 0, tanca, false);
+  caixa(W, .01, D, M.paretInt, 0, H, 0, tanca, false);
+  interior.add(tanca);
+  scene.background = nit ? new THREE.Color(0x1B1E22) : entorn;
+  cubCam.update(renderer, scene);
+  scene.background = null;
+  interior.remove(tanca); allibera(tanca);
+  miralls.forEach(m => { m.visible = true; });
+  M.mirall.envMap = cubCam.renderTarget.texture; M.mirall.envMapIntensity = 1; brut = true;
+  if (tweens.size) { clearTimeout(reflexMirall.t); reflexMirall.t = setTimeout(() => reflexMirall(st.llum === 'nit'), 750); }   // l'escena encara creix
+}
+
+/* ── «Antes»: mentre es prem, l'habitació com estava (fusta envernissada, rajola vella, terratzo) ── */
+function posaAbans(on) {
+  if (!renderer || !interior || st.abans === on) return;
+  if (!on) { aplicaMaterials(); return; }
+  st.abans = true;
+  $('[data-abans]').setAttribute('aria-pressed', 'true');
+  interior.traverse(o => { if (o.userData.nou) o.visible = false; });
+  const vell = (m, c, t) => { m.map = t || null; m.bumpMap = null; m.color.set(t ? 0xffffff : c); m.roughness = .7; m.needsUpdate = true; };
+  M.aixeta.color.set(0xBFC3C6);
+  if (st.vista === 'cocina') {
+    vell(M.frente, 0x9A6B3F); vell(M.encimera, 0xCDBF9F); vell(M.terra, 0, tex('viejo', 1.6));
+    vell(M.frontal, 0, tex('az#D9CFA9', .6, azulejo('#D9CFA9')));
+    M.paretInt.color.set(0xE6DBBE); M.tirador.color.set(0xB89A6A); M.tirador.visible = true;
+  } else {
+    vell(M.rajola, 0, tex('az#C8D3BC', .6, azulejo('#C8D3BC'))); vell(M.terraBany, 0, tex('viejo', 1.2));
+    vell(M.moble, 0x9A6B3F); M.wc.color.set(0xF0EEE6);
+  }
+  aplicaLlum();
+}
+
+/* ── Girar sola i tornar a la vista inicial ── */
+function posaGir(on) {
+  st.gir = !!on && !QUIET && !!controls;
+  $('[data-gir]').setAttribute('aria-pressed', String(st.gir));
+  if (st.gir) { st.girT0 = performance.now(); st.girAz = controls.getAzimuthalAngle(); }
+  brut = true;
+}
+function reinicia() {
+  posaGir(false); posaAbans(false);
+  if (renderer) posa(vistaActual());
+  $('[data-tota]').hidden = true;
+}
+
+/* ── Acostar la càmera a una part (clicada al 3D o triada a la graella) ── */
+function enfocaPart(part, punt) {
+  if (!renderer || !interior) return;
+  const caixaP = new THREE.Box3();
+  interior.updateMatrixWorld();
+  interior.traverse(o => { if (o.isMesh && o.userData.part === part) caixaP.expandByObject(o); });
+  if (caixaP.isEmpty()) return;
+  const c = punt ? punt.clone() : caixaP.getCenter(new THREE.Vector3());
+  const mida = Math.min(3.2, caixaP.getSize(new THREE.Vector3()).length());
+  const r = Math.max(1.5, Math.min(vistaActual().r * .78, mida * 1.1 + 1.1)) * Math.max(1, 1.3 / aspUtil());
+  posaGir(false);
+  const deT = controls.target.clone(), de = camera.position.clone();
+  const a = c.clone().add(de.clone().sub(deT).normalize().multiplyScalar(r));
+  controls.minDistance = r * .6;
+  radiObjectiu = null;
+  tween(800, k => { camera.position.lerpVectors(de, a, k); controls.target.lerpVectors(deT, c, k); });
+  $('[data-tota]').hidden = false;
+}
+/* La part sota el punter (dins de la cuina o el bany); el decorat (planta, bol, cadires) no obre res */
+function partSota(e) {
+  if (!interior) return null;
+  const r = canvas.getBoundingClientRect();
+  punter.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(punter, camera);
+  for (const h of ray.intersectObject(interior, true)) {
+    const m = Array.isArray(h.object.material) ? h.object.material[0] : h.object.material;
+    if (!h.object.visible || !h.object.parent.visible || m.visible === false) continue;
+    return h.object.userData.part ? { part: h.object.userData.part, punt: h.point } : null;
+  }
+  return null;
+}
+
+/* ── El 3D ocupa tota la pantalla, però el centre de la vista és l'espai que deixa el panell ── */
+const elPanell = $('.pn-panell');
+function despla() {   // escriptori: el panell; mòbil: la columna de controls de la dreta
+  return innerWidth > 860 ? elPanell.offsetWidth + 2 * (parseFloat(getComputedStyle(elPanell).right) || 0) : 64;
+}
+function aspUtil() { return Math.max(.5, (visor.clientWidth - despla()) / Math.max(1, visor.clientHeight)); }
+function encaixa() {
+  const w = visor.clientWidth, h = visor.clientHeight, d = despla();
+  renderer.setSize(w, h, false); camera.aspect = w / h;
+  if (d) camera.setViewOffset(w, h, d / 2, 0, w, h); else camera.clearViewOffset();
+  camera.updateProjectionMatrix(); brut = true;
+}
+
 /* ── Veure la cuina o el bany per dins ── */
+/* Ceràmica amb vernís (clearcoat): es crea en obrir el bany, perquè la vista del pis no compili aquest shader
+   (Lighthouse mòbil, 21/10/2026). Les peces del bany es munten després, ja amb aquests materials. */
+function vernisBany() {
+  if (M.ceramica.isMeshPhysicalMaterial) return;
+  const v = { roughness: .22, clearcoat: 1, clearcoatRoughness: .06 };
+  M.ceramica = new THREE.MeshPhysicalMaterial({ color: 0xF6F6F3, ...v });
+  M.pica = new THREE.MeshPhysicalMaterial({ color: 0xF6F6F3, ...v, side: THREE.DoubleSide });
+  M.wc = new THREE.MeshPhysicalMaterial({ color: M.wc.color.getHex(), ...v, side: THREE.DoubleSide });
+}
 function obreInterior() {
   const z = st.zones.get(st.activa);
   if (!z || !renderer) return;
   st.vista = z.tipus;
+  if (z.tipus === 'bano') vernisBany();
   if (interior) { scene.remove(interior); allibera(interior); }
   interior = z.tipus === 'cocina' ? escenaCuina(z.opts) : escenaBany(z.opts);
   interior.userData.ultim = { ...z.opts };
   scene.add(interior); creix(interior, 600);
   pla.grup.visible = false; elEtiq.hidden = true;
   $('[data-torna]').hidden = false;
+  $('[data-tota]').hidden = true; $('[data-abans]').hidden = false;
+  $$('[data-tota-sol]').forEach(el => { el.hidden = el.dataset.totaSol !== st.vista; });
   ombraPer(interior.userData.mida + 2);
   posa(vistaActual());
-  $('.pn-pista').textContent = I18N.t('Arrastra para girarla');
+  aplicaMaterials();
+  $('.pn-pista').textContent = I18N.t('Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.');
   brut = true;
 }
 function tancaInterior() {
   if (interior) { scene.remove(interior); allibera(interior); interior = null; }
   st.vista = 'pis';
   pla.grup.visible = true; elEtiq.hidden = false;
-  $('[data-torna]').hidden = true;
+  $('[data-torna]').hidden = true; $('[data-tota]').hidden = true; $('[data-abans]').hidden = true;
   ombraPer(Math.max(plaObj.W, plaObj.D) + 2);
+  aplicaLlum();
   posa(vistaActual());
   $('.pn-pista').textContent = I18N.t('Toca una zona para elegirla. Arrastra para girar el piso.');
   brut = true;
@@ -1215,15 +1705,15 @@ function refrescaInterior() {
       interior = z.tipus === 'cocina' ? escenaCuina(v) : escenaBany(v);
       scene.add(interior);
       radiObjectiu = vistaActual().r;
-    } else if (z.tipus === 'cocina' && v.forma !== u.forma) {
+    } else if (z.tipus === 'cocina' && ['forma', 'lamparas', 'electro'].some(k => v[k] !== u[k])) {
       const m = interior.userData.mobles; m.children.slice().forEach(c => { m.remove(c); allibera(c); });
-      muntaCuina(m, v.forma, interior.userData.mides); creix(m, 550);
-    } else if (z.tipus === 'bano' && (v.tipo !== u.tipo || v.paquete !== u.paquete)) {
+      muntaCuina(m, v, interior.userData.mides); creix(m, 550);
+    } else if (z.tipus === 'bano' && ['tipo', 'paquete', 'espejo', 'luces'].some(k => v[k] !== u[k])) {
       const p = interior.userData.peces; p.children.slice().forEach(c => { p.remove(c); allibera(c); });
       muntaBany(p, v, interior.userData.mides); creix(p, 500);
     }
     interior.userData.ultim = { ...v };
-    brut = true;
+    aplicaMaterials();
   });
 }
 
@@ -1252,13 +1742,13 @@ function iniciaWebGL() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = .95;
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.shadowMap.type = MOBIL ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
 
   scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), .04).texture;
+  scene.environment = entorn = pmrem.fromScene(new RoomEnvironment(), .04).texture;
   scene.environmentIntensity = .42;
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xCFCBC2, .5));
+  hemi = new THREE.HemisphereLight(0xffffff, 0xCFCBC2, .5); scene.add(hemi);
   sol = new THREE.DirectionalLight(0xFFEFD8, 3.0);
   sol.position.set(-3, 9, 6.5);
   sol.castShadow = true;
@@ -1273,32 +1763,36 @@ function iniciaWebGL() {
   controls = new OrbitControls(camera, canvas);
   controls.enableDamping = !QUIET; controls.dampingFactor = .08;
   controls.enablePan = false; controls.rotateSpeed = .55; controls.zoomSpeed = .6;
-  controls.addEventListener('start', () => { radiObjectiu = null; });
+  controls.addEventListener('start', () => { radiObjectiu = null; if (st.gir) posaGir(false); });
 
   preparaMaterials();
+  for (const m of [M.mirall, M.aixeta, M.inox, M.llauto, M.tirador, M.electro]) { m.envMap = entorn; m.envMapIntensity = 1; }
   M.base = new THREE.MeshStandardMaterial({ color: 0xF3F2EE, roughness: .9 });
   M.vidrePla = new THREE.MeshStandardMaterial({ color: 0xCFE0E6, roughness: .05, transparent: true, opacity: .45, depthWrite: false });
   M.plat = new THREE.MeshStandardMaterial({ color: 0x8E8D88, roughness: .5 });
   M.coixi = new THREE.MeshStandardMaterial({ color: 0xB9B1A3, roughness: 1 });
   MP = [M.paret, M.paret, M.tall, M.paret, M.paret, M.paret];
 
-  new ResizeObserver(() => {
-    const w = visor.clientWidth, h = visor.clientHeight;
-    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); brut = true;
-  }).observe(visor);
+  new ResizeObserver(encaixa).observe(visor);
 
   let visible = true, tAbans = performance.now();
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; }).observe(visor);
   const v3 = new THREE.Vector3();
   renderer.setAnimationLoop(t => {
     const dt = Math.min(.05, (t - tAbans) / 1000); tAbans = t;
-    if (!visible) return;
+    if (!visible || !pinta) return;
     for (const tw of tweens) {
       const k = Math.min(1, (t - tw.t0) / tw.dur);
       tw.fn(ease(k)); if (k >= 1) tweens.delete(tw);
       brut = true;
     }
     if (st.vista === 'pis' && avancaPla(dt)) brut = true;
+    if (st.gir) {          // gira sola: va i ve davant de l'habitació
+      const off = camera.position.clone().sub(controls.target), sph = new THREE.Spherical().setFromVector3(off);
+      sph.theta = st.girAz + Math.sin((t - st.girT0) * .00035) * .55;
+      camera.position.copy(controls.target).add(off.setFromSpherical(sph));
+      brut = true;
+    }
     if (controls.update()) brut = true;
     if (!brut) return;
     brut = false;
@@ -1320,11 +1814,17 @@ function iniciaWebGL() {
     if (!baixa) return;
     const mou = Math.hypot(e.clientX - baixa.x, e.clientY - baixa.y); baixa = null;
     if (mou > 6) return;
+    if (interior) {        // dins de la cuina o el bany: clicar una cosa obre la seva part i s'hi acosta
+      const h = partSota(e);
+      if (h) obrePartDes3D(FORM_DE[st.vista], h.part, h.punt);
+      return;
+    }
     const id = zonaSota(e);
     if (id) { tocaZona(id); if (!elEditor.hidden) elEditor.scrollIntoView({ behavior: QUIET ? 'auto' : 'smooth', block: MOBIL ? 'start' : 'nearest' }); }
   });
   canvas.addEventListener('pointermove', e => {
     if (e.pointerType !== 'mouse' || baixa) return;
+    if (interior) { canvas.style.cursor = partSota(e) ? 'pointer' : ''; return; }
     const id = zonaSota(e);
     if (id !== hover) { hover = id; canvas.style.cursor = id ? 'pointer' : ''; brut = true; }
   });
@@ -1340,17 +1840,27 @@ function iniciaWebGL() {
    captura de la maqueta (JPEG), el que s'ha triat i les partides.
    El servidor (/api/disseny) només desa el correu i dona el WhatsApp. */
 
+function filesPerPart(z) {
+  const clau = FORM_DE[z.tipus], f = forms[clau];
+  return [[I18N.t('Superficie'), fmtNum(z.opts.m2) + ' m²'], ...$$('[data-part]', f).map(fs => {
+    const noms = [...new Set($$('input', fs).map(i => i.name).filter(n => n && n !== 'setmana'))];
+    return [$('legend', fs).textContent.trim(), noms.map(n => nomValor(clau, n, z.opts[n])).join(' · ')];
+  })];
+}
 function resumDisseny() {
   const r = calcula(), files = [];
-  for (const [nom, , p] of r.linies) files.push([nom, p.detalls.join(' · ')]);
+  const sola = unaSola() && r.triades.length === 1 && FORM_DE[r.triades[0].tipus] !== 'estancia';
+  if (sola) files.push(...filesPerPart(r.triades[0]));
+  else for (const [nom, , p] of r.linies) files.push([nom, p.detalls.join(' · ')]);
   files.push([I18N.t('Empezamos'), $('output[data-tria="setmana"]').textContent.trim()]);
-  files.push([I18N.t('Te la entregamos'), I18N.t('semana del {dia}', { dia: $('[data-entrega]').textContent.trim() })]);
+  files.push([I18N.t('Entrega prevista'), I18N.t('semana del {dia}', { dia: $('[data-entrega]').textContent.trim() })]);
+  const desg = desglossa(r).map(([t, n]) => [t, rang(n)]), forq = r.total ? forquilla(r.total) : '';
   const totes = r.triades.length === st.zones.size;
   const modeNom = totes ? I18N.t('Todo el piso') : r.triades.map(nomZona).join(', ');
   const m2 = r.triades.reduce((a, z) => a + z.opts.m2, 0);
   const una = unaSola() && r.triades[0];
-  if (una) return { mode: unaSola(), modeNom: nomZona(una), files, linies: r.linies.map(l => [l[0], l[1]]), total: r.total, v: { m2, paquete: una.opts.paquete } };
-  return { mode: 'integral', modeNom, files, linies: r.linies.map(l => [l[0], l[1]]), total: r.total, v: { m2, paquete: '' } };
+  if (una) return { mode: unaSola(), modeNom: nomZona(una), files, linies: desg, forq, total: r.total, v: { m2, paquete: una.opts.paquete } };
+  return { mode: 'integral', modeNom, files, linies: desg, forq, total: r.total, v: { m2, paquete: '' } };
 }
 
 /* Captura de la maqueta a 1600×1000, amb les etiquetes dibuixades a sobre */
@@ -1366,6 +1876,7 @@ function capturaMaqueta(w = 1600, h = 1000) {
   // Mateix angle que veu l'usuari, però la distància que toca per a una foto apaïsada
   const posAbans = camera.position.clone();
   const vf = vistaActual(w / h);
+  camera.clearViewOffset(); camera.updateProjectionMatrix();
   camera.position.sub(controls.target).normalize().multiplyScalar(vf.r * .92).add(controls.target);
   renderer.render(scene, camera);
   const c = document.createElement('canvas'); c.width = w; c.height = h;
@@ -1391,8 +1902,7 @@ function capturaMaqueta(w = 1600, h = 1000) {
     if (sub) { g.font = '500 18px "Bricolage Grotesque", Arial, sans-serif'; g.fillStyle = '#52565A'; g.fillText(sub, x, y + 13); }
   }
   camera.position.copy(posAbans);
-  renderer.setPixelRatio(pr); renderer.setSize(abans.x, abans.y, false);
-  camera.aspect = abans.x / abans.y; camera.updateProjectionMatrix(); brut = true;
+  renderer.setPixelRatio(pr); encaixa();
   return c.toDataURL('image/jpeg', .88);
 }
 
@@ -1478,16 +1988,16 @@ function fesPdf(r, jpeg, correu) {
   for (const [nom, n] of r.linies) {
     const ls = trenca(nom, 9.5, ampCol - 70);
     ls.forEach((l, i) => { text(l, cx2, yd - i * 12, 9.5); });
-    text(n ? eur(n) : I18N.t('Incluido'), W - M, yd, 9.5, { negreta: true, dreta: true });
+    text(typeof n === 'string' ? n : n ? eur(n) : I18N.t('Incluido'), W - M, yd, 9.5, { negreta: true, dreta: true });
     yd -= ls.length * 12 + 4;
     linia(cx2, yd + 1, W - M, yd + 1, '#DBDEE1', .5); yd -= 13;
   }
   yd -= 6;
-  text($('.pn-preu-etiqueta').textContent.trim(), cx2, yd, 9, { col: '#52565A' }); yd -= 30;
-  text(eur(r.total), cx2, yd, 28, { negreta: true, col: '#622F26' });
+  text(I18N.t('Precio orientativo, IVA incluido'), cx2, yd, 9, { col: '#52565A' }); yd -= 26;
+  text(r.forq, cx2, yd, 20, { negreta: true, col: '#622F26' });
   // Peu
   linia(M, 74, W - M, 74);
-  trenca(I18N.t('Lo que no está en esta lista no se cobra. Antes de firmar venimos a tu casa a medir, y si todo cuadra, firmamos este precio.'), 8.5, amp).forEach((l, i) => text(l, M, 60 - i * 11, 8.5, { col: '#52565A' }));
+  trenca(I18N.t('Precio orientativo. Antes de firmar venimos a tu casa a medir y te damos el precio final por escrito.'), 8.5, amp).forEach((l, i) => text(l, M, 60 - i * 11, 8.5, { col: '#52565A' }));
 
   // Muntatge dels objectes
   const parts = [], offsets = [];
@@ -1575,11 +2085,15 @@ formPdf.addEventListener('submit', async e => {
 
 /* ── WhatsApp: el número és un secret del servidor ── */
 const errWa = $('[data-error-wa]');
-$('[data-whatsapp]').addEventListener('click', async () => {
+function missatgeWhatsApp(r = resumDisseny()) {
+  return I18N.t('Hola, he diseñado mi reforma en vuestra web: {obra}. {detall}. Precio orientativo: {preu}. ¿Podemos hablar?',
+    { obra: r.modeNom, detall: r.files.map(f => `${f[0]}: ${f[1]}`).join('; '), preu: r.forq });
+}
+$$('[data-whatsapp]').forEach(boto => boto.addEventListener('click', async () => {
   errWa.hidden = true;
   const r = resumDisseny();
-  const missatge = I18N.t('Hola, he diseñado mi reforma en vuestra web: {obra}. {detall}. Precio: {preu}. ¿Podemos hablar?',
-    { obra: r.modeNom, detall: r.files.map(f => `${f[0]}: ${f[1]}`).join('; '), preu: eur(r.total) });
+  const missatge = missatgeWhatsApp(r);
+  if (boto.classList.contains('pn-wa-mini')) { $('[data-preu]').classList.add('obert'); $('[data-preu-obre]').setAttribute('aria-expanded', 'true'); }
   const finestra = window.open('', '_blank');          // s'obre ara, amb el clic, perquè no la bloquegin
   try {
     const d = await envia(dadesServidor(r, { accio: 'whatsapp' }));
@@ -1591,6 +2105,12 @@ $('[data-whatsapp]').addEventListener('click', async () => {
     if (finestra) finestra.close();
     errWa.hidden = false;
   }
+}));
+/* Mòbil: la barra de preu s'obre amb la nota, el desglossament i la crida */
+$('[data-preu-obre]').addEventListener('click', e => {
+  const obert = $('[data-preu]').classList.toggle('obert');
+  e.currentTarget.setAttribute('aria-expanded', String(obert));
+  if (obert) $('[data-desg]').open = true;
 });
 
 
@@ -1610,6 +2130,7 @@ function refresca() { if (plaAra) plaAra._brut = true; pintaPanell(); brut = tru
 
 // Les mostres de material (llenços de 512 px) es dibuixen quan el fil queda lliure: abans era 1 s de bloqueig en mòbil
 pintaMostres();
+pintaPreusOpcions();
 preparaSetmanes();
 sincronitzaZones();
 /* La maqueta: Three.js i l'escena es preparen quan la pàgina ja s'ha pintat. Mentrestant (i si WebGL
@@ -1638,6 +2159,7 @@ async function carrega3D() {
   if (st.activa) obreEditor(st.activa);
   if (dins) obreInterior();
   refresca();
+  pinta = true; brut = true;
 }
 const quanLliure = window.requestIdleCallback ? f => requestIdleCallback(f, { timeout: 700 }) : f => setTimeout(f, 200);
 if (document.readyState === 'complete') quanLliure(carrega3D);
@@ -1701,6 +2223,7 @@ Object.entries(forms).forEach(([clau, f]) => {
     const z = st.zones.get(st.activa);
     if (!z) return;
     if (e.target.name === 'm2') ajustaMinims(clau, true);
+    const totalAbans = calcula().total;
     const v = llegeixForm(clau), abans = z.opts.m2;
     if (z.tipus === 'pasillo') delete v.m2;
     z.opts = { ...z.opts, ...v };
@@ -1708,10 +2231,55 @@ Object.entries(forms).forEach(([clau, f]) => {
     if (z.opts.m2 !== abans) nouObjectiu();
     aplicaMaterials();
     refrescaInterior();
+    const nom = e.target.name === 'm2' ? `${I18N.t('Superficie')}: ${fmtNum(z.opts.m2)} m²`
+      : e.target.name === 'setmana' ? null : `${nomGrup(clau, e.target.name)}: ${nomValor(clau, e.target.name, z.opts[e.target.name])}`;
+    if (nom) ultimCanvi = { delta: calcula().total - totalAbans, nom };
+    refresca();
+  });
+  f.addEventListener('click', e => {
+    const peca = e.target.closest('[data-peca]');
+    if (peca) { obrePart(clau, peca.dataset.peca); return; }
+    const b = e.target.closest('[data-estil]');
+    const z = b && st.zones.get(st.activa);
+    if (!z) return;
+    const totalAbans = calcula().total;
+    z.opts = { ...z.opts, ...ESTILS[clau][b.dataset.estil] };
+    escriuForm(clau, z.opts);
+    aplicaMaterials();
+    refrescaInterior();
+    ultimCanvi = { delta: calcula().total - totalAbans, nom: $('b', b).textContent.trim() };
     refresca();
   });
 });
 $('[data-dins]').addEventListener('click', obreInterior);
+/* Controls sobre el 3D (peça 16): dia/nit, «Antes» mentre es prem, girar sola, vista inicial i «Ver toda…» */
+$$('[data-llum]').forEach(b => b.addEventListener('click', () => {
+  st.llum = b.dataset.llum;
+  $$('[data-llum]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  aplicaLlum();
+}));
+const elAbans = $('[data-abans]');
+elAbans.addEventListener('pointerdown', e => { e.preventDefault(); elAbans.setPointerCapture?.(e.pointerId); posaAbans(true); });
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => elAbans.addEventListener(t, () => posaAbans(false)));
+elAbans.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); posaAbans(true); } });
+elAbans.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') posaAbans(false); });
+elAbans.addEventListener('contextmenu', e => e.preventDefault());
+$('[data-gir]').addEventListener('click', () => posaGir(!st.gir));
+$('[data-reinicia]').addEventListener('click', reinicia);
+$('[data-tota]').addEventListener('click', () => { if (renderer) posa(vistaActual()); $('[data-tota]').hidden = true; });
+if (QUIET) $('[data-gir]').hidden = true;
+/* Clicar al 3D: obre la part al panell; al mòbil, el panell baixa fins a la part */
+function obrePartDes3D(clau, part, punt) {
+  obrePart(clau, part, false);
+  enfocaPart(part, punt);
+  portaALaVista($(`[data-part="${part}"]`, forms[clau]));
+}
+/* La part oberta, a la vista: al mòbil, sota el 3D enganxat; a l'escriptori, dins del panell */
+function portaALaVista(fs) {
+  if (!fs) return;
+  if (innerWidth <= 860) scrollTo({ top: fs.getBoundingClientRect().top + scrollY - visor.offsetHeight - 12, behavior: QUIET ? 'auto' : 'smooth' });
+  else fs.scrollIntoView({ block: 'nearest', behavior: QUIET ? 'auto' : 'smooth' });
+}
 $('[data-torna]').addEventListener('click', tancaInterior);
 elDies.addEventListener('change', () => pintaPanell());
 
@@ -1722,6 +2290,8 @@ document.addEventListener('idioma-canviat', () => {
   const ara = $$('input[name="setmana"]', elDies)[i];
   if (ara && !ara.disabled) ara.checked = true;
   if (plaAra) plaAra._brut = true;
+  pintaPreusOpcions();
+  for (const clau of ['cocina', 'bano']) if (!forms[clau].hidden) construeixGraella(clau);
   pintaPanell();
   brut = true;
 });
@@ -1742,6 +2312,6 @@ $$('[data-sol-boto]').forEach(b => b.addEventListener('click', () => { if (b.dat
 
 // Entrada des de les pàgines de servei: ?tipo=cocina|bano (l'script del <head> ja ho ha marcat a <html>), ?tipo=casa
 const entrada = location.hash.slice(1) || new URLSearchParams(location.search).get('tipo');
-if (unaSola()) { triaSol(unaSola()); $('.pn-pista').textContent = I18N.t('Arrastra para girarla'); }
+if (unaSola()) { triaSol(unaSola()); $('.pn-pista').textContent = I18N.t('Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.'); }
 else if (entrada === 'casa' || entrada === 'integral') { for (const z of st.zones.values()) z.on = true; refresca(); }
 else pintaPanell();
