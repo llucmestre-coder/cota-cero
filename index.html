@@ -17,7 +17,7 @@
   <link rel="preload" href="assets/fonts/BricolageGrotesque-0.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/fonts.css?v=20261021c">
   <link rel="stylesheet" href="css/styles.css?v=20261021c">
-  <link rel="stylesheet" href="css/sala.css?v=20261021c">
+  <link rel="stylesheet" href="css/sala.css?v=20261022d">
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -92,6 +92,12 @@
              El retall vertical és el centre de la foto, que és el que el cover ja ensenyava: l'enquadrament no canvia. -->
         <div class="sala-fotos">
           <picture><source media="(max-aspect-ratio: 3/4)" srcset="assets/img/sala/f0-v810.webp 810w, assets/img/sala/f0-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img class="sala-base" src="assets/img/sala/f0-1920.webp" srcset="assets/img/sala/f0-960.webp 960w, assets/img/sala/f0-1920.webp 1920w, assets/img/sala/f0-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" fetchpriority="high"></picture>
+          <!-- Els estats del mig (1-5) no es baixen fins que js/sala.js munta l'escena (data-srcset): no competeixen amb el titular -->
+          <div class="sala-capa" data-fase="1"><picture><source media="(max-aspect-ratio: 3/4)" data-srcset="assets/img/sala/f1-v810.webp 810w, assets/img/sala/f1-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img data-srcset="assets/img/sala/f1-960.webp 960w, assets/img/sala/f1-1920.webp 1920w, assets/img/sala/f1-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
+          <div class="sala-capa" data-fase="2"><picture><source media="(max-aspect-ratio: 3/4)" data-srcset="assets/img/sala/f2-v810.webp 810w, assets/img/sala/f2-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img data-srcset="assets/img/sala/f2-960.webp 960w, assets/img/sala/f2-1920.webp 1920w, assets/img/sala/f2-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
+          <div class="sala-capa" data-fase="3"><picture><source media="(max-aspect-ratio: 3/4)" data-srcset="assets/img/sala/f3-v810.webp 810w, assets/img/sala/f3-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img data-srcset="assets/img/sala/f3-960.webp 960w, assets/img/sala/f3-1920.webp 1920w, assets/img/sala/f3-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
+          <div class="sala-capa" data-fase="4"><picture><source media="(max-aspect-ratio: 3/4)" data-srcset="assets/img/sala/f4-v810.webp 810w, assets/img/sala/f4-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img data-srcset="assets/img/sala/f4-960.webp 960w, assets/img/sala/f4-1920.webp 1920w, assets/img/sala/f4-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
+          <div class="sala-capa" data-fase="5"><picture><source media="(max-aspect-ratio: 3/4)" data-srcset="assets/img/sala/f5-v810.webp 810w, assets/img/sala/f5-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img data-srcset="assets/img/sala/f5-960.webp 960w, assets/img/sala/f5-1920.webp 1920w, assets/img/sala/f5-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
           <div class="sala-capa" data-fase="6"><picture><source media="(max-aspect-ratio: 3/4)" srcset="assets/img/sala/f6-v810.webp 810w, assets/img/sala/f6-v1215.webp 1215w" sizes="75vh" width="1215" height="1620"><img src="assets/img/sala/f6-1920.webp" srcset="assets/img/sala/f6-960.webp 960w, assets/img/sala/f6-1920.webp 1920w, assets/img/sala/f6-2880.webp 2880w" sizes="(max-aspect-ratio: 16/9) 178vh, 100vw" alt="" width="1920" height="1080" decoding="async"></picture></div>
         </div>
         </div>
@@ -122,33 +128,19 @@
       <div class="sala-intro-espai" aria-hidden="true"></div>
 
       <div class="sala-fases">
-        <!-- Els passos (en Lluc, 16/10/2026): un fons blanc puja sobre la sala en runes i s'hi queda; els 7 passos
-             apareixen d'esquerra a dreta sobre una línia a mesura que es baixa, i al final es veuen tots junts.
-             Després el blanc puja i descobreix la sala acabada (js/sala.js). -->
-        <section class="obra" aria-labelledby="obra-titol">
-          <div class="obra-fixe">
-            <header class="obra-cap">
-              <h2 id="obra-titol">Así es una reforma con nosotros</h2>
-              <p class="obra-nota">Plazos orientativos de una reforma integral de unos 70&nbsp;m².</p>
-            </header>
-            <ol class="obra-llista">
-              <li class="obra-pas"><p class="obra-quan">Día 1</p><h3>Visita y medición</h3><p>Lo medimos todo con láser. Ningún precio a ojo.</p></li>
-              <li class="obra-pas"><p class="obra-quan">En cinco días</p><h3>Plano y precio cerrado</h3><p>Partida por partida. Lo que no está escrito no se cobra.</p></li>
-              <li class="obra-pas"><p class="obra-quan">Semana 1</p><h3>Derribo y obra limpia</h3><p>Escalera protegida y escombro fuera cada tarde.</p></li>
-              <li class="obra-pas"><p class="obra-quan">Semanas 2 y 3</p><h3>Instalaciones nuevas</h3><p>Luz y agua nuevas, con boletín y fotos de todo.</p></li>
-              <li class="obra-pas"><p class="obra-quan">Semanas 3 a 5</p><h3>Paredes, techo y ventanas</h3><p>Paredes a nivel y un parte de obra cada viernes.</p></li>
-              <li class="obra-pas"><p class="obra-quan">Semanas 6 y 7</p><h3>Suelo y acabados</h3><p>Lo que elegiste. Ningún cambio sin precio.</p></li>
-              <li class="obra-pas"><p class="obra-quan">Semana 8</p><h3>Entrega y garantía</h3><p>Lo repasamos contigo y te damos la garantía firmada.</p></li>
-            </ol>
-          </div>
-        </section>
-        <div class="sala-final">
-          <img class="sala-final-foto" src="assets/img/sala/f6-1920.webp" srcset="assets/img/sala/f6-960.webp 960w, assets/img/sala/f6-1920.webp 1920w" sizes="100vw" alt="El mismo salón ya reformado: paredes lisas, suelo de roble en espiga y muebles." width="1920" height="1080" loading="lazy" decoding="async">
-          <div class="sala-final-text">
-            <p class="sala-final-frase">Así te la devolvemos.</p>
-            <div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div>
-          </div>
-        </div>
+        <!-- L'obra es construeix amb l'scroll (en Lluc, 21-22/10/2026; peces 13 i 15): la sala queda fixa, cada fase en fon
+             la foto següent i el seu text canvia sempre al mateix lloc (js/sala.js). Sense terminis: explica què fem.
+             Sense moviment: llista amb la foto de cada fase. -->
+        <h2 id="obra-titol" class="fases-titol">Así hacemos una reforma</h2>
+        <ol class="fases-llista" aria-labelledby="obra-titol">
+          <li class="fase" data-fase="0"><img class="fase-foto" src="assets/img/sala/f0-960.webp" srcset="assets/img/sala/f0-960.webp 960w, assets/img/sala/f0-1920.webp 1920w" sizes="(max-width: 760px) 100vw, 58vw" alt="El salón en obra: suelo levantado, escombro y sacos de runa." width="1920" height="1080" loading="lazy" decoding="async"><div class="fase-targeta"><h3>Derribo y obra limpia</h3><p>Protegemos la escalera y el escombro sale de casa cada tarde.</p></div></li>
+          <li class="fase" data-fase="1"><img class="fase-foto" src="assets/img/sala/f1-960.webp" srcset="assets/img/sala/f1-960.webp 960w, assets/img/sala/f1-1920.webp 1920w" sizes="(max-width: 760px) 100vw, 58vw" alt="Las paredes en bruto, con las rozas de la instalación nueva." width="1920" height="1080" loading="lazy" decoding="async"><div class="fase-targeta"><h3>Instalaciones nuevas</h3><p>Luz y agua nuevas por dentro de la pared, con boletín y fotos de todo.</p></div></li>
+          <li class="fase" data-fase="2"><img class="fase-foto" src="assets/img/sala/f2-960.webp" srcset="assets/img/sala/f2-960.webp 960w, assets/img/sala/f2-1920.webp 1920w" sizes="(max-width: 760px) 100vw, 58vw" alt="Paredes y techo ya lisos y pintados, con el suelo de cemento." width="1920" height="1080" loading="lazy" decoding="async"><div class="fase-targeta"><h3>Paredes y techo</h3><p>Lisos, a nivel y pintados. Cada viernes te mandamos un parte de obra.</p></div></li>
+          <li class="fase" data-fase="3"><img class="fase-foto" src="assets/img/sala/f3-960.webp" srcset="assets/img/sala/f3-960.webp 960w, assets/img/sala/f3-1920.webp 1920w" sizes="(max-width: 760px) 100vw, 58vw" alt="El suelo de roble en espiga ya colocado." width="1920" height="1080" loading="lazy" decoding="async"><div class="fase-targeta"><h3>El suelo</h3><p>El que elegiste, colocado pieza a pieza.</p></div></li>
+          <li class="fase" data-fase="4"><img class="fase-foto" src="assets/img/sala/f4-960.webp" srcset="assets/img/sala/f4-960.webp 960w, assets/img/sala/f4-1920.webp 1920w" sizes="(max-width: 760px) 100vw, 58vw" alt="Apliques de pared y aire acondicionado instalados." width="1920" height="1080" loading="lazy" decoding="async"><div class="fase-targeta"><h3>Luz y clima</h3><p>Puntos de luz donde los necesitas y aire acondicionado sin tubos a la vista.</p></div></li>
+          <li class="fase" data-fase="5"><img class="fase-foto" src="assets/img/sala/f5-960.webp" srcset="assets/img/sala/f5-960.webp 960w, assets/img/sala/f5-1920.webp 1920w" sizes="(max-width: 760px) 100vw, 58vw" alt="El salón con los muebles, listo para entregar." width="1920" height="1080" loading="lazy" decoding="async"><div class="fase-targeta"><h3>Entrega</h3><p>Lo repasamos contigo, habitación por habitación, y te damos <span class="cinta">la garantía por escrito</span>.</p></div></li>
+          <li class="fase" data-fase="6"><img class="fase-foto" src="assets/img/sala/f6-960.webp" srcset="assets/img/sala/f6-960.webp 960w, assets/img/sala/f6-1920.webp 1920w" sizes="(max-width: 760px) 100vw, 58vw" alt="El mismo salón ya reformado: paredes lisas, suelo de roble en espiga y muebles." width="1920" height="1080" loading="lazy" decoding="async"><div class="fase-targeta"><h3>Así te la devolvemos</h3><p>Cuéntanos qué quieres hacer y te damos una horquilla de precio orientativa.</p><div class="botons"><a class="btn btn-principal" href="presupuesto.html">Calcula tu presupuesto</a></div></div></li>
+        </ol>
         <div class="sala-final-espai" aria-hidden="true"></div>
       </div>
     </section>
@@ -470,7 +462,7 @@
   </a>
 <script src="js/traduccions.js?v=20261021c" defer></script>
 <script src="js/main.js?v=20261021c" defer></script>
-<script src="js/sala.js?v=20261021c" defer></script>
+<script src="js/sala.js?v=20261022c" defer></script>
 <script src="js/portes.js?v=20261021c" defer></script>
 <script src="js/galeria.js?v=20261021c" defer></script>
 </body>
