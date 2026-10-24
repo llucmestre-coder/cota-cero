@@ -1,8 +1,8 @@
 // POST /api/disseny — el panell «Diseña tu reforma».
 //  · accio "correu": el navegador fa el PDF i l'envia en base64; aquí s'envia per Brevo a l'adreça escrita
 //    (adjunt cota-cero-reforma.pdf), es desa el contacte (D1, taula leads) i s'avisa el negoci.
-//    Al cos del correu no hi va cap text de l'usuari: només frases fixes i la forquilla calculada aquí.
-//  · accio "pdf": el mateix sense enviar res a l'usuari (versions velles del panell, que descarregaven el PDF).
+//    Al cos del correu no hi va cap text de l'usuari: només frases fixes, la forquilla calculada aquí i l'enllaç al
+//    disseny (`enllac`, presupuesto.html#d=…), que només s'accepta si és d'aquest mateix origen i té el format esperat.
 //  · accio "whatsapp": torna el número (secret WHATSAPP) per obrir el xat amb el disseny.
 // Límits a KV (CODIS): per IP a totes les accions, un de més estricte per IP a "correu" i un
 // enviament per adreça cada hora (la clau és un hash del correu, no el correu).
@@ -14,6 +14,18 @@ const MAX_CORREUS_PER_IP = 5;
 const MAX_PDF = 3 * 1024 * 1024;                    // 3 MB de PDF
 const MAX_B64 = Math.ceil(MAX_PDF / 3) * 4;         // el mateix, en base64
 const FORQ = [0.95, 1.10];                          // la forquilla del panell (js/panell.js)
+const MAX_ENLLAC = 2500;                            // mida màxima de l'enllaç al disseny (el panell el limita a ~2.000)
+
+// L'enllaç al disseny: del mateix origen que la petició, /presupuesto.html i un #d= en base64url. Es torna a
+// muntar a partir de les parts validades; qualsevol altra cosa, o massa llarga, és ''.
+function enllacValid(brut, request) {
+  if (typeof brut !== 'string' || brut.length > MAX_ENLLAC) return '';
+  let u, propi;
+  try { u = new URL(brut); propi = new URL(request.url).origin; } catch { return ''; }
+  const m = /^#d=([A-Za-z0-9_-]{1,2300})$/.exec(u.hash);
+  if (u.origin !== propi || u.pathname !== '/presupuesto.html' || u.search || u.username || u.password || !m) return '';
+  return propi + '/presupuesto.html#d=' + m[1];
+}
 
 function json(dades, status = 200) {
   return new Response(JSON.stringify(dades), {
@@ -50,11 +62,12 @@ const CORREU = {
   es: {
     obra: { cocina: 'la reforma de tu cocina', bano: 'la reforma de tu baño', integral: 'la reforma de tu piso' },
     assumpte: (f) => 'Tu reforma con Cota Cero: ' + f,
-    text: (obra, f) => [
+    text: (obra, f, enllac) => [
       'Hola:',
       '',
       'Aquí tienes en PDF ' + obra + ', tal como la has diseñado en nuestra web.',
       'Precio orientativo: ' + f + ', IVA incluido. El precio final te lo damos por escrito después de ver tu casa.',
+      ...(enllac ? ['', 'Vuelve a tu diseño cuando quieras, con todo lo que elegiste:', enllac] : []),
       '',
       'Si quieres comentarlo, responde a este correo.',
       '',
@@ -64,11 +77,12 @@ const CORREU = {
   ca: {
     obra: { cocina: 'la reforma de la teva cuina', bano: 'la reforma del teu bany', integral: 'la reforma del teu pis' },
     assumpte: (f) => 'La teva reforma amb Cota Cero: ' + f,
-    text: (obra, f) => [
+    text: (obra, f, enllac) => [
       'Hola,',
       '',
       'Aquí tens en PDF ' + obra + ', tal com l\'has dissenyada a la nostra web.',
       'Preu orientatiu: ' + f + ', IVA inclòs. El preu final te\'l donem per escrit després de veure casa teva.',
+      ...(enllac ? ['', 'Torna al teu disseny quan vulguis, amb tot el que vas triar:', enllac] : []),
       '',
       'Si ho vols comentar, respon aquest correu.',
       '',
@@ -78,11 +92,12 @@ const CORREU = {
   en: {
     obra: { cocina: 'your kitchen renovation', bano: 'your bathroom renovation', integral: 'your home renovation' },
     assumpte: (f) => 'Your renovation with Cota Cero: ' + f,
-    text: (obra, f) => [
+    text: (obra, f, enllac) => [
       'Hi,',
       '',
       'Here is ' + obra + ' as a PDF, just as you designed it on our website.',
       'Approximate price: ' + f + ', VAT included. We give you the final price in writing after we visit your home.',
+      ...(enllac ? ['', 'Come back to your design any time, with everything you picked:', enllac] : []),
       '',
       'If you want to talk it over, just reply to this email.',
       '',
@@ -108,7 +123,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
   if (!(await compta(env, 'disseny:' + ip, MAX_PER_IP))) return json({ ok: false, error: 'limit' }, 429);
 
   if (d.accio === 'whatsapp') return json({ ok: true, whatsapp: env.WHATSAPP });
-  if (d.accio !== 'pdf' && d.accio !== 'correu') return json({ ok: false, error: 'accio' }, 400);
+  if (d.accio !== 'correu') return json({ ok: false, error: 'accio' }, 400);
 
   const correu = net(d.correu, 254).toLowerCase();
   if (!/^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,24}$/.test(correu)) return json({ ok: false, error: 'correu' }, 400);
@@ -118,10 +133,11 @@ export async function onRequestPost({ request, env, waitUntil }) {
   const idioma = ['es', 'ca', 'en'].includes(d.idioma) ? d.idioma : 'es';
   const files = Array.isArray(d.files) ? d.files.slice(0, 20).map((f) => [net(f && f[0], 80), net(f && f[1], 160)]) : [];
   const resum = files.map((f) => f[0] + ': ' + f[1]).join(' | ').slice(0, 1500);
+  const enllac = enllacValid(d.enllac, request);
 
   // Correu a l'usuari. L'adjunt ha de ser un PDF («%PDF» = «JVBER» en base64) de 3 MB com a molt.
   let enviat = false;
-  if (d.accio === 'correu') {
+  {
     const pdf = typeof d.pdf === 'string' ? d.pdf.replace(/\s/g, '') : '';
     if (pdf.length > MAX_B64) return json({ ok: false, error: 'mida' }, 413);
     if (!pdf.startsWith('JVBER') || !/^[A-Za-z0-9+/]+={0,2}$/.test(pdf)) return json({ ok: false, error: 'pdf' }, 400);
@@ -137,7 +153,7 @@ export async function onRequestPost({ request, env, waitUntil }) {
         sender: { name: 'Cota Cero Reformas', email: env.BREVO_SENDER },
         to: [{ email: correu }],
         subject: T.assumpte(f),
-        textContent: T.text(T.obra[mode], f).join('\n'),
+        textContent: T.text(T.obra[mode], f, enllac).join('\n'),
         attachment: [{ name: 'cota-cero-reforma.pdf', content: pdf }],
       });
       enviat = res.ok;
@@ -148,20 +164,19 @@ export async function onRequestPost({ request, env, waitUntil }) {
     if (!enviat) await env.CODIS.delete(clauAdreca);   // que ho pugui tornar a provar
   }
 
-  // Lead (D1). Es desa el total del panell (mínim = màxim); la forquilla que veu l'usuari (−5 % / +10 %) surt d'aquest total.
+  // Lead (D1). L'enllaç al disseny va al final de «acabats» (és TEXT, sense límit): no cal cap migració. Es desa el total del panell (mínim = màxim); la forquilla que veu l'usuari (−5 % / +10 %) surt d'aquest total.
   try {
     await env.LEADS.prepare(
       'INSERT INTO leads (correu, idioma, tipo, m2, inclou, acabats, inici, minim, maxim) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    ).bind(correu, idioma, 'panel-' + mode, m2, net(d.paquete, 40), resum, net(d.inici, 40), total, total).run();
+    ).bind(correu, idioma, 'panel-' + mode, m2, net(d.paquete, 40), resum + (enllac ? '\nEnlace: ' + enllac : ''), net(d.inici, 40), total, total).run();
   } catch (e) {
     console.error('D1 leads:', e && e.message);
   }
 
   // Avís al negoci (el de sempre)
   const NOMS = { cocina: 'Cocina', bano: 'Baño', integral: 'Piso entero' };
-  const que = d.accio === 'pdf' ? 'Alguien ha descargado su diseño en PDF desde el panel de Cota Cero.'
-    : enviat ? 'Alguien ha pedido su diseño en PDF por correo y se lo hemos mandado.'
-    : 'Alguien ha pedido su diseño en PDF por correo, pero Brevo no lo ha enviado (en la web se le ofrece descargarlo).';
+  const que = enviat ? 'Alguien ha pedido su diseño en PDF por correo y se lo hemos mandado.'
+    : 'Alguien ha pedido su diseño en PDF por correo, pero Brevo no lo ha enviado (en la web se le ofrece el enlace a su diseño).';
   waitUntil(brevo(env, {
     sender: { name: 'Panel Cota Cero', email: env.BREVO_SENDER },
     to: [{ email: env.BREVO_SENDER }],
@@ -173,11 +188,12 @@ export async function onRequestPost({ request, env, waitUntil }) {
       'Correo: ' + correu,
       ...files.map((f) => f[0] + ': ' + f[1]),
       'Precio mostrado: ' + euros(total, 'es'),
+      ...(enllac ? ['Enlace al diseño: ' + enllac] : []),
       'Idioma de la web: ' + idioma,
     ].join('\n'),
   }).catch(() => {}));
 
-  if (d.accio === 'correu' && !enviat) return json({ ok: false, error: 'enviament' }, 502);
+  if (!enviat) return json({ ok: false, error: 'enviament' }, 502);
   return json({ ok: true });
 }
 

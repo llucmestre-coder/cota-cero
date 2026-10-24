@@ -23,6 +23,9 @@
   --marca-fosc:   var(--argila-900);
   --accent:       var(--mantega-100);  /* tots els botons (text --text, 15,2:1) i la cinta */
   --accent-hover: var(--mantega-200);
+  --boto:         #E7D472;             /* botons de mantega (en Lluc, 25/10/2026: entremig de mantega-200 i 300; sense contorn; text 11,8:1) */
+  --boto-hover:   #D6C150;
+  --preu-fons:    var(--mantega-50);   /* línia i barra del preu del panell */
   --blanc:        #FFFFFF;
   --error:       #A3291F;
   --whatsapp:    #157A43;   /* text blanc 5,4:1 (#1F8F4E feia 4,1) */
@@ -107,8 +110,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
   transition: background-color .2s, color .2s, border-color .2s;
 }
 .btn:disabled { opacity: .6; cursor: progress; }
-.btn-principal { background: var(--accent); color: var(--text); border-color: var(--text); }   /* tots els botons de mantega; sobre clar, vora de grafit (en Lluc, 21/10/2026) */
-.btn-principal:hover { background: var(--accent-hover); }
+.btn-principal { background: var(--boto); color: var(--text); border-color: transparent; }   /* tots els botons de mantega, sense contorn (en Lluc, 25/10/2026; desfà la vora de grafit del 21/10) */
+.btn-principal:hover { background: var(--boto-hover); }
 .btn-linia { border-color: var(--text); color: var(--text); background: transparent; }
 .btn-linia:hover { background: var(--bloc-fosc); color: var(--fons); }
 .fosc .btn-principal { border-color: transparent; }
@@ -478,7 +481,7 @@ fieldset.camp { border: 0; margin: 0; padding: 0; }
 /* ── v2: fotos i seccions noves (15/09/2026). Les bandes fosques (abans --nit) ja són --bloc-fosc. */
 .fosc-calid { background: var(--bloc-fosc); color: var(--fons); }
 .fosc-calid .intro { color: var(--grafit-300); }
-.fosc-calid .btn-principal { background: var(--accent); color: var(--text); }
+.fosc-calid .btn-principal { background: var(--boto); color: var(--text); }
 .fosc-calid .btn-principal:hover { background: var(--blanc); }
 .fosc-calid :focus-visible { outline-color: var(--accent); }
 .fosc-calid .projecte-tipus { color: var(--accent); }
@@ -569,7 +572,7 @@ fieldset.camp { border: 0; margin: 0; padding: 0; }
 .hero-foto.servei h1 { font-size: var(--t-xl); max-width: 20ch; }
 .hero-foto .hero-sub { margin: 1.4rem auto 0; max-width: 38rem; color: var(--grafit-50); }
 .hero-foto .botons { justify-content: center; }
-.hero-foto .btn-principal { background: var(--accent); color: var(--text); }
+.hero-foto .btn-principal { background: var(--boto); color: var(--text); }
 .hero-foto .btn-principal:hover { background: var(--blanc); }
 .hero-foto .btn-linia { border-color: rgba(255,255,255,.85); color: var(--blanc); }
 .hero-foto .btn-linia:hover { background: var(--blanc); color: var(--text); }
@@ -612,7 +615,7 @@ fieldset.camp { border: 0; margin: 0; padding: 0; }
 /* Contacte: la targeta del costat també en fosc càlid */
 .despres { background: var(--bloc-fosc); color: var(--fons); padding: clamp(1.5rem, 3vw, 2.25rem); border-radius: 10px; }
 .despres p { color: var(--grafit-300); }
-.despres .btn-principal { background: var(--accent); color: var(--text); margin-top: 1.25rem; }
+.despres .btn-principal { background: var(--boto); color: var(--text); margin-top: 1.25rem; }
 .despres .btn-principal:hover { background: var(--blanc); }
 .despres .cta-tel { color: var(--accent); }
 

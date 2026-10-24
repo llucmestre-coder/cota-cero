@@ -65,8 +65,8 @@
 .pn-pastilla button[aria-pressed="true"] { background: var(--bloc-fosc); color: var(--blanc); }
 .pn-pastilla button:focus-visible, .pn-boto-3d:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
 .pn-pastilla .pn-ico { width: 2.4rem; padding: 0; justify-content: center; }
-.pn-pastilla .pn-abans { background: var(--accent); color: var(--text); box-shadow: inset 0 0 0 1px var(--text); user-select: none; -webkit-user-select: none; touch-action: none; }
-.pn-pastilla .pn-abans:hover, .pn-pastilla .pn-abans[aria-pressed="true"] { background: var(--accent-hover); color: var(--text); }
+.pn-pastilla .pn-abans { background: var(--boto); color: var(--text); user-select: none; -webkit-user-select: none; touch-action: none; }
+.pn-pastilla .pn-abans:hover, .pn-pastilla .pn-abans[aria-pressed="true"] { background: var(--boto-hover); color: var(--text); }
 .pn-pastilla[hidden], .pn-boto-3d[hidden] { display: none; }
 
 /* A baix a l'esquerra: tornar a tota la cuina (o al pis) i la pista */
@@ -75,8 +75,8 @@
   display: inline-flex; align-items: center; gap: .35rem; height: 2.75rem; padding: 0 1rem 0 .75rem;
   border-radius: 999px; cursor: pointer; font: 600 var(--t-s)/1 var(--f-titol); color: var(--text);
 }
-.pn-boto-3d { background: var(--accent); border-color: var(--text); }
-.pn-boto-3d:hover { background: var(--accent-hover); }
+.pn-boto-3d { background: var(--boto); border: 0; }
+.pn-boto-3d:hover { background: var(--boto-hover); }
 .pn-boto-3d svg { width: 1.1rem; height: 1.1rem; }
 .pn-pista {
   margin: 0; padding: .4rem .65rem; border-radius: 6px; background: rgb(249 250 252 / .82);
@@ -88,6 +88,7 @@
 .pn-preu {
   position: absolute; z-index: 4; top: var(--pn-vora); left: var(--pn-vora);
   width: min(25rem, calc(100% - var(--pn-amp) - var(--pn-vora) * 4));
+  background: var(--preu-fons); backdrop-filter: none;   /* fons propi, el mateix a l'ordinador i al mòbil (en Lluc, 25/10/2026) */
   display: flex; flex-direction: column; border-radius: var(--pn-radi); overflow: hidden;
   max-height: calc(100% - var(--pn-vora) * 2 - 4rem);
 }
@@ -423,10 +424,9 @@
   font: 600 .8125rem/1 var(--f-titol);
 }
 .pn-comptador button {
-  width: 2rem; height: 2rem; border-radius: 50%; border: 1px solid var(--text); background: var(--accent);   /* botó de mantega */
+  width: 2rem; height: 2rem; border-radius: 50%; border: 0; background: var(--boto);   /* botó de mantega */
   font: 500 1.1rem/1 var(--f-titol); color: var(--text); cursor: pointer;
 }
-.pn-comptador button:hover:not(:disabled) { border-color: var(--text); }
 .pn-comptador button:disabled { opacity: .35; cursor: not-allowed; }
 .pn-comptador button:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
 .pn-comptador output { min-width: 1.4ch; text-align: center; font-size: 1rem; font-variant-numeric: tabular-nums; }
@@ -496,11 +496,15 @@
   content: ""; flex: none; width: 1.15rem; height: 1.15rem; margin-top: .05rem; border-radius: 50%;
   background: var(--whatsapp) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.6 2.6L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat;
 }
-.pn-pla-b {   /* just sota el missatge d'error, com si en fos l'última línia */
-  justify-self: start; margin-top: -.75rem; padding: .3rem 0; border: 0; background: none; cursor: pointer;
-  font: 600 .875rem/1.2 var(--f-titol); color: var(--marca); text-decoration: underline; text-underline-offset: .2em;
+/* L'enllaç al disseny quan el correu falla: camp de lectura i botó de copiar, en una fila */
+.pn-enllac { display: flex; gap: .5rem; align-items: stretch; margin-top: -.25rem; }
+.pn-enllac input {
+  flex: 1 1 auto; min-width: 0; font: 400 .8125rem/1.3 var(--f-cos); padding: 0 .75rem; min-height: 3rem;
+  border: 1.5px solid var(--vora); border-radius: var(--radi); background: var(--blanc); color: var(--text-suau);
+  text-overflow: ellipsis;
 }
-.pn-pla-b:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+.pn-enllac input:focus-visible { outline: none; border-color: var(--marca); box-shadow: 0 0 0 3px var(--accent); color: var(--text); }
+.pn-copia { flex: none; width: 10.5rem; }   /* amplada fixa: «Copiar enlace» → «Copiado» no fa saltar la fila */
 
 /* ── Mòbil: 3D enganxat a dalt, panell a sota, barra de preu fixa a baix ── */
 @media (max-width: 860px) {
@@ -539,7 +543,7 @@
   /* Preu: la mateixa línia, fixa a baix; s'obre cap amunt amb el desglossament i la crida */
   .pn-preu {
     position: fixed; z-index: 40; top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 82svh;
-    border-radius: 16px 16px 0 0; border-width: 1px 0 0; background: var(--blanc);
+    border-radius: 16px 16px 0 0; border-width: 1px 0 0; background: var(--preu-fons);
     box-shadow: 0 -10px 28px -12px rgb(22 25 27 / .35); padding-bottom: env(safe-area-inset-bottom);
   }
   .pn-preu-fila { padding-right: .75rem; }

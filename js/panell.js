@@ -2036,13 +2036,6 @@ function preparaPdf(correu) {
   }
   return { r, blob: fesPdf(r, jpeg, correu) };
 }
-function descarregaPdf({ r, blob }) {
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `cota-cero-${r.mode}-${new Date().toISOString().slice(0, 10)}.pdf`;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-}
 function enBase64(blob) {
   return new Promise((ok, ko) => {
     const lector = new FileReader();
@@ -2050,6 +2043,79 @@ function enBase64(blob) {
     lector.onerror = () => ko(lector.error);
     lector.readAsDataURL(blob);
   });
+}
+
+/* ── L'enllaç al disseny: presupuesto.html#d=<base64url d'un JSON versionat>. Només les tries (cap dada
+   personal). Format v1: { v, t: 'casa'|'cocina'|'bano', d: dormitoris, b: banys, l: 'dia'|'nit',
+   w: setmana d'inici, a: zona oberta, e: [zones al preu], z: { zona: { opció: valor } } } — de cada zona,
+   només el que difereix de l'inici. Les peces següents hi afegeixen camps i els vells s'ignoren; una versió
+   que no coneixem no es restaura. Si l'URL passa de ~2.000 caràcters, les opcions s'abreugen amb ENLLAC_CLAUS
+   (només s'hi poden afegir noms al final: l'ordre és part del format). ── */
+const ENLLAC_V = 1, ENLLAC_MAX = 2000;
+const ENLLAC_CLAUS = ['m2', 'forma', 'tipo', 'frente', 'acabado', 'tiradores', 'encimera', 'frontal', 'suelo', 'paredes', 'lamparas',
+  'grifo', 'led', 'electro', 'paquete', 'mueble', 'espejo', 'griferia', 'sueloB', 'pared', 'luces', 'inodoro', 'armario', 'ventanas'];
+const enB64u = s => btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const deB64u = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)));
+
+function estatEnllac(compacte) {
+  const z = {};
+  for (const zona of st.zones.values()) {
+    const ini = opcionsInicials(zona.tipus, zona.n), dif = {};
+    for (const k of Object.keys(zona.opts)) if (k !== 'setmana' && zona.opts[k] !== ini[k]) dif[compacte && ENLLAC_CLAUS.includes(k) ? ENLLAC_CLAUS.indexOf(k) : k] = zona.opts[k];
+    if (Object.keys(dif).length) z[zona.id] = dif;
+  }
+  const w = ($('input[name="setmana"]:checked', elDies) || {}).value;
+  return {
+    v: ENLLAC_V, ...(compacte ? { c: 1 } : {}), t: unaSola() || 'casa', d: st.dorm, b: st.banos, l: st.llum,
+    ...(w ? { w } : {}), ...(st.activa ? { a: st.activa } : {}),
+    e: [...st.zones.values()].filter(x => x.on).map(x => x.id), z,
+  };
+}
+function enllacDisseny() {
+  const base = location.origin + '/presupuesto.html#d=';
+  const llarg = base + enB64u(JSON.stringify(estatEnllac(false)));
+  return llarg.length <= ENLLAC_MAX ? llarg : base + enB64u(JSON.stringify(estatEnllac(true)));
+}
+/* Llegeix #d= i torna l'estat, o null si falta, està mal format o és d'una versió que no coneixem */
+function llegeixEnllac() {
+  const m = /^#d=([A-Za-z0-9_-]{1,6000})$/.exec(location.hash);
+  if (!m) return null;
+  try {
+    const e = JSON.parse(deB64u(m[1]));
+    return e && typeof e === 'object' && e.v === ENLLAC_V ? e : null;
+  } catch { return null; }
+}
+/* Posa l'estat llegit al panell. Cada valor es valida contra el que el formulari ofereix; el que no quadra es deixa com a l'inici. */
+function restauraEnllac(e) {
+  const compta = (n, max) => Number.isInteger(n) ? Math.max(1, Math.min(max, n)) : null;
+  st.dorm = compta(e.d, 5) ?? st.dorm; st.banos = compta(e.b, 3) ?? st.banos;
+  sincronitzaZones();
+  const on = Array.isArray(e.e) ? e.e : [];
+  for (const z of st.zones.values()) z.on = on.includes(z.id);
+  const zs = e.z && typeof e.z === 'object' ? e.z : {};
+  for (const id of Object.keys(zs)) {
+    const z = st.zones.get(id), dif = zs[id];
+    if (!z || !dif || typeof dif !== 'object') continue;
+    const ini = opcionsInicials(z.tipus, z.n), clau = FORM_DE[z.tipus];
+    for (const kk of Object.keys(dif)) {
+      const k = e.c ? (ENLLAC_CLAUS[kk] || kk) : kk, v = dif[kk];
+      if (!Object.hasOwn(ini, k)) continue;
+      if (k === 'm2') {
+        const [mn, mx, pas] = RANG[z.tipus] || [];
+        if (typeof v === 'number' && pas) z.opts.m2 = Math.min(mx, Math.max(mn, Math.round(v / pas) * pas));
+      } else if (typeof ini[k] === 'boolean') { if (typeof v === 'boolean') z.opts[k] = v; }
+      else if (typeof v === 'string' && $$(`input[name="${k}"]`, forms[clau]).some(i => i.value === v)) z.opts[k] = v;
+    }
+    const mn = MINIMS[clau];
+    if (mn && z.opts[mn[0]] === mn[1] && z.opts.m2 < mn[2]) z.opts[mn[0]] = mn[3];
+  }
+  if (e.l === 'nit' || e.l === 'dia') {
+    st.llum = e.l;
+    $$('[data-llum]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.llum === st.llum)));
+  }
+  const setm = typeof e.w === 'string' && $$('input[name="setmana"]', elDies).find(i => i.value === e.w && !i.disabled);
+  if (setm) setm.checked = true;
+  if (typeof e.a === 'string' && st.zones.has(e.a)) obreEditor(e.a);
 }
 
 function dadesServidor(r, extra) {
@@ -2068,41 +2134,51 @@ function envia(dades) {
   });
 }
 
-/* ── Finestra del PDF: el PDF es fa aquí i el servidor l'envia al correu (acció «correu»).
-   Si l'enviament falla, el mateix PDF es pot descarregar (pla B). ── */
+/* ── Finestra del correu: el PDF es fa aquí i el servidor l'envia (acció «correu») amb l'enllaç al disseny.
+   Si l'enviament falla, la finestra ensenya l'enllaç i un botó per copiar-lo. ── */
 const dialeg = $('[data-dialeg-pdf]'), formPdf = $('[data-form-pdf]');
-const botoPdf = $('[data-baixa-pdf]'), errPdf = $('[data-error-pdf]'), fetPdf = $('[data-fet-pdf]'), plaB = $('[data-pla-b]');
-const textBotoPdf = botoPdf.textContent, textErrPdf = errPdf.textContent;
-let pdfFet = null;   // l'últim PDF fet, per al pla B
+const botoPdf = $('[data-baixa-pdf]'), errPdf = $('[data-error-pdf]'), fetPdf = $('[data-fet-pdf]');
+const caixaEnllac = $('[data-enllac]'), campEnllac = $('[data-enllac-url]'), botoCopia = $('[data-copia]');
+const textBotoPdf = botoPdf.textContent, textErrPdf = errPdf.textContent, textCopia = botoCopia.textContent;
 $('[data-obre-pdf]').addEventListener('click', () => {
-  errPdf.hidden = true; fetPdf.hidden = true; plaB.hidden = true; formPdf.correu.removeAttribute('aria-invalid');
+  errPdf.hidden = true; fetPdf.hidden = true; caixaEnllac.hidden = true; formPdf.correu.removeAttribute('aria-invalid');
   dialeg.showModal(); formPdf.correu.focus();
 });
 $('[data-tanca]').addEventListener('click', () => dialeg.close());
 dialeg.addEventListener('click', e => { if (e.target === dialeg) dialeg.close(); });
-plaB.addEventListener('click', () => { if (pdfFet) descarregaPdf(pdfFet); });
+function ensenyaEnllac(url) {
+  campEnllac.value = url; botoCopia.textContent = textCopia; caixaEnllac.hidden = false;
+}
+botoCopia.addEventListener('click', async () => {
+  try { await navigator.clipboard.writeText(campEnllac.value); }
+  catch { campEnllac.focus(); campEnllac.select(); if (!document.execCommand?.('copy')) return; }
+  botoCopia.textContent = I18N.t('Copiado');
+  clearTimeout(botoCopia.t); botoCopia.t = setTimeout(() => { botoCopia.textContent = textCopia; }, 2200);
+});
+campEnllac.addEventListener('focus', () => campEnllac.select());
 function errorEnviament(e) {
   const codi = e && e.error;
   if (codi === 'adreca') return I18N.t('Ya te lo hemos mandado a este correo hace un rato. Míralo en la bandeja de entrada o en el correo no deseado.');
-  if (codi === 'limit') return I18N.t('Has pedido varios envíos seguidos. Vuelve a probar dentro de una hora o descárgalo aquí.');
-  return I18N.t('No hemos podido mandarlo. Puedes descargarlo aquí mismo.');
+  if (codi === 'limit') return I18N.t('Has pedido varios envíos seguidos. Vuelve a probar dentro de una hora o guarda este enlace a tu diseño.');
+  return I18N.t('No hemos podido mandarlo. Guarda este enlace y podrás volver a tu diseño cuando quieras.');
 }
 formPdf.addEventListener('submit', async e => {
   e.preventDefault();
   if (botoPdf.disabled) return;
   const correu = formPdf.correu.value.trim();
-  fetPdf.hidden = true; plaB.hidden = true;
+  fetPdf.hidden = true; caixaEnllac.hidden = true;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correu)) {
     errPdf.textContent = textErrPdf;
     errPdf.hidden = false; formPdf.correu.setAttribute('aria-invalid', 'true'); formPdf.correu.focus(); return;
   }
   errPdf.hidden = true; formPdf.correu.removeAttribute('aria-invalid');
   botoPdf.setAttribute('aria-busy', 'true'); botoPdf.disabled = true; botoPdf.textContent = I18N.t('Preparando el PDF…');
+  const enllac = enllacDisseny();
   try {
-    pdfFet = preparaPdf(correu);
-    const pdf = await enBase64(pdfFet.blob);
+    const feta = preparaPdf(correu);
+    const pdf = await enBase64(feta.blob);
     botoPdf.textContent = I18N.t('Enviando…');
-    await envia(dadesServidor(pdfFet.r, { accio: 'correu', correu, pdf }));
+    await envia(dadesServidor(feta.r, { accio: 'correu', correu, pdf, enllac }));
     fetPdf.textContent = I18N.t('Enviado a {correu}. Si en unos minutos no lo ves, mira en el correo no deseado.', { correu });
     fetPdf.hidden = false;
   } catch (err) {
@@ -2110,7 +2186,7 @@ formPdf.addEventListener('submit', async e => {
       errPdf.textContent = textErrPdf; formPdf.correu.setAttribute('aria-invalid', 'true');
     } else {
       errPdf.textContent = errorEnviament(err);
-      plaB.hidden = !pdfFet;
+      if (!(err && err.error === 'adreca')) ensenyaEnllac(enllac);
     }
     errPdf.hidden = false;
   } finally {
@@ -2354,7 +2430,14 @@ function triaSol(tipus) {
 $$('[data-sol-boto]').forEach(b => b.addEventListener('click', () => { if (b.dataset.solBoto !== unaSola()) triaSol(b.dataset.solBoto); }));
 
 // Entrada des de les pàgines de servei: ?tipo=cocina|bano (l'script del <head> ja ho ha marcat a <html>), ?tipo=casa
-const entrada = location.hash.slice(1) || new URLSearchParams(location.search).get('tipo');
-if (unaSola()) { triaSol(unaSola()); $('.pn-pista').textContent = I18N.t('Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.'); }
+// Un enllaç #d= (el del correu) ho restaura tot; un de mal format o d'una versió desconeguda s'ignora i el panell arrenca com sempre.
+const enllacRestaurat = llegeixEnllac();
+const entrada = enllacRestaurat ? '' : location.hash.slice(1) || new URLSearchParams(location.search).get('tipo');
+if (unaSola()) {
+  triaSol(unaSola());
+  $('.pn-pista').textContent = I18N.t('Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.');
+  if (enllacRestaurat) { restauraEnllac(enllacRestaurat); refresca(); }
+} else if (enllacRestaurat) { restauraEnllac(enllacRestaurat); refresca(); }
 else if (entrada === 'casa' || entrada === 'integral') { for (const z of st.zones.values()) z.on = true; refresca(); }
 else pintaPanell();
+if (/^#d=/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);   // l'estat ja és al panell: l'URL no ha de quedar desfasada
