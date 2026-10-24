@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="css/fonts.css?v=20261021c">
   <link rel="stylesheet" href="css/styles.css?v=20261021c">
   <link rel="preload" href="assets/fonts/BricolageGrotesque-0.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/panell.css?v=20261021p">
+  <link rel="stylesheet" href="css/panell.css?v=20261025a">
   <script src="js/i18n.js?v=20261021c"></script>
   <!-- Des de cocinas.html i banos.html (?tipo=cocina|bano): el panell és només d'aquella habitació (en Lluc, 16/10/2026).
        Es marca abans de pintar perquè no surti el bloc del pis ni un moment. -->
@@ -71,35 +71,42 @@
       </div>
     </section>
 
-    <!-- ═══ PREU: targeta flotant (al mòbil, barra fixa a baix que s'obre) ═══ -->
+    <!-- ═══ PREU: una línia plegada (en Lluc, 24/10/2026); la fletxa obre el desglossament, el correu i
+         WhatsApp. A l'escriptori s'obre cap avall; al mòbil és la barra fixa de baix i s'obre cap amunt. ═══ -->
+    <!-- Vel del mòbil darrere del full obert: tocar-lo el plega (a l'escriptori no es veu) -->
+    <div class="pn-preu-vel" data-preu-vel hidden></div>
     <aside class="pn-preu" aria-label="Precio orientativo" data-preu>
-      <div class="pn-preu-cap">
-        <span class="pn-viu">Estimación en directo</span>
-        <span class="pn-cinta" data-gama>Gama básica</span>
-      </div>
       <div class="pn-preu-fila">
-        <div class="pn-preu-xifra">
-          <output class="pn-forquilla" data-total aria-live="polite">—</output>
-          <p class="pn-xip" data-xip hidden></p>
-        </div>
-        <button type="button" class="pn-preu-obre" data-preu-obre aria-expanded="false" aria-label="Ver el desglose y descargar el PDF">
+        <button type="button" class="pn-preu-obre" data-preu-obre aria-expanded="false" aria-controls="pn-preu-mes">
+          <span class="pn-preu-linia"><span class="pn-preu-et">Tu reforma</span>
+          <output class="pn-forquilla" data-total aria-live="polite">—</output></span>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <button type="button" class="pn-wa pn-wa-mini" data-whatsapp aria-label="Hablar por WhatsApp">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></svg>
         </button>
       </div>
-      <div class="pn-preu-mes">
+      <div class="pn-preu-mes" id="pn-preu-mes" hidden>
+        <div class="pn-preu-cap">
+          <span class="pn-viu">Estimación en directo</span>
+          <span class="pn-cinta" data-gama>Gama básica</span>
+        </div>
+        <p class="pn-xip" data-xip hidden></p>
         <p class="pn-nota-preu">Orientativo, IVA incluido. El precio final, después de la visita.</p>
-        <details class="pn-desg" data-desg>
-          <summary>Ver el desglose</summary>
+        <div class="pn-desg">
+          <h2 class="pn-desg-titol">Desglose</h2>
           <ul data-partides></ul>
-        </details>
+        </div>
         <div class="pn-crida">
           <p class="pn-crida-text">¿Te encaja? Te lo mandamos o lo hablamos.</p>
           <p class="pn-cap-zona" data-cap-zona>Elige al menos una zona para ver el precio.</p>
           <div class="pn-accions">
-            <button type="button" class="btn btn-principal" data-obre-pdf>Descargar PDF</button>
+            <!-- COPY PENDENT: text provisional del botó del correu; ha de ser una CTA clara (en Lluc, 24/10/2026).
+                 Es decideix a la passada de copy final (skill copy-per-seccions). -->
+            <button type="button" class="btn btn-principal" data-obre-pdf>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5h17v11h-17z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m4 7 8 6.2L20 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Te lo mandamos
+            </button>
             <button type="button" class="btn pn-wa" data-whatsapp>
               <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></svg>
               WhatsApp
@@ -516,26 +523,28 @@
     </section>
   </main>
 
-  <!-- ═══ PDF: correu i descàrrega ═══ -->
+  <!-- ═══ PDF per correu (en Lluc, 24/10/2026): el navegador fa el PDF i /api/disseny l'envia amb Brevo.
+       Si el servidor falla, el mateix PDF es pot descarregar aquí mateix (pla B). ═══ -->
   <dialog class="pn-dialeg" data-dialeg-pdf aria-labelledby="pn-pdf-titol">
     <form class="pn-pdf" data-form-pdf novalidate>
       <button type="button" class="pn-tanca" data-tanca aria-label="Cerrar">×</button>
-      <h2 id="pn-pdf-titol">Tu reforma en PDF</h2>
-      <p>La maqueta, lo que has elegido y el precio de cada partida, en una hoja que puedes guardar o enseñar en casa.</p>
+      <h2 id="pn-pdf-titol">Te lo mandamos al correo</h2>
+      <p>Un PDF con la maqueta, lo que has elegido y el precio de cada partida, para guardarlo o enseñarlo en casa.</p>
       <label class="pn-camp">
         <span>Tu correo</span>
         <input type="email" name="correu" autocomplete="email" required placeholder="nombre@correo.com">
       </label>
       <p class="pn-error" data-error-pdf role="alert" hidden>Escribe un correo válido, por ejemplo nombre@correo.com.</p>
-      <p class="pn-legal">Usamos tu correo solo para hablar de esta reforma. Más detalles en la <a href="politica-privacidad.html">política de privacidad</a>.</p>
-      <button type="submit" class="btn btn-principal pn-baixa" data-baixa-pdf>Descargar PDF</button>
-      <p class="pn-fet" data-fet-pdf role="status" hidden>Listo. Lo tienes en tus descargas.</p>
+      <button type="button" class="pn-pla-b" data-pla-b hidden>Descargar el PDF</button>
+      <p class="pn-legal">Usamos tu correo para mandarte el PDF y hablar de esta reforma. Más detalles en la <a href="politica-privacidad.html">política de privacidad</a>.</p>
+      <button type="submit" class="btn btn-principal pn-baixa" data-baixa-pdf>Mandar el PDF</button>
+      <p class="pn-fet" data-fet-pdf role="status" hidden></p>
     </form>
   </dialog>
 
-  <script src="js/traduccions.js?v=20261021p" defer></script>
+  <script src="js/traduccions.js?v=20261024a" defer></script>
   <script src="js/main.js?v=20261021c" defer></script>
   <!-- Mòdul: s'executa després de traduccions.js (I18N ja llest) -->
-  <script type="module" src="js/panell.js?v=20261021p"></script>
+  <script type="module" src="js/panell.js?v=20261025a"></script>
 </body>
 </html>

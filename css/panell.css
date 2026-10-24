@@ -84,14 +84,26 @@
 }
 .pn-pista.amaga { opacity: 0; }
 
-/* ── Targeta de preu: dalt a l'esquerra ────────────────────────── */
+/* ── Preu: una línia dalt a l'esquerra que es desplega cap avall (en Lluc, 24/10/2026) ── */
 .pn-preu {
   position: absolute; z-index: 4; top: var(--pn-vora); left: var(--pn-vora);
-  width: min(21.5rem, calc(100% - var(--pn-amp) - var(--pn-vora) * 4));
-  border-radius: var(--pn-radi); overflow: hidden;
-  max-height: calc(100% - var(--pn-vora) * 2 - 4rem); overflow-y: auto; scrollbar-width: thin;
+  width: min(25rem, calc(100% - var(--pn-amp) - var(--pn-vora) * 4));
+  display: flex; flex-direction: column; border-radius: var(--pn-radi); overflow: hidden;
+  max-height: calc(100% - var(--pn-vora) * 2 - 4rem);
 }
-.pn-preu-cap { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: 1rem 1.15rem 0; font: 500 var(--t-xs)/1.2 var(--f-titol); color: var(--text-suau); }
+.pn-preu-fila { display: flex; align-items: center; gap: .5rem; flex: none; }
+.pn-preu-obre {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: .65rem; height: 3.5rem; padding: 0 .9rem 0 1.15rem;
+  border: 0; background: none; cursor: pointer; text-align: left; color: var(--text); border-radius: inherit;
+}
+.pn-preu-obre:focus-visible { outline: 2px solid var(--marca); outline-offset: -3px; }
+.pn-preu-et { flex: none; font: 500 var(--t-xs)/1.2 var(--f-titol); color: var(--text-suau); }
+.pn-preu-linia { display: flex; align-items: baseline; gap: .65rem; min-width: 0; }
+.pn-preu-obre svg { flex: none; width: 1.35rem; height: 1.35rem; margin-left: auto; transform: rotate(180deg); transition: transform .25s var(--entra, ease); }
+.pn-preu.obert .pn-preu-obre svg { transform: none; }
+.pn-preu-mes { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; border-top: 1px solid var(--grafit-200); }
+.pn-preu-mes:not([hidden]) { animation: pn-xip .3s var(--entra, ease) both; }
+.pn-preu-cap { display: flex; justify-content: space-between; align-items: center; gap: .5rem; padding: .85rem 1.15rem 0; font: 500 var(--t-xs)/1.2 var(--f-titol); color: var(--text-suau); }
 .pn-viu { display: inline-flex; align-items: center; gap: .4rem; }
 .pn-viu::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; background: var(--marca); }
 /* Cinta de pintor (paleta B2): etiqueta de mantega girada, per a 2–3 dades clau */
@@ -100,32 +112,23 @@
   background: var(--accent); color: var(--text); font-weight: 600; white-space: nowrap;
   box-shadow: 0 1px 2px rgb(22 25 27 / .15);
 }
-.pn-preu-fila { display: flex; align-items: flex-start; gap: .5rem; padding: .55rem 1.15rem 0; }
-.pn-preu-xifra { flex: 1; min-width: 0; }
 .pn-forquilla {
-  display: block; font: 700 clamp(1.45rem, 1.1rem + .8vw, 1.85rem)/1.05 var(--f-titol); white-space: nowrap;
-  letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--text); transition: color .5s;
+  display: block; font: 700 1.25rem/1.1 var(--f-titol); white-space: nowrap;
+  letter-spacing: -.015em; font-variant-numeric: tabular-nums; color: var(--text); transition: color .5s;
 }
 .pn-forquilla.puja { color: var(--marca); }
 .pn-xip {
-  display: inline-block; margin: .6rem 0 0; padding: .25rem .65rem; border-radius: 999px;
+  display: inline-block; margin: .6rem 1.15rem 0; padding: .25rem .65rem; border-radius: 999px;
   background: var(--argila-50); border: 1px solid var(--argila-200); color: var(--marca);
   font: 500 var(--t-xs)/1.35 var(--f-titol);
 }
 .pn-xip b { font-weight: 700; font-variant-numeric: tabular-nums; }
 .pn-xip:not([hidden]) { animation: pn-xip .45s var(--entra, ease) both; }
 @keyframes pn-xip { from { opacity: 0; transform: translateY(4px); } }
-.pn-preu-obre, .pn-wa-mini { display: none; }
+.pn-wa-mini, .pn-preu-vel { display: none; }
 .pn-nota-preu { margin: .5rem 1.15rem 0; font-family: var(--f-cos); font-size: var(--t-xs); line-height: 1.4; color: var(--text-suau); }
 .pn-desg { margin-top: .9rem; border-top: 1px solid var(--grafit-200); }
-.pn-desg summary {
-  display: flex; justify-content: space-between; align-items: center; padding: .7rem 1.15rem;
-  font: 600 var(--t-s)/1.2 var(--f-titol); cursor: pointer; list-style: none;
-}
-.pn-desg summary::-webkit-details-marker { display: none; }
-.pn-desg summary::after { content: ""; width: .5rem; height: .5rem; border: solid var(--text-suau); border-width: 0 2px 2px 0; transform: rotate(45deg) translateY(-2px); transition: transform .25s; }
-.pn-desg[open] summary::after { transform: rotate(-135deg) translateY(-2px); }
-.pn-desg summary:focus-visible { outline: 2px solid var(--marca); outline-offset: -2px; }
+.pn-desg-titol { margin: 0; padding: .75rem 1.15rem .35rem; font: 600 var(--t-s)/1.2 var(--f-titol); }
 .pn-desg ul { list-style: none; margin: 0; padding: 0 1.15rem .7rem; font: 500 var(--t-xs)/1.3 var(--f-titol); }
 .pn-desg li { display: flex; justify-content: space-between; gap: 1rem; padding: .4rem 0; border-bottom: 1px dashed var(--grafit-300); }
 .pn-desg li:last-child { border-bottom: 0; }
@@ -134,7 +137,8 @@
 .pn-crida-text { margin: 0 0 .7rem; font: 600 var(--t-s)/1.3 var(--f-titol); }
 .pn-crida .pn-cap-zona { margin: 0 0 .6rem; font: 500 var(--t-xs)/1.35 var(--f-titol); color: var(--grafit-200); }
 .pn-accions { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-.pn-accions .btn { min-height: 2.75rem; padding-inline: .7rem; font-size: .9375rem; white-space: nowrap; }
+.pn-accions .btn { min-height: 2.75rem; padding-inline: .7rem; font-size: .9375rem; white-space: nowrap; gap: .45rem; }
+.pn-accions .btn-principal svg { width: 1.15rem; height: 1.15rem; flex: none; }
 .pn-accions .btn:disabled, .pn-wa-mini:disabled { opacity: .45; cursor: not-allowed; }
 .pn-accions .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .pn-wa { background: var(--whatsapp); color: var(--blanc); }
@@ -411,9 +415,10 @@
 .pn-total-m2 output { font-variant-numeric: tabular-nums; color: var(--text-suau); }
 
 /* Comptadors */
-.pn-grup-comptadors { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+/* Dos per fila si hi caben; si no (panell estret, 1024–1280), un sota l'altre: res d'scroll lateral */
+.pn-grup-comptadors { display: grid; grid-template-columns: repeat(auto-fit, minmax(11.75rem, 1fr)); gap: .5rem; }
 .pn-comptador {
-  display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: .35rem;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; align-items: center; gap: .35rem;
   padding: .45rem .5rem .45rem .8rem; background: var(--blanc); border: 1px solid var(--vora); border-radius: var(--radi);
   font: 600 .8125rem/1 var(--f-titol);
 }
@@ -482,11 +487,24 @@
 .pn-legal a { color: inherit; }
 .pn-baixa { width: 100%; }
 .pn-baixa[aria-busy="true"] { cursor: progress; opacity: .75; }
-.pn-pdf .pn-fet { font: 600 .875rem/1.3 var(--f-titol); color: var(--marca); }
+/* Enviat: caixa neutra amb la marca de fet, perquè no es confongui amb l'error (argila) */
+.pn-pdf .pn-fet {
+  display: flex; gap: .55rem; align-items: flex-start; margin: 0; padding: .7rem .8rem; border-radius: 8px;
+  background: var(--superficie-2); color: var(--text); font: 600 .875rem/1.4 var(--f-titol); overflow-wrap: anywhere;
+}
+.pn-pdf .pn-fet::before {
+  content: ""; flex: none; width: 1.15rem; height: 1.15rem; margin-top: .05rem; border-radius: 50%;
+  background: var(--whatsapp) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.6 2.6L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat;
+}
+.pn-pla-b {   /* just sota el missatge d'error, com si en fos l'última línia */
+  justify-self: start; margin-top: -.75rem; padding: .3rem 0; border: 0; background: none; cursor: pointer;
+  font: 600 .875rem/1.2 var(--f-titol); color: var(--marca); text-decoration: underline; text-underline-offset: .2em;
+}
+.pn-pla-b:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
 
 /* ── Mòbil: 3D enganxat a dalt, panell a sota, barra de preu fixa a baix ── */
 @media (max-width: 860px) {
-  .pg-panell { --pn-vora: .75rem; --pn-barra: 5.4rem; }
+  .pg-panell { --pn-vora: .75rem; --pn-barra: 3.6rem; }
   .pn { height: auto; min-height: 0; }
   .pn-visor { position: sticky; top: 0; z-index: 3; height: 46svh; min-height: 260px; border-bottom: 1px solid var(--vora-suau); }   /* per sobre del panell quan es fa scroll */
   .pn-estat { inset: 50% auto auto 50%; }
@@ -518,33 +536,36 @@
   .pn-cos { overflow: visible; padding: 1rem 1rem 1rem; }
   .pn-cos h1 { font-size: 1.5rem; }
   .pn-peu { padding: .9rem 1rem; }
-  /* Preu: barra fixa a baix; s'obre amb la nota, el desglossament i la crida */
+  /* Preu: la mateixa línia, fixa a baix; s'obre cap amunt amb el desglossament i la crida */
   .pn-preu {
     position: fixed; z-index: 40; top: auto; left: 0; right: 0; bottom: 0; width: auto; max-height: 82svh;
     border-radius: 16px 16px 0 0; border-width: 1px 0 0; background: var(--blanc);
     box-shadow: 0 -10px 28px -12px rgb(22 25 27 / .35); padding-bottom: env(safe-area-inset-bottom);
   }
-  .pn-preu-cap { display: none; }
-  .pn-preu.obert .pn-preu-cap { display: flex; padding-top: .8rem; }
-  .pn-preu-fila { align-items: center; padding: .65rem 1rem .7rem; }
-  .pn-forquilla { font-size: 1.3rem; }
-  .pn-xip { margin-top: .3rem; padding: .15rem .55rem; font-size: .75rem; line-height: 1.3; max-width: 100%; border-radius: 10px; }
-  .pn-xip .pn-xip-et { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .pn-preu-obre, .pn-wa-mini {
-    display: inline-flex; align-items: center; justify-content: center; flex: none; width: 2.75rem; height: 2.75rem;
-    border-radius: 10px; cursor: pointer;
+  .pn-preu-fila { padding-right: .75rem; }
+  .pn-preu-obre { padding-left: 1rem; gap: 1rem; }
+  .pn-preu-linia { gap: .5rem; }
+  .pn-forquilla { font-size: 1.125rem; }
+  .pn-preu.obert .pn-wa-mini { display: none; }   /* obert, ja hi ha el botó gran de WhatsApp */
+  /* Vel darrere del full obert, per sobre de tot el que hi ha sota (capçalera, 3D, panell) */
+  .pn-preu-vel:not([hidden]) {
+    display: block; position: fixed; inset: 0; z-index: 39; background: rgb(22 25 28 / .45);
+    animation: pn-vel .25s ease both;
   }
-  .pn-preu-obre { border: 1px solid var(--text); background: var(--accent); color: var(--text); }
-  .pn-preu-obre svg { width: 1.25rem; height: 1.25rem; transition: transform .25s; }
+  @keyframes pn-vel { from { opacity: 0; } }
+  .pn-preu-obre svg { transform: none; }
   .pn-preu.obert .pn-preu-obre svg { transform: rotate(180deg); }
-  .pn-wa-mini { border: 0; }
+  .pn-wa-mini {
+    display: inline-flex; align-items: center; justify-content: center; flex: none; width: 2.75rem; height: 2.75rem;
+    border: 0; border-radius: 10px; cursor: pointer;
+  }
   .pn-wa-mini svg { width: 1.35rem; height: 1.35rem; }
-  .pn-preu-obre:focus-visible, .pn-wa-mini:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
-  .pn-preu-mes { display: none; }
-  .pn-preu.obert .pn-preu-mes { display: block; }
-  .pn-nota-preu { margin: 0 1rem; }
+  .pn-wa-mini:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+  .pn-preu-cap { padding-inline: 1rem; }
+  .pn-xip { margin-inline: 1rem; }
+  .pn-nota-preu { margin: .5rem 1rem 0; }
   .pn-desg { margin-top: .6rem; }
-  .pn-desg summary { padding-inline: 1rem; }
+  .pn-desg-titol { padding-inline: 1rem; }
   .pn-desg ul { padding-inline: 1rem; }
   .pn-crida { padding: .8rem 1rem 1rem; }
   .pn-et { font-size: .625rem; padding: .2rem .35rem; }
@@ -554,7 +575,7 @@
   .pn-graella { gap: .3rem; }
   .pn-peca { font-size: .625rem; padding-inline: .1rem; }
   .pn-estil { padding: .4rem; font-size: .75rem; }
-  .pn-forquilla { font-size: 1.15rem; }
+  .pn-forquilla { font-size: 1.05rem; }
   .pn-targetes { gap: .35rem; }
   .pn-targeta b { font-size: .75rem; }
 }
@@ -567,6 +588,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .pn-targeta, .pn-mostra, .pn-forquilla, .pn-pista, .pn-et, .pn-estil, .pn-visor::before { transition: none; }
-  .pn-dialeg[open], .pn-part:not([hidden]), .pn-xip:not([hidden]) { animation: none; }
+  .pn-dialeg[open], .pn-part:not([hidden]), .pn-xip:not([hidden]), .pn-preu-mes:not([hidden]), .pn-preu-vel:not([hidden]) { animation: none; }
+  .pn-preu-obre svg { transition: none; }
   .pn-targeta:active, .pn-estil:active { transform: none; }
 }

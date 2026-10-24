@@ -1838,7 +1838,7 @@ function iniciaWebGL() {
 /* ═══ 5. PDF I WHATSAPP ══════════════════════════════════════════
    El PDF es fa aquí mateix, sense biblioteca: una pàgina A4 amb la
    captura de la maqueta (JPEG), el que s'ha triat i les partides.
-   El servidor (/api/disseny) només desa el correu i dona el WhatsApp. */
+   El servidor (/api/disseny) l'envia al correu, desa el contacte i dona el WhatsApp. */
 
 function filesPerPart(z) {
   const clau = FORM_DE[z.tipus], f = forms[clau];
@@ -2026,7 +2026,7 @@ function fesPdf(r, jpeg, correu) {
   return new Blob(parts, { type: 'application/pdf' });
 }
 
-async function descarregaPdf(correu) {
+function preparaPdf(correu) {
   const r = resumDisseny();
   const url = capturaMaqueta();
   let jpeg = null;
@@ -2034,13 +2034,22 @@ async function descarregaPdf(correu) {
     const bin = atob(url.split(',')[1]);
     jpeg = { w: 1600, h: 1000, bytes: Uint8Array.from(bin, c => c.charCodeAt(0)) };
   }
-  const blob = fesPdf(r, jpeg, correu);
+  return { r, blob: fesPdf(r, jpeg, correu) };
+}
+function descarregaPdf({ r, blob }) {
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = `cota-cero-${r.mode}-${new Date().toISOString().slice(0, 10)}.pdf`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-  return r;
+}
+function enBase64(blob) {
+  return new Promise((ok, ko) => {
+    const lector = new FileReader();
+    lector.onload = () => ok(String(lector.result).split(',')[1] || '');
+    lector.onerror = () => ko(lector.error);
+    lector.readAsDataURL(blob);
+  });
 }
 
 function dadesServidor(r, extra) {
@@ -2053,31 +2062,57 @@ function dadesServidor(r, extra) {
 function envia(dades) {
   return fetch('/api/disseny', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dades),
-  }).then(res => res.ok ? res.json() : Promise.reject(res.status));
+  }).then(async res => {
+    const d = await res.json().catch(() => ({}));
+    return res.ok ? d : Promise.reject({ status: res.status, error: d.error || '' });
+  });
 }
 
-/* ── Finestra del PDF ── */
+/* ── Finestra del PDF: el PDF es fa aquí i el servidor l'envia al correu (acció «correu»).
+   Si l'enviament falla, el mateix PDF es pot descarregar (pla B). ── */
 const dialeg = $('[data-dialeg-pdf]'), formPdf = $('[data-form-pdf]');
-const botoPdf = $('[data-baixa-pdf]'), errPdf = $('[data-error-pdf]'), fetPdf = $('[data-fet-pdf]');
-const textBotoPdf = botoPdf.textContent;
+const botoPdf = $('[data-baixa-pdf]'), errPdf = $('[data-error-pdf]'), fetPdf = $('[data-fet-pdf]'), plaB = $('[data-pla-b]');
+const textBotoPdf = botoPdf.textContent, textErrPdf = errPdf.textContent;
+let pdfFet = null;   // l'últim PDF fet, per al pla B
 $('[data-obre-pdf]').addEventListener('click', () => {
-  errPdf.hidden = true; fetPdf.hidden = true; formPdf.correu.removeAttribute('aria-invalid');
+  errPdf.hidden = true; fetPdf.hidden = true; plaB.hidden = true; formPdf.correu.removeAttribute('aria-invalid');
   dialeg.showModal(); formPdf.correu.focus();
 });
 $('[data-tanca]').addEventListener('click', () => dialeg.close());
 dialeg.addEventListener('click', e => { if (e.target === dialeg) dialeg.close(); });
+plaB.addEventListener('click', () => { if (pdfFet) descarregaPdf(pdfFet); });
+function errorEnviament(e) {
+  const codi = e && e.error;
+  if (codi === 'adreca') return I18N.t('Ya te lo hemos mandado a este correo hace un rato. Míralo en la bandeja de entrada o en el correo no deseado.');
+  if (codi === 'limit') return I18N.t('Has pedido varios envíos seguidos. Vuelve a probar dentro de una hora o descárgalo aquí.');
+  return I18N.t('No hemos podido mandarlo. Puedes descargarlo aquí mismo.');
+}
 formPdf.addEventListener('submit', async e => {
   e.preventDefault();
+  if (botoPdf.disabled) return;
   const correu = formPdf.correu.value.trim();
+  fetPdf.hidden = true; plaB.hidden = true;
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correu)) {
+    errPdf.textContent = textErrPdf;
     errPdf.hidden = false; formPdf.correu.setAttribute('aria-invalid', 'true'); formPdf.correu.focus(); return;
   }
   errPdf.hidden = true; formPdf.correu.removeAttribute('aria-invalid');
   botoPdf.setAttribute('aria-busy', 'true'); botoPdf.disabled = true; botoPdf.textContent = I18N.t('Preparando el PDF…');
   try {
-    const r = await descarregaPdf(correu);
-    envia(dadesServidor(r, { accio: 'pdf', correu })).catch(() => {});   // el PDF no depèn del servidor
+    pdfFet = preparaPdf(correu);
+    const pdf = await enBase64(pdfFet.blob);
+    botoPdf.textContent = I18N.t('Enviando…');
+    await envia(dadesServidor(pdfFet.r, { accio: 'correu', correu, pdf }));
+    fetPdf.textContent = I18N.t('Enviado a {correu}. Si en unos minutos no lo ves, mira en el correo no deseado.', { correu });
     fetPdf.hidden = false;
+  } catch (err) {
+    if (err && err.error === 'correu') {
+      errPdf.textContent = textErrPdf; formPdf.correu.setAttribute('aria-invalid', 'true');
+    } else {
+      errPdf.textContent = errorEnviament(err);
+      plaB.hidden = !pdfFet;
+    }
+    errPdf.hidden = false;
   } finally {
     botoPdf.removeAttribute('aria-busy'); botoPdf.disabled = false; botoPdf.textContent = textBotoPdf;
   }
@@ -2093,7 +2128,7 @@ $$('[data-whatsapp]').forEach(boto => boto.addEventListener('click', async () =>
   errWa.hidden = true;
   const r = resumDisseny();
   const missatge = missatgeWhatsApp(r);
-  if (boto.classList.contains('pn-wa-mini')) { $('[data-preu]').classList.add('obert'); $('[data-preu-obre]').setAttribute('aria-expanded', 'true'); }
+  if (boto.classList.contains('pn-wa-mini')) obrePreu(true);
   const finestra = window.open('', '_blank');          // s'obre ara, amb el clic, perquè no la bloquegin
   try {
     const d = await envia(dadesServidor(r, { accio: 'whatsapp' }));
@@ -2106,11 +2141,19 @@ $$('[data-whatsapp]').forEach(boto => boto.addEventListener('click', async () =>
     errWa.hidden = false;
   }
 }));
-/* Mòbil: la barra de preu s'obre amb la nota, el desglossament i la crida */
-$('[data-preu-obre]').addEventListener('click', e => {
-  const obert = $('[data-preu]').classList.toggle('obert');
-  e.currentTarget.setAttribute('aria-expanded', String(obert));
-  if (obert) $('[data-desg]').open = true;
+/* La línia del preu: plegada per defecte; la fletxa (botó, Enter/Espai) obre el desglossament,
+   la nota, el correu i WhatsApp. Esc la torna a plegar. */
+const elPreu = $('[data-preu]'), botoPreu = $('[data-preu-obre]'), elPreuMes = $('#pn-preu-mes'), velPreu = $('[data-preu-vel]');
+function obrePreu(obert) {
+  elPreu.classList.toggle('obert', obert);
+  elPreuMes.hidden = !obert;
+  velPreu.hidden = !obert;   // al mòbil, el vel darrere del full
+  botoPreu.setAttribute('aria-expanded', String(obert));
+}
+botoPreu.addEventListener('click', () => obrePreu(elPreuMes.hidden));
+velPreu.addEventListener('click', () => obrePreu(false));
+elPreu.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !elPreuMes.hidden) { obrePreu(false); botoPreu.focus(); }
 });
 
 
