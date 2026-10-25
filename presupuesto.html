@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="css/fonts.css?v=20261021c">
   <link rel="stylesheet" href="css/styles.css?v=20261025b">
   <link rel="preload" href="assets/fonts/BricolageGrotesque-0.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/panell.css?v=20261025b">
+  <link rel="stylesheet" href="css/panell.css?v=20261025d">
   <script src="js/i18n.js?v=20261021c"></script>
   <!-- Des de cocinas.html i banos.html (?tipo=cocina|bano): el panell és només d'aquella habitació (en Lluc, 16/10/2026).
        Es marca abans de pintar perquè no surti el bloc del pis ni un moment. -->
@@ -72,7 +72,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z" fill="currentColor"/></svg>
           <span data-tota-sol="cocina">Ver toda la cocina</span><span data-tota-sol="bano">Ver todo el baño</span>
         </button>
-        <p class="pn-pista">Toca una zona para elegirla. Arrastra para girar el piso.</p>
+        <p class="pn-pista">Toca un espacio para verlo de cerca. Arrastra para girar el piso.</p>
       </div>
     </section>
 
@@ -161,7 +161,7 @@
           <span data-titol-sol="cocina">Diseña tu cocina</span>
           <span data-titol-sol="bano">Diseña tu baño</span>
         </h1>
-        <p class="pn-intro">Toca cualquier cosa en la maqueta o elige una parte abajo. Cada cambio mueve el precio.</p>
+        <p class="pn-intro">De entrada lo reformamos todo. Quita lo que no quieras y entra en cada espacio para afinarlo.</p>
 
         <!-- ── El pis: quantes estances i quines es reformen ── -->
         <section class="pn-grup pn-pis" aria-labelledby="pn-pis-titol">
@@ -185,21 +185,30 @@
             <input class="pn-rang" id="pn-m2-total" type="range" min="40" max="200" step="1" value="70" data-m2-slider>
             <p class="pn-nota">Reparte los metros entre las estancias. Después puedes afinar cada una.</p>
           </div>
-          <p class="pn-zones-titol" id="pn-zones-titol">¿Qué quieres reformar? Tócalo en la maqueta o aquí.</p>
-          <div class="pn-zones" data-zones role="group" aria-labelledby="pn-zones-titol"></div>
+          <!-- Un estil per a tot el pis i la llista d'espais, tots marcats d'entrada (en Lluc, 24/10/2026) -->
+          <div class="pn-estils pn-estils-pis">
+            <p class="pn-titol-grup">Un estilo para todo el piso</p>
+            <div class="pn-estils-fila">
+              <button type="button" class="pn-estil" data-estil-pis="norte" aria-pressed="false"><span class="pn-tires"><i style="--m:#E7E3DA"></i><i style="--m:#B98652"></i><i style="--m:#ECEAE5"></i></span><b>Luz de norte</b><small>Blanco y roble</small></button>
+              <button type="button" class="pn-estil" data-estil-pis="pueblo" aria-pressed="false"><span class="pn-tires"><i style="--m:#8F9B86"></i><i style="--m:#E9E1D2"></i><i style="--m:#B08D57"></i></span><b>Casa de pueblo</b><small>Salvia y latón</small></button>
+              <button type="button" class="pn-estil" data-estil-pis="piedra" aria-pressed="false"><span class="pn-tires"><i style="--m:#3A3C3F"></i><i style="--m:#1F2123"></i><i style="--m:#9C7A4E"></i></span><b>Noche de piedra</b><small>Grafito y piedra</small></button>
+            </div>
+          </div>
+          <p class="pn-titol-grup pn-llista-titol" id="pn-zones-titol">Qué reformamos <span data-compte-on></span></p>
+          <ul class="pn-llista" data-zones aria-labelledby="pn-zones-titol"></ul>
           <button type="button" class="pn-tot" data-tot>Reformar todo el piso</button>
         </section>
 
         <!-- ── Editor de la zona triada ── -->
         <section class="pn-editor" data-editor aria-labelledby="pn-editor-nom" hidden>
+          <button type="button" class="pn-enrere" data-torna-panell>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z" fill="currentColor"/></svg>
+            Todo el piso
+          </button>
           <div class="pn-editor-cap">
             <h2 id="pn-editor-nom" class="pn-titol-grup" data-editor-nom>Cocina</h2>
             <label class="pn-interruptor"><input type="checkbox" data-incloure checked><span>Reformar esta zona</span></label>
           </div>
-          <button type="button" class="btn btn-principal pn-dins" data-dins hidden>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-5 0-9 4.5-10 7 1 2.5 5 7 10 7s9-4.5 10-7c-1-2.5-5-7-10-7Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" fill="currentColor"/></svg>
-            Verla por dentro
-          </button>
 
         <!-- ── Cocina: la mida, tres estils i les parts (només la triada és oberta). Els preus de cada
              opció els escriu el JS a partir de PREUS; data-grup = un dels quatre grups (21/10/2026). ── -->
@@ -346,15 +355,14 @@
               </div>
             </fieldset>
             <fieldset class="pn-part" data-part="obra" hidden>
-              <legend>Obra y fecha</legend>
-              <p class="pn-part-sub">Lo que hacemos nosotros y cuándo empezamos.</p>
+              <legend>Obra</legend>
+              <p class="pn-part-sub">Lo que hacemos nosotros.</p>
               <p class="pn-part-preu" data-part-preu></p>
               <div class="pn-paquets">
                 <label class="pn-paquet"><input type="radio" name="paquete" value="esencial" checked><b>Muebles y encimera <span data-preu></span></b><small>Montados, con fregadero y grifo.</small></label>
                 <label class="pn-paquet"><input type="radio" name="paquete" value="completa"><b>Y la instalación <span data-preu></span></b><small>Además, luz y agua nuevas con boletín.</small></label>
                 <label class="pn-paquet"><input type="radio" name="paquete" value="llave"><b>Llave en mano <span data-preu></span></b><small>Además, pintura, remates y limpieza final.</small></label>
               </div>
-              <div data-lloc-setmanes></div>
             </fieldset>
           </div>
         </form>
@@ -462,15 +470,14 @@
               </div>
             </fieldset>
             <fieldset class="pn-part" data-part="obra" hidden>
-              <legend>Obra y fecha</legend>
-              <p class="pn-part-sub">Lo que hacemos nosotros y cuándo empezamos.</p>
+              <legend>Obra</legend>
+              <p class="pn-part-sub">Lo que hacemos nosotros.</p>
               <p class="pn-part-preu" data-part-preu></p>
               <div class="pn-paquets">
                 <label class="pn-paquet"><input type="radio" name="paquete" value="esencial" checked><b>Alicatado y sanitarios <span data-preu></span></b><small>Paredes, suelo, plato o bañera, inodoro y lavabo.</small></label>
                 <label class="pn-paquet"><input type="radio" name="paquete" value="completa"><b>Y la fontanería <span data-preu></span></b><small>Además, tuberías nuevas y mampara a medida.</small></label>
                 <label class="pn-paquet"><input type="radio" name="paquete" value="llave"><b>Llave en mano <span data-preu></span></b><small>Además, toallero eléctrico y luz nueva.</small></label>
               </div>
-              <div data-lloc-setmanes></div>
             </fieldset>
           </div>
         </form>
@@ -510,12 +517,6 @@
         </form>
         </section>
 
-        <!-- ── Comú: quan comencem (a la cuina i al bany, el JS el posa dins de «Obra y fecha») ── -->
-        <fieldset class="pn-grup pn-setmanes">
-          <legend>Cuándo empezamos <output data-tria="setmana"></output></legend>
-          <div class="pn-dies" data-setmanes></div>
-          <p class="pn-entrega">Calculamos entregártela la <strong class="pn-cinta">semana del <span data-entrega>…</span></strong>.</p>
-        </fieldset>
       </div>
 
       <footer class="pn-peu">
@@ -550,9 +551,9 @@
     </form>
   </dialog>
 
-  <script src="js/traduccions.js?v=20261025c" defer></script>
+  <script src="js/traduccions.js?v=20261025e" defer></script>
   <script src="js/main.js?v=20261021c" defer></script>
   <!-- Mòdul: s'executa després de traduccions.js (I18N ja llest) -->
-  <script type="module" src="js/panell.js?v=20261025b"></script>
+  <script type="module" src="js/panell.js?v=20261025e"></script>
 </body>
 </html>
