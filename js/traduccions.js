@@ -430,6 +430,7 @@ window.TRAD = {
     "Reformar todo el piso": "Reformar tot el pis",
     "Todo el piso": "Tot el pis",
     "Reformar esta zona": "Reformar aquesta zona",
+    "Solo esta sala": "Només aquesta sala",
     "Opciones de la cocina": "Opcions de la cuina",
     "Superficie": "Superfície",
     "Metros cuadrados de la cocina": "Metres quadrats de la cuina",
@@ -648,7 +649,7 @@ window.TRAD = {
     "Preparando el PDF…": "Preparant el PDF…",
     "Enviado a {correu}. Si en unos minutos no lo ves, mira en el correo no deseado.": "Enviat a {correu}. Si d'aquí a uns minuts no el veus, mira al correu brossa.",
     "Hola, he diseñado mi reforma en vuestra web: {obra}. {detall}. Precio orientativo: {preu}. ¿Podemos hablar?": "Hola, he dissenyat la meva reforma al vostre web: {obra}. {detall}. Preu orientatiu: {preu}. En podem parlar?",
-    "Arrastra un objeto para moverlo. Toca otro espacio para entrar en él.": "Arrossega un objecte per moure'l. Toca un altre espai per entrar-hi.",
+    "Toca un objeto para elegirlo y después arrástralo. Toca otro espacio para entrar en él.": "Toca un objecte per triar-lo i després arrossega'l. Toca un altre espai per entrar-hi.",
     "Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.": "Toca qualsevol cosa de la maqueta per canviar-la. Arrossega per girar-la.",
     "¿Y la cocina? ¿Y el baño?": "I la cuina? I el bany?",
     "Abre una puerta y mira lo que hacemos dentro.": "Obre una porta i mira què hi fem a dins.",
@@ -733,7 +734,7 @@ window.TRAD = {
     "Cómoda": "Calaixera",
     "Lámpara de pie": "Llum de peu",
     "Mueble de entrada": "Moble d'entrada",
-    "Arrastra un objeto para moverlo; el suelo, para girar la sala.": "Arrossega un objecte per moure'l; el terra, per girar la sala."
+    "Toca un objeto para elegirlo y después arrástralo. Acércate con la rueda o pellizcando.": "Toca un objecte per triar-lo i després arrossega'l. Apropa-t'hi amb la roda o pessigant."
   },
   "en": {
     "Saltar al contenido": "Skip to content",
@@ -1095,6 +1096,7 @@ window.TRAD = {
     "Reformar todo el piso": "Renovate the whole flat",
     "Todo el piso": "The whole flat",
     "Reformar esta zona": "Renovate this area",
+    "Solo esta sala": "Just this room",
     "Opciones de la cocina": "Kitchen options",
     "Superficie": "Floor area",
     "Metros cuadrados de la cocina": "Kitchen floor area in square metres",
@@ -1313,7 +1315,7 @@ window.TRAD = {
     "Preparando el PDF…": "Preparing the PDF…",
     "Enviado a {correu}. Si en unos minutos no lo ves, mira en el correo no deseado.": "Sent to {correu}. If you don't see it in a few minutes, check your spam folder.",
     "Hola, he diseñado mi reforma en vuestra web: {obra}. {detall}. Precio orientativo: {preu}. ¿Podemos hablar?": "Hi, I've designed my renovation on your website: {obra}. {detall}. Approximate price: {preu}. Can we talk?",
-    "Arrastra un objeto para moverlo. Toca otro espacio para entrar en él.": "Drag an item to move it. Tap another space to go into it.",
+    "Toca un objeto para elegirlo y después arrástralo. Toca otro espacio para entrar en él.": "Tap an item to pick it, then drag it. Tap another space to go into it.",
     "Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.": "Tap anything on the model to change it. Drag to turn it.",
     "¿Y la cocina? ¿Y el baño?": "What about the kitchen? And the bathroom?",
     "Abre una puerta y mira lo que hacemos dentro.": "Open a door and see what we do inside.",
@@ -1405,7 +1407,7 @@ window.TRAD = {
     "Cómoda": "Chest of drawers",
     "Lámpara de pie": "Floor lamp",
     "Mueble de entrada": "Hall console",
-    "Arrastra un objeto para moverlo; el suelo, para girar la sala.": "Drag an item to move it, or drag the floor to turn the room."
+    "Toca un objeto para elegirlo y después arrástralo. Acércate con la rueda o pellizcando.": "Tap an item to pick it, then drag it. Zoom in with the wheel or a pinch."
   }
 };
 /* ── TRAD:fi ── */
