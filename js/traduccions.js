@@ -255,11 +255,12 @@ window.TRAD = {
     "El mismo salón ya reformado: paredes lisas, suelo de roble en espiga y muebles.": "El mateix menjador ja reformat: parets llises, terra de roure en espiga i mobles.",
     "Así te la devolvemos": "Així te la tornem",
     "Cuéntanos qué quieres hacer y te damos una horquilla de precio orientativa.": "Explica'ns què vols fer i et donem una forquilla de preu orientativa.",
-    "Tu piso, en maqueta": "El teu pis, en maqueta",
-    "Lo levantamos en 3D mientras bajas. Cambia los suelos y los metros y mira cómo se mueve el precio.": "L'aixequem en 3D mentre baixes. Canvia els terres i els metres i mira com es mou el preu.",
+    "Haz tuyo este piso": "Fes teu aquest pis",
+    "Cámbiale los suelos, las habitaciones y los metros hasta que se parezca a tu casa. El precio se ajusta con cada cambio.": "Canvia-li els terres, les habitacions i els metres fins que s'assembli a casa teva. El preu s'ajusta amb cada canvi.",
     "Diseña tu reforma en la maqueta 3D": "Dissenya la teva reforma a la maqueta 3D",
     "Haz clic para diseñar tu reforma": "Fes clic per dissenyar la teva reforma",
-    "¿Solo la cocina o el baño?": "Només la cuina o el bany?",
+    "¿Solo la cocina?…": "Només la cuina?…",
+    "…¿o el baño?": "…o el bany?",
     "Lo que firmamos es lo que pagas": "El que signem és el que pagues",
     "La horquilla de la web es orientativa. El precio de verdad sale después de medir tu casa, partida por partida, y no cambia sin que lo firmes.": "La forquilla de la web és orientativa. El preu de veritat surt després de mesurar casa teva, partida per partida, i no canvia sense que ho signis.",
     "Lo hace nuestro propio equipo, sin subcontratas de última hora, y cada tarde dejamos la obra recogida.": "Ho fa el nostre propi equip, sense subcontractes d'última hora, i cada tarda deixem l'obra recollida.",
@@ -408,7 +409,7 @@ window.TRAD = {
     "Desglose": "Desglossament",
     "¿Te encaja? Te lo mandamos o lo hablamos.": "T'encaixa? T'ho enviem o en parlem.",
     "Elige al menos una zona para ver el precio.": "Tria almenys una zona per veure el preu.",
-    "Te lo mandamos": "T'ho enviem",
+    "Envíamelo por correo": "Envia-m'ho per correu",
     "No hemos podido abrir WhatsApp. Llámanos al": "No hem pogut obrir WhatsApp. Truca'ns al",
     "Diseña tu reforma": "Dissenya la teva reforma",
     "De entrada lo reformamos todo. Quita lo que no quieras y entra en cada espacio para afinarlo.": "D'entrada ho reformem tot. Treu el que no vulguis i entra a cada espai per afinar-lo.",
@@ -734,7 +735,7 @@ window.TRAD = {
     "Cómoda": "Calaixera",
     "Lámpara de pie": "Llum de peu",
     "Mueble de entrada": "Moble d'entrada",
-    "Toca un objeto para elegirlo y después arrástralo. Acércate con la rueda o pellizcando.": "Toca un objecte per triar-lo i després arrossega'l. Apropa-t'hi amb la roda o pessigant."
+    "Toca un objeto para elegirlo y después arrástralo. Haz zoom para verlo de cerca.": "Toca un objecte per triar-lo i després arrossega'l. Fes zoom per veure'l de prop."
   },
   "en": {
     "Saltar al contenido": "Skip to content",
@@ -921,11 +922,12 @@ window.TRAD = {
     "El mismo salón ya reformado: paredes lisas, suelo de roble en espiga y muebles.": "The same living room after the renovation: smooth walls, oak herringbone floor and furniture.",
     "Así te la devolvemos": "This is how we hand it back",
     "Cuéntanos qué quieres hacer y te damos una horquilla de precio orientativa.": "Tell us what you want to do and we'll give you an approximate price range.",
-    "Tu piso, en maqueta": "Your flat, as a 3D model",
-    "Lo levantamos en 3D mientras bajas. Cambia los suelos y los metros y mira cómo se mueve el precio.": "We build it in 3D as you scroll. Change the floors and the square metres and watch the price move.",
+    "Haz tuyo este piso": "Make this place yours",
+    "Cámbiale los suelos, las habitaciones y los metros hasta que se parezca a tu casa. El precio se ajusta con cada cambio.": "Change the flooring, the rooms and the size until it looks like your home. The price updates with every change.",
     "Diseña tu reforma en la maqueta 3D": "Design your renovation on the 3D model",
     "Haz clic para diseñar tu reforma": "Click to design your renovation",
-    "¿Solo la cocina o el baño?": "Just the kitchen or the bathroom?",
+    "¿Solo la cocina?…": "Just the kitchen?…",
+    "…¿o el baño?": "…or the bathroom?",
     "Lo que firmamos es lo que pagas": "What we sign is what you pay",
     "La horquilla de la web es orientativa. El precio de verdad sale después de medir tu casa, partida por partida, y no cambia sin que lo firmes.": "The range on the website is a guide. The real price comes after we measure your home, line by line, and it doesn't change unless you sign off on it.",
     "Lo hace nuestro propio equipo, sin subcontratas de última hora, y cada tarde dejamos la obra recogida.": "Our own crew does the work, no last-minute subcontractors, and we leave the site tidy every afternoon.",
@@ -1074,7 +1076,7 @@ window.TRAD = {
     "Desglose": "Breakdown",
     "¿Te encaja? Te lo mandamos o lo hablamos.": "Does it work for you? We'll send it over or talk it through.",
     "Elige al menos una zona para ver el precio.": "Choose at least one area to see the price.",
-    "Te lo mandamos": "Email it to me",
+    "Envíamelo por correo": "Email it to me",
     "No hemos podido abrir WhatsApp. Llámanos al": "We couldn't open WhatsApp. Call us on",
     "Diseña tu reforma": "Design your renovation",
     "De entrada lo reformamos todo. Quita lo que no quieras y entra en cada espacio para afinarlo.": "We start with everything included. Untick what you don't want and open each room to fine-tune it.",
@@ -1407,7 +1409,7 @@ window.TRAD = {
     "Cómoda": "Chest of drawers",
     "Lámpara de pie": "Floor lamp",
     "Mueble de entrada": "Hall console",
-    "Toca un objeto para elegirlo y después arrástralo. Acércate con la rueda o pellizcando.": "Tap an item to pick it, then drag it. Zoom in with the wheel or a pinch."
+    "Toca un objeto para elegirlo y después arrástralo. Haz zoom para verlo de cerca.": "Tap an item to pick it, then drag it. Zoom in to see it up close."
   }
 };
 /* ── TRAD:fi ── */

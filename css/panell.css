@@ -658,3 +658,8 @@
   .pn-cat-avis { left: 50%; bottom: 1rem; }
 }
 @media (prefers-reduced-motion: reduce) { .pn-objecte, .pn-pestanya { transition: none; } .pn-objecte:active { transform: none; } }
+/* Al mòbil, «Volver al piso» només al panell: el de damunt del 3D quedava just a sobre (en Lluc, 25/10/2026) */
+@media (max-width: 860px) { .pn-torna { display: none !important; } }
+/* La nota «En la maqueta, toca un objeto…» repetia la pista del 3D: fora on hi ha la pista (ordinador). Al mòbil la pista
+   s'amaga, i la nota és l'única instrucció (en Lluc, 25/10/2026) */
+@media (min-width: 861px) { .pn-cat-com { display: none; } }

@@ -76,3 +76,6 @@
 @media (prefers-reduced-motion: reduce) {
   .maqueta-poster, .maqueta-3d, .maqueta-crida, .casa-foto img, .casa-et { transition: none; }
 }
+/* «¿Solo la cocina… …o el baño?»: cada meitat del títol sobre la seva targeta (en Lluc, 25/10/2026) */
+.cases-titol { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(.75rem, 2.5vw, 2rem); }
+@media (max-width: 760px) { .cases-titol { font-size: var(--t-m); } }

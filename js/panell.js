@@ -1423,7 +1423,7 @@ function obreInterior(vol = false) {
   $$('[data-tota-sol]').forEach(el => { el.hidden = el.dataset.totaSol !== st.vista; });
   if (!vol) { ombraPer(interior.userData.mida + 2); posa(vistaActual()); }
   aplicaMaterials();
-  $('.pn-pista').textContent = I18N.t(FORM_DE[z.tipus] === 'estancia' ? 'Toca un objeto para elegirlo y después arrástralo. Acércate con la rueda o pellizcando.' : 'Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.');
+  $('.pn-pista').textContent = I18N.t(FORM_DE[z.tipus] === 'estancia' ? 'Toca un objeto para elegirlo y después arrástralo. Haz zoom para verlo de cerca.' : 'Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.');
   brut = true;
 }
 /* Canvis d'opcions amb la cuina o el bany oberts */
