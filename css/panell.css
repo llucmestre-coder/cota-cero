@@ -590,3 +590,63 @@
   .pn-preu-obre svg { transition: none; }
   .pn-targeta:active, .pn-estil:active { transform: none; }
 }
+
+/* ── Catàleg de les estances (peça 3): dues pestanyes i fitxes amb la miniatura de la maqueta ── */
+.pn-pestanyes { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border-radius: 999px; background: var(--superficie-2); }
+.pn-pestanya {
+  height: 2.25rem; border: 0; border-radius: 999px; background: transparent; cursor: pointer;
+  font: 600 var(--t-xs)/1 var(--f-titol); color: var(--text-suau); transition: background-color .2s, color .2s;
+}
+.pn-pestanya[aria-selected="true"] { background: var(--blanc); color: var(--text); box-shadow: 0 1px 2px rgb(22 25 27 / .12); }
+.pn-pestanya:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+.pn-cat-nota { margin: .55rem 0 .6rem; font: 500 var(--t-xs)/1.35 var(--f-titol); color: var(--text-suau); }
+.pn-cat-com { margin: .6rem 0 0; }
+.pn-objectes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .45rem; }
+.pn-objecte {
+  display: flex; flex-direction: column; align-items: flex-start; gap: .15rem; min-width: 0; padding: .35rem .35rem .5rem;
+  border: 1px solid var(--grafit-200); border-radius: 10px; background: var(--blanc); cursor: pointer; text-align: left;
+  font: 600 .75rem/1.2 var(--f-titol); color: var(--text); transition: border-color .2s, transform .2s var(--entra, ease);
+}
+.pn-objecte-img { display: block; width: 100%; aspect-ratio: 4 / 3; margin-bottom: .2rem; border-radius: 7px; background: var(--grafit-50); overflow: hidden; }
+.pn-objecte-img img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.pn-objecte b { font-weight: 600; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: anywhere; }
+.pn-objecte small { font: 500 .6875rem/1.2 var(--f-titol); color: var(--marca); min-height: .8rem; }
+.pn-objecte:active { transform: scale(.97); }
+.pn-objecte:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+@media (hover: hover) { .pn-objecte:hover { border-color: var(--text-suau); } }
+
+/* L'objecte triat (en Lluc, 25/10/2026): pastilla petita d'icones. Girar, de mantega; treure, vermell sobri; confirmar,
+   el verd de WhatsApp. El vermell i el verd són fora de la paleta perquè els ha demanat ell; contrast ≥ 4,5:1. */
+.pn-sel {
+  --sel-vermell: #A3352A; --sel-vermell-fons: #F8E8E5;      /* icona sobre el fons: 5,9:1 */
+  position: absolute; z-index: 3; left: 0; top: 0; display: flex; align-items: center; gap: .2rem;
+  padding: .2rem; border-radius: 999px; background: var(--pn-flota); box-shadow: var(--pn-ombra); white-space: nowrap;
+}
+.pn-sel[hidden] { display: none; }
+.pn-sel-boto {
+  position: relative; display: grid; place-items: center; width: 2rem; height: 2rem; padding: 0; border: 0; border-radius: 50%;
+  cursor: pointer; color: var(--text); background: var(--boto);
+}
+.pn-sel-boto svg { width: 1.05rem; height: 1.05rem; }
+.pn-sel-treu { background: var(--sel-vermell-fons); color: var(--sel-vermell); }
+.pn-sel-ok { background: var(--whatsapp); color: var(--blanc); }
+.pn-sel-boto:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+@media (hover: hover) {
+  .pn-sel-gira:hover { background: var(--boto-hover); }
+  .pn-sel-treu:hover { background: #F1D5D0; }
+  .pn-sel-ok:hover { background: var(--whatsapp-hover); }
+}
+.pn-sel.mou { opacity: .35; pointer-events: none; }
+.pn-cat-avis {
+  position: absolute; z-index: 3; left: calc((100% - var(--pn-amp)) / 2); bottom: 4.5rem; transform: translateX(-50%); margin: 0;
+  padding: .5rem .8rem; border-radius: 8px; background: var(--grafit-950); color: var(--fons); font: 500 var(--t-xs)/1.3 var(--f-titol);
+}
+.pn-cat-avis[hidden] { display: none; }
+@media (max-width: 860px) {
+  /* Icona petita, però 44 px de zona tocable */
+  .pn-sel { gap: .25rem; padding: .25rem; }
+  .pn-sel-boto { width: 2.25rem; height: 2.25rem; }
+  .pn-sel-boto::after { content: ""; position: absolute; inset: -.25rem; }
+  .pn-cat-avis { left: 50%; bottom: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) { .pn-objecte, .pn-pestanya { transition: none; } .pn-objecte:active { transform: none; } }

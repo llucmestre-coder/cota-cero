@@ -9,6 +9,8 @@
 // Three.js es carrega després del primer pintat (carrega3D, al final): el preu i el panell
 // funcionen de seguida i la maqueta arriba un moment després (Lighthouse mòbil, 15/10/2026).
 let THREE, OrbitControls, RoomEnvironment, RoundedBoxGeometry;
+// El catàleg «Obra» i «Muebles» de les estances i moure objectes (peça 3) és un mòdul a part
+import { creaCataleg, preuObjectes, obraDe, OBJECTES } from './cataleg.js?v=20261026d';
 
 // Textos del JS: I18N.t amb la frase castellana escrita literal (js/i18n.js). Sense i18n, queda el castellà.
 const I18N = window.I18N || { t: (s, v) => (v ? s.replace(/\{(\w+)\}/g, (tot, k) => v[k] ?? tot) : s) };
@@ -178,8 +180,9 @@ function preuZona(z) {
   if (clau === 'estancia') {
     total += (P['suelo/m2'][o.suelo] || 0) * m2 + (P['paredes/m2'][o.paredes] || 0) * m2;
     detalls.push(`${nomGrup(clau, 'suelo')}: ${nomValor(clau, 'suelo', o.suelo)}`, `${nomGrup(clau, 'paredes')}: ${nomValor(clau, 'paredes', o.paredes)}`);
-    if (o.armario && z.tipus === 'dorm') { total += P.armario; detalls.push(nomValor(clau, 'armario')); }
+    if (o.armario && z.tipus === 'dorm' && !z.objs) { total += P.armario; detalls.push(nomValor(clau, 'armario')); }   // enllaç antic
     if (o.ventanas && finestresZona(z)) { total += P.ventana * finestresZona(z); detalls.push(nomValor(clau, 'ventanas')); }
+    total += preuObjectes(z); detalls.push(...obraDe(z));   // l'obra afegida des del catàleg (els mobles no tenen preu)
   } else {
     for (const [k, taula] of Object.entries(P)) {
       if (k === 'obra') continue;
@@ -418,7 +421,8 @@ function obreEditor(id) {
     const f = forms.estancia;
     $('[data-camp="m2"]', f).hidden = z.tipus === 'pasillo';
     $('[data-camp="pasillo"]', f).hidden = z.tipus !== 'pasillo';
-    $('[data-camp="armario"]', f).hidden = z.tipus !== 'dorm';
+    $('[data-camp="armario"]', f).hidden = true;   // l'armari encastat és al catàleg (peça 3)
+    cat.pintaPanell(z);
     $('[data-camp="ventanas"]', f).hidden = !finestresZona(z);
     $('[data-camp="extres"]', f).hidden = z.tipus === 'pasillo';
   } else { ajustaMinims(clau, false); construeixGraella(clau); }
@@ -622,7 +626,13 @@ async function pintaMostres() {
 const visor = $('.pn-visor');
 const canvas = $('.pn-canvas');
 const elEstat = $('.pn-estat');
-let renderer, scene, camera, controls, sol, brut = true, pinta = false;
+const cat = creaCataleg({
+  canvas, visor, eur, despla, encaixa, creix,
+  redibuixa: () => { brut = true; },
+  canvi: (delta, nom) => { ultimCanvi = { delta, nom }; refresca(); },
+  zona: () => st.activa && st.zones.get(st.activa),
+});
+let renderer, scene, camera, controls, sol, brut = true, pinta = false, TALL;
 
 
 const M = {};                       // materials compartits
@@ -839,8 +849,7 @@ function escenaEstancia(z) {
     caixa(wx2 - wx1, wy2 - wy1, .02, M.finestra, (wx1 + wx2) / 2, wy1, z0 - T * .7, g, false);
     caixa(wx2 - wx1 + .08, .03, .16, mt.marc, (wx1 + wx2) / 2, wy1 - .03, z0 + .02, g);
   } else paret(W + T, H, T, -T / 2, 0, zb, g, P);
-  const mb = MOBLES[z.tipus]();
-  g.add(mb.grup); mb.posa({ x1: x0, x2: -x0, z1: z0, z2: -z0 }, z.opts);
+  cat.munta(g, z, { W, D });            // els mobles i l'obra del catàleg, que es mouen (peça 3)
   g.userData = { mides: { W, D, H, T }, mida: Math.max(W, D) };
   return g;
 }
@@ -1260,6 +1269,27 @@ function mobleBany() {
   } };
 }
 const MOBLES = { dorm: mobleDorm, salon: mobleSalo, cocina: mobleCuina, bano: mobleBany };
+/* A la maqueta del pis, les estances que ja s'han obert (o que venen d'un enllaç) ensenyen els objectes del catàleg on
+   els has deixat; les altres, els mobles de sempre */
+function moblesZona(z) {
+  const def = MOBLES[z.tipus] ? MOBLES[z.tipus]() : null;
+  if (FORM_DE[z.tipus] !== 'estancia') return def;
+  const g = new THREE.Group(), cg = new THREE.Group();
+  if (def) g.add(def.grup);
+  g.add(cg);
+  return { grup: g, posa(r, o) {
+    const meus = !!z.objs;
+    if (def) { def.grup.visible = !meus; if (!meus) def.posa(r, o); }
+    cg.visible = meus;
+    if (meus) cat.posaPis(cg, z, r);
+  } };
+}
+/* El passadís s'edita dins del pis (en Lluc, 25/10/2026): els objectes van dins del seu rectangle i les peces de paret,
+   a qualsevol de les quatre parets */
+function muntaPassadis() {
+  const z = st.zones.get('pasillo'), r = plaObj.zones.pasillo;
+  cat.munta(pla.grup, z, { W: r.x2 - r.x1 - TI, D: r.z2 - r.z1 - TI }, { x: (r.x1 + r.x2) / 2, z: (r.z1 + r.z2) / 2, parets: [0, 1, 2, 3] });
+}
 
 /* ── Muntar el pis (quan canvien els dormitoris o els banys) ── */
 const elEtiq = $('.pn-etiquetes');
@@ -1290,7 +1320,7 @@ function muntaPla(anima) {
     const mt = materialsZona(z);
     const terra = caixaU(mt.terra, g, false);
     const vel = caixaU(mt.vel, g, false); vel.userData.zona = id; vel.renderOrder = 2;
-    const mb = MOBLES[z.tipus] ? MOBLES[z.tipus]() : null;
+    const mb = moblesZona(z);
     if (mb) g.add(mb.grup);
     P.zones[id] = { terra, vel, mobles: mb, et: etiqueta() };
   }
@@ -1301,6 +1331,7 @@ function muntaPla(anima) {
   plaObj = calculaPla(); plaAra = copiaPla(plaObj);
   aplicaPla(plaAra); aplicaMaterials();
   if (anima) creix(g, 700);
+  if (st.dins === 'pasillo') muntaPassadis();
   pintaEtiquetes();
   brut = true;
 }
@@ -1690,7 +1721,7 @@ function obreInterior() {
   ombraPer(interior.userData.mida + 2);
   posa(vistaActual());
   aplicaMaterials();
-  $('.pn-pista').textContent = I18N.t(FORM_DE[z.tipus] === 'estancia' ? 'Arrastra para girarla.' : 'Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.');
+  $('.pn-pista').textContent = I18N.t(FORM_DE[z.tipus] === 'estancia' ? 'Arrastra un objeto para moverlo; el suelo, para girar la sala.' : 'Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.');
   brut = true;
 }
 /* Canvis d'opcions amb la cuina o el bany oberts */
@@ -1799,7 +1830,9 @@ function iniciaWebGL() {
     if (controls.update()) brut = true;
     if (!brut) return;
     brut = false;
+    TALL.constant = st.vista === 'pis' ? HM + .06 : 1e5;   // al pis, res per sobre del tall de les parets
     renderer.render(scene, camera);
+    cat.posaBarra();
     if (st.vista === 'pis' && etiquetes.length) {
       const w = visor.clientWidth, h = visor.clientHeight, sy = pla ? pla.grup.scale.y : 1;
       for (const e of etiquetes) {
@@ -1833,6 +1866,9 @@ function iniciaWebGL() {
   });
   canvas.addEventListener('pointerleave', () => { if (hover) { hover = null; canvas.style.cursor = ''; brut = true; } });
 
+  // Pla de tall del pis: els objectes alts del catàleg (armaris, làmpades) no passen dels 1,1 m de la maqueta
+  TALL = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e5); renderer.clippingPlanes = [TALL];
+  cat.inicia({ THREE, M, caixa, caixaR, cilindre, planta, cadira, llit, renderer, scene, camera, controls });
   elEstat.dataset.estat = 'llest';
   return true;
 }
@@ -2052,7 +2088,8 @@ function enBase64(blob) {
    només el que difereix de l'inici. Les peces següents hi afegeixen camps i els vells s'ignoren; una versió
    que no coneixem no es restaura. El camp «w» (setmana d'inici) va existir fins al 25/10/2026 i ara s'ignora (en Lluc: cap termini al 3D). Si l'URL passa de ~2.000 caràcters, les opcions s'abreugen amb ENLLAC_CLAUS
    (només s'hi poden afegir noms al final: l'ordre és part del format). ── */
-const ENLLAC_V = 1, ENLLAC_MAX = 2000;
+const TIPUS_OBJ = Object.keys(OBJECTES);   // l'ordre no es pot canviar: el fan servir els enllaços compactes
+const ENLLAC_V = 2, ENLLAC_MAX = 2000;   // v2 (peça 3): els objectes del catàleg; un enllaç v1 s'obre igual
 const ENLLAC_CLAUS = ['m2', 'forma', 'tipo', 'frente', 'acabado', 'tiradores', 'encimera', 'frontal', 'suelo', 'paredes', 'lamparas',
   'grifo', 'led', 'electro', 'paquete', 'mueble', 'espejo', 'griferia', 'sueloB', 'pared', 'luces', 'inodoro', 'armario', 'ventanas'];
 const enB64u = s => btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -2069,6 +2106,8 @@ function estatEnllac(compacte) {
     v: ENLLAC_V, ...(compacte ? { c: 1 } : {}), t: unaSola() || 'casa', d: st.dorm, b: st.banos, l: st.llum,
     ...(st.activa ? { a: st.activa } : {}),
     e: [...st.zones.values()].filter(x => x.on).map(x => x.id), z,
+    // Objectes de les sales que s'han tocat: [tipus (en compacte, el número), x i z en cm des del centre, gir]
+    o: Object.fromEntries([...st.zones.values()].filter(x => x.tocat && x.objs).map(x => [x.id, x.objs.map(b => [compacte ? TIPUS_OBJ.indexOf(b.t) : b.t, Math.round(b.x * 100), Math.round(b.z * 100), b.r])])),
   };
 }
 function enllacDisseny() {
@@ -2082,7 +2121,7 @@ function llegeixEnllac() {
   if (!m) return null;
   try {
     const e = JSON.parse(deB64u(m[1]));
-    return e && typeof e === 'object' && e.v === ENLLAC_V ? e : null;
+    return e && typeof e === 'object' && (e.v === 1 || e.v === ENLLAC_V) ? e : null;
   } catch { return null; }
 }
 /* Posa l'estat llegit al panell. Cada valor es valida contra el que el formulari ofereix; el que no quadra es deixa com a l'inici. */
@@ -2108,6 +2147,16 @@ function restauraEnllac(e) {
     }
     const mn = MINIMS[clau];
     if (mn && z.opts[mn[0]] === mn[1] && z.opts.m2 < mn[2]) z.opts[mn[0]] = mn[3];
+  }
+  // Objectes del catàleg: només tipus que hi ha en aquella sala; la posició es comprova en obrir-la (reubica)
+  const os = e.o && typeof e.o === 'object' ? e.o : {};
+  for (const id of Object.keys(os)) {
+    const z = st.zones.get(id);
+    if (!z || FORM_DE[z.tipus] !== 'estancia' || !Array.isArray(os[id])) continue;
+    z.objs = os[id].map(b => (Array.isArray(b) && e.c && Number.isInteger(b[0]) ? [TIPUS_OBJ[b[0]], ...b.slice(1)] : b))
+      .filter(b => Array.isArray(b) && OBJECTES[b[0]]?.sales.includes(z.tipus) && Number.isFinite(b[1]) && Number.isFinite(b[2]) && [0, 1, 2, 3].includes(b[3]))
+      .slice(0, 40).map(([t, x, zz, r]) => ({ t, x: x / 100, z: zz / 100, r }));
+    z.tocat = true; z.opts.armario = false;
   }
   if (e.l === 'nit' || e.l === 'dia') {
     st.llum = e.l;
@@ -2243,6 +2292,7 @@ function marcaZona(id, on) {
    passadís, que s'edita dins del pis amb boira a la resta. Si era fosca, es torna a marcar. Es desa on era la
    càmera perquè «Volver al piso» hi torni. */
 function entraZona(id) {
+  cat.surt();
   const z = st.zones.get(id);
   if (!z.on) marcaZona(id, true);
   if (renderer && !st.dins) st.tornada = { p: camera.position.clone(), t: controls.target.clone() };
@@ -2258,12 +2308,14 @@ function entraZona(id) {
       st.vista = 'pis'; pla.grup.visible = true; elEtiq.hidden = false; $('[data-abans]').hidden = true;
       ombraPer(Math.max(plaObj.W, plaObj.D) + 2); aplicaLlum();
       posa(vistaSala(id));
-      $('.pn-pista').textContent = I18N.t('Arrastra para girar. Toca otro espacio para entrar en él.');
+      muntaPassadis();
+      $('.pn-pista').textContent = I18N.t('Arrastra un objeto para moverlo. Toca otro espacio para entrar en él.');
     }
   }
   refresca();
 }
 function tornaPis() {
+  cat.surt();
   st.dins = null; st.activa = null; elEditor.hidden = true;
   elCos.classList.remove('dins');
   $('[data-torna]').hidden = true;
@@ -2318,7 +2370,7 @@ async function carrega3D() {
   if (dins) obreInterior();
   else if (st.dins) { const id = st.dins; st.dins = null; entraZona(id); st.tornada = { p: puntVista(vPis), t: vPis.t.clone() }; }
   // Proves automàtiques (?prova): l'estat i la càmera, per comparar-los des de Playwright. Sense ?prova no hi ha res.
-  if (new URLSearchParams(location.search).has('prova')) window.__panell = { st, pla: () => pla, camera, controls, preuZona, calcula, enllacDisseny, resumDisseny, missatgeWhatsApp };
+  if (new URLSearchParams(location.search).has('prova')) window.__panell = { st, cat, OBJECTES, pla: () => pla, camera, controls, preuZona, calcula, enllacDisseny, resumDisseny, missatgeWhatsApp, preparaPdf };
   refresca();
   pinta = true; brut = true;
 }
@@ -2459,6 +2511,7 @@ document.addEventListener('idioma-canviat', () => {
   if (plaAra) plaAra._brut = true;
   pintaPreusOpcions();
   for (const clau of ['cocina', 'bano']) if (!forms[clau].hidden) construeixGraella(clau);
+  if (!forms.estancia.hidden) cat.pintaPanell(st.zones.get(st.activa));   // fitxes del catàleg i nom de l'objecte triat
   pintaPanell();
   brut = true;
 });
