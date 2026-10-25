@@ -1060,6 +1060,34 @@ function escalfaVol() {
   renderer.compileAsync(scene, camera).catch(() => {});
   fos.restaura();
 }
+/* La primera entrada al bany s'encallava 1,5–2 s (25/10/2026). Muntar-lo és ràpid; el que s'encalla és compilar de cop
+   els shaders de les seves peces en pintar-lo i, a l'ordinador, la foto del mirall (reflexMirall), que pinta l'escena cap
+   a un cub i en demana una altra versió (sense el to de la pantalla) per al bany, el pis i les còpies transparents del
+   vol. Al mateix primer gest, es munta un bany de prova fora de l'escena, el navegador compila tot això de fons i les
+   textures pugen a la GPU. També sense moviment: allà no hi ha vol, però el bany s'obre igual. */
+let escalfatBany = false;
+function escalfaBany() {
+  const z = [...st.zones.values()].find(z => z.tipus === 'bano');
+  if (escalfatBany || !renderer || !pla || !z || interior || st.vol) return;
+  escalfatBany = true;
+  vernisBany();
+  const prova = new THREE.Scene(), g = escenaDe(z), mats = new Set();
+  prova.add(g);
+  g.traverse(o => { if (o.isMesh) [].concat(o.material).forEach(m => mats.add(m)); });
+  for (const m of mats) for (const t of [m.map, m.bumpMap]) if (t) renderer.initTexture(t);
+  const compila = escena => renderer.compileAsync(escena, camera, scene).catch(() => {});
+  if (!MOBIL) {
+    const rt = renderer.getRenderTarget(), env = M.mirall.envMap, fos = esvaeix(pla.grup);
+    renderer.setRenderTarget(cubCamera().renderTarget);      // el que veu el mirall: el bany i el pis, quiet i esvaint-se
+    compila(prova); compila(scene); fos.restaura(); compila(scene);
+    renderer.setRenderTarget(rt);
+    M.mirall.envMap = cubCam.renderTarget.texture;           // i el mirall amb el seu reflex, a la pantalla
+    compila(prova);
+    M.mirall.envMap = env;
+  } else compila(prova);
+  allibera(g);
+}
+const escalfa = () => { escalfaVol(); escalfaBany(); };
 /* Un sol recorregut: el punt on mira va en línia recta; la distància (en escala logarítmica), l'altura i el gir, de mica
    en mica. a: { t, r, pol, az } */
 function camiCamera(de, deT, a) {
@@ -1294,9 +1322,13 @@ function aplicaLlum() {
 }
 
 let cubCam = null;
+function cubCamera() {
+  if (!cubCam) { cubCam = new THREE.CubeCamera(.05, 30, new THREE.WebGLCubeRenderTarget(256)); scene.add(cubCam); }
+  return cubCam;
+}
 function reflexMirall(nit) {
   if (MOBIL || !interior || st.vista !== 'bano') { M.mirall.envMap = entorn; M.mirall.envMapIntensity = nit ? .35 : 1; return; }
-  if (!cubCam) { cubCam = new THREE.CubeCamera(.05, 30, new THREE.WebGLCubeRenderTarget(256)); scene.add(cubCam); }
+  cubCamera();
   const miralls = [];
   interior.updateMatrixWorld();
   interior.traverse(o => { if (o.isMesh && o.material === M.mirall) miralls.push(o); });
@@ -1535,7 +1567,7 @@ function iniciaWebGL() {
 
   // Tocar: un clic sense arrossegar tria la zona; el ratolí per sobre la il·lumina
   let baixa = null;
-  canvas.addEventListener('pointerdown', e => { escalfaVol(); baixa = pessic ? null : { x: e.clientX, y: e.clientY }; });
+  canvas.addEventListener('pointerdown', e => { escalfa(); baixa = pessic ? null : { x: e.clientX, y: e.clientY }; });
   canvas.addEventListener('pointerup', e => {
     if (!baixa) return;
     const mou = Math.hypot(e.clientX - baixa.x, e.clientY - baixa.y); baixa = null;
@@ -1549,7 +1581,7 @@ function iniciaWebGL() {
     if (id && id !== st.dins) entraZona(id);
   });
   canvas.addEventListener('pointermove', e => {
-    escalfaVol();
+    escalfa();
     if (e.pointerType !== 'mouse' || baixa) return;
     if (interior) { canvas.style.cursor = partSota(e) ? 'pointer' : ''; return; }
     const id = zonaSota(e);
@@ -1707,7 +1739,7 @@ function fesPdf(r, jpeg, correu) {
 
   // Capçalera
   text('Cota Cero Reformas', M, H - 50, 12, { negreta: true });
-  text('cota-cero.pages.dev  ·  600 000 000', W - M, H - 50, 9, { col: '#52565A', dreta: true });
+  text('cotacero.ductik.com  ·  600 000 000', W - M, H - 50, 9, { col: '#52565A', dreta: true });
   linia(M, H - 62, W - M, H - 62);
   // Títol
   const titol = trenca(`${I18N.t('Tu reforma')}: ${r.modeNom}`, 22, amp, true).slice(0, 2);
@@ -2107,7 +2139,7 @@ elZones.addEventListener('change', e => {
   const c = e.target.closest('[data-check-zona]');
   if (c) { marcaZona(c.dataset.checkZona, c.checked); $(`[data-check-zona="${c.dataset.checkZona}"]`, elZones)?.focus(); }
 });
-['pointerover', 'focusin'].forEach(t => elZones.addEventListener(t, escalfaVol));   // «Editar ›» també entra volant
+['pointerover', 'focusin'].forEach(t => elZones.addEventListener(t, escalfa));   // «Editar ›» també entra volant
 elZones.addEventListener('click', e => {
   const b = e.target.closest('[data-edita-zona]');
   if (b) { entraZona(b.dataset.editaZona); $('[data-torna-panell]').focus({ preventScroll: true }); }

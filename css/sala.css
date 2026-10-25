@@ -43,6 +43,10 @@
   background: radial-gradient(ellipse 85% 95% at 0% 100%, rgb(var(--sala-fosc) / .82) 0%, rgb(var(--sala-fosc) / .7) 50%, rgb(var(--sala-fosc) / 0) 88%);
 }
 @media (max-width: 760px) {
+  /* Els botons del hero, per sobre del WhatsApp flotant (3,5rem a 1rem de baix). Sense moviment, la capçalera és
+     sticky i l'escenari comença a sota seu: el hero acaba una capçalera més avall de la pantalla. */
+  .sala-hero { padding-bottom: 5.75rem; }
+  html:not(.sala-moviment) .sala-hero { padding-bottom: calc(var(--cap-h) + 5.75rem); }
   .sala-hero::before { background: linear-gradient(to top, rgb(var(--sala-fosc) / .84) 0%, rgb(var(--sala-fosc) / .64) 48%, rgb(var(--sala-fosc) / 0) 82%); }
 }
 .sala-hero h1 {
