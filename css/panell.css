@@ -182,7 +182,7 @@
 
 /* ── Només una habitació (?tipo=cocina|bano): sense res del pis ── */
 :root:not([data-sol]) .pn-modes,
-[data-sol] .pn-pis, [data-sol] .pn-editor-cap, [data-sol] .pn-dins,
+[data-sol] .pn-pis, [data-sol] .pn-editor-cap, [data-sol] .pn-enrere,
 [data-sol] .pn-torna, [data-sol] .pn-etiquetes, [data-sol] .pn-cap-zona { display: none; }
 [data-sol] .pn-editor { border-top: 0; padding-top: 0; }
 [data-titol-sol] { display: none; }
@@ -252,7 +252,6 @@
 .pn-part-preu b { font: 700 var(--t-s)/1.2 var(--f-titol); color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .pn-sub + .pn-sub { margin-top: .9rem; }
 .pn-sub-titol { margin: 0 0 .45rem; font: 600 var(--t-xs)/1.2 var(--f-titol); }
-.pn-part .pn-setmanes { margin-top: 1rem; padding-bottom: 0; }
 .pn-part .pn-paquet b { display: flex; justify-content: space-between; gap: .5rem; }
 .pn-part .pn-paquet b span { font-weight: 500; color: var(--text-suau); white-space: nowrap; }
 
@@ -278,35 +277,47 @@
 /* Estances sense triar: més apagades; la que s'edita, marcada */
 .pn-et-off { color: var(--text-suau); background: var(--superficie-2); }
 .pn-et-activa { box-shadow: 0 0 0 2px var(--marca); }
+.pn-et-fora { opacity: .35 !important; }   /* dins del passadís, les etiquetes de la resta */
 
 
 /* El pis: comptadors i zones */
 .pn-titol-grup { font: 600 var(--t-s)/1.2 var(--f-titol); margin: 0 0 .85rem; }
 .pn-pis .pn-grup-comptadors { margin-bottom: 1rem; }
-.pn-zones-titol { margin: 0 0 .6rem; font-size: .875rem; line-height: 1.45; color: var(--text-suau); }
-.pn-zones { display: flex; flex-wrap: wrap; gap: .4rem; }
-.pn-zona {
-  display: inline-flex; align-items: baseline; gap: .4rem;
-  padding: .55rem .75rem; border-radius: 999px; cursor: pointer;
-  font: 600 .8125rem/1.1 var(--f-titol); color: var(--text-suau);   /* sobre --superficie-2: 6,5:1 */
-  background: var(--superficie-2); border: 1px solid transparent;
-  transition: background-color .2s, color .2s, border-color .2s;
+.pn-estils-pis { margin: 1.1rem 0 1.25rem; }
+/* La llista d'espais (en Lluc, 24/10/2026): casella d'argila, nom, m² i «Editar ›»; desmarcat, el nom en gris */
+.pn-llista-titol span { font-variant-numeric: tabular-nums; }
+.pn-llista { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--vora-suau); }
+.pn-fila { display: flex; align-items: center; gap: .5rem; min-height: 3rem; border-bottom: 1px solid var(--vora-suau); }
+.pn-fila-check { flex: 1; min-width: 0; display: flex; align-items: center; gap: .7rem; padding: .55rem 0; cursor: pointer; }
+.pn-fila-check input {
+  appearance: none; flex: none; width: 1.25rem; height: 1.25rem; margin: 0; cursor: pointer;
+  border: 1.5px solid var(--vora); border-radius: 4px; background: var(--blanc); transition: background-color .15s, border-color .15s;
 }
-.pn-zona:hover { border-color: var(--text-suau); }
-.pn-zona[aria-pressed="true"] { background: var(--blanc); color: var(--text); border-color: var(--vora-suau); }
-.pn-zona[aria-pressed="true"]::before {
-  content: ""; align-self: center; width: .5rem; height: .5rem; border-radius: 50%; background: var(--marca);
+.pn-fila-check input:checked { background: var(--marca) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 80% no-repeat; border-color: var(--marca); }
+.pn-fila-check input:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+.pn-fila-nom { font: 600 .9375rem/1.25 var(--f-titol); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pn-fila-m2 { margin-left: auto; font: 500 .8125rem/1 var(--f-titol); color: var(--text-suau); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pn-fila.off .pn-fila-nom { font-weight: 500; color: var(--text-suau); }
+.pn-fila-edita {
+  flex: none; padding: .55rem .1rem .55rem .7rem; border: 0; background: none; cursor: pointer;
+  font: 600 .8125rem/1 var(--f-titol); color: var(--marca);
+  text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; transition: text-decoration-color .15s;
 }
-.pn-zona.activa { border-color: var(--marca); box-shadow: inset 0 0 0 1px var(--marca); }
-.pn-zona:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
-.pn-zona-m2 { font-weight: 500; font-size: .75rem; font-variant-numeric: tabular-nums; }
+@media (hover: hover) { .pn-fila-edita:hover { text-decoration-color: currentColor; } }
+.pn-fila-edita:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; border-radius: 3px; }
 .pn-tot {
   margin-top: .7rem; padding: .3rem 0; border: 0; background: none; cursor: pointer;
   font: 600 .875rem/1.2 var(--f-titol); color: var(--marca); text-decoration: underline; text-underline-offset: .2em;
 }
 .pn-tot:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
 
-/* Editor de la zona */
+/* Editor de la zona: amb una zona oberta, el panell només ensenya l'editor i «‹ Todo el piso» */
+.pn-enrere { display: none; align-items: center; gap: .25rem; margin: 0 0 .9rem -.2rem; padding: .3rem .2rem; border: 0; background: none; cursor: pointer; font: 600 .875rem/1 var(--f-titol); color: var(--marca); }
+.pn-enrere svg { width: 1.1rem; height: 1.1rem; }
+.pn-enrere:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; border-radius: 3px; }
+.pn-cos.dins .pn-enrere { display: inline-flex; }
+.pn-cos.dins .pn-pis, .pn-cos.dins .pn-intro, .pn-cos.dins #pn-titol { display: none; }
+.pn-cos.dins .pn-editor { border-top: 0; padding-top: 0; }
 .pn-editor { border-top: 1px solid var(--vora-suau); padding-top: 1.1rem; scroll-margin-top: calc(var(--cap-h) + 1rem); }
 .pn-editor:not([hidden]) { animation: pn-editor .35s var(--entra, ease) both; }
 @keyframes pn-editor { from { opacity: 0; transform: translateY(8px); } }
@@ -324,8 +335,6 @@
 .pn-interruptor input:checked { background: var(--marca); }
 .pn-interruptor input:checked::after { transform: translateX(1rem); }
 .pn-interruptor input:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
-.pn-dins { width: 100%; min-height: 2.75rem; font-size: .9375rem; margin-bottom: .3rem; }
-.pn-dins svg { width: 1.15rem; height: 1.15rem; }
 .pn-editor .pn-opcions .pn-grup:first-child { border-top: 0; }
 .pn-targetes-4 { grid-template-columns: repeat(2, 1fr); }
 .pn-targetes-4 .pn-mat { aspect-ratio: 16 / 5; }
@@ -345,7 +354,7 @@
 .pn-accions .btn:disabled { opacity: .45; cursor: not-allowed; }
 
 /* Inputs amagats però accessibles dins de cada etiqueta */
-.pn-targeta input, .pn-mostra input, .pn-paquet input, .pn-dia input {
+.pn-targeta input, .pn-mostra input, .pn-paquet input {
   position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none;
 }
 
@@ -432,21 +441,6 @@
 .pn-comptador output { min-width: 1.4ch; text-align: center; font-size: 1rem; font-variant-numeric: tabular-nums; }
 .pn-avis { grid-column: 1 / -1; margin: .2rem 0 0; font: 500 .75rem/1.35 var(--f-titol); color: var(--text-suau); }
 
-/* Setmanes */
-.pn-dies { display: grid; grid-template-columns: repeat(4, 1fr); gap: .45rem; }
-.pn-dia {
-  position: relative; display: grid; justify-items: center; gap: .1rem; padding: .5rem .25rem .55rem; cursor: pointer;
-  background: var(--blanc); border: 1px solid var(--vora); border-radius: var(--radi);
-  font: 500 .6875rem/1.1 var(--f-titol); color: var(--text-suau);
-  transition: border-color .2s, box-shadow .2s;
-}
-.pn-dia b { font: 700 1.25rem/1 var(--f-titol); color: var(--text); font-variant-numeric: tabular-nums; }
-.pn-dia:has(input:checked) { border-color: var(--marca); box-shadow: inset 0 0 0 1px var(--marca); }
-.pn-dia:has(input:focus-visible) { outline: 2px solid var(--marca); outline-offset: 2px; }
-.pn-dia:has(input:disabled) { cursor: not-allowed; background: transparent; border-style: dashed; }
-.pn-dia:has(input:disabled) b { color: var(--vora-suau); }
-.pn-entrega { margin: .8rem 0 0; font-size: .875rem; line-height: 1.45; color: var(--text-suau); }
-.pn-entrega strong { color: var(--text); font-weight: 600; }
 
 /* Partides */
 .pn-partides { border-top: 1px solid var(--vora-suau); padding-top: 1rem; }

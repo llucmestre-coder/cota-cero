@@ -36,7 +36,6 @@ const PREUS = {
     grifo: { negro: 140, laton: 290 },
     electro: { inox: 1900, negro: 2100, integrados: 2600 },
     paquete: { completa: 2300, llave: 2600 },
-    setmanes: { esencial: 3, completa: 3, llave: 4 },
   },
   bano: {
     obra: 380,
@@ -49,7 +48,6 @@ const PREUS = {
     'pared/m2': { verde: 90, cobalto: 90, micro: 160 },
     luces: { apliques: 190, led: 260 },
     paquete: { completa: 1400, llave: 2300 },
-    setmanes: { esencial: 2, completa: 2, llave: 3 },
   },
   estancia: {       // dormitoris, saló i passadís
     obra: 15,       // protecció, retirada i neteja
@@ -74,6 +72,8 @@ const ESTILS = {
   },
 };
 /* Forquilla (21/10/2026): del total −5 % al +10 %, arrodonit a 100 €. Gama segons el preu per m². */
+/* A les estances (saló, dormitoris, passadís), l'estil del pis només canvia el terra: el de la cuina de cada estil (en Lluc, 25/10/2026) */
+ESTILS.estancia = { norte: { suelo: 'porcelanico' }, pueblo: { suelo: 'espiga' }, piedra: { suelo: 'microcemento' } };
 const FORQ = [.95, 1.10];
 const GAMES = { cocina: [900, 1300], bano: [1200, 1700], estancia: [150, 260] };
 
@@ -81,7 +81,7 @@ const GAMES = { cocina: [900, 1300], bano: [1200, 1700], estancia: [150, 260] };
 const FORM_DE = { salon: 'estancia', pasillo: 'estancia', dorm: 'estancia', cocina: 'cocina', bano: 'bano' };
 const RANG = { salon: [14, 40, .5], dorm: [7, 20, .5], cocina: [6, 30, 1], bano: [4, 12, .5] };
 const forms = Object.fromEntries($$('.pn-opcions').map(f => [f.dataset.per, f]));
-const st = { dorm: 2, banos: 1, zones: new Map(), activa: null, vista: 'pis', llum: 'dia', abans: false, gir: false };
+const st = { dorm: 2, banos: 1, zones: new Map(), activa: null, dins: null, tornada: null, vista: 'pis', llum: 'dia', abans: false, gir: false };
 /* 'cocina' o 'bano' quan el panell és d'una sola habitació (l'script del <head> ho marca a <html>); si no, null */
 const unaSola = () => document.documentElement.dataset.sol || null;
 
@@ -102,14 +102,20 @@ function ordreFons() {
   return ids.concat(banys);
 }
 function idsZones() { return ['salon', 'cocina', 'pasillo', ...ordreFons()]; }
+/* Totes les zones comencen marcades (en Lluc, 24/10/2026), també les que s'afegeixen amb «+». El Map es refà
+   sempre en l'ordre del pis, perquè la llista i el desglossament no depenguin de l'ordre dels clics. */
+/* L'estil del pis que porten totes les zones marcades (o null): el botó marcat i el de les zones noves */
+function estilComu() {
+  const on = [...st.zones.values()].filter(z => z.on);
+  return (on.length && Object.keys(ESTILS.estancia).find(e => on.every(z => Object.entries(ESTILS[FORM_DE[z.tipus]][e]).every(([k, v]) => z.opts[k] === v)))) || null;
+}
 function sincronitzaZones() {
-  const ids = idsZones();
-  for (const id of [...st.zones.keys()]) if (!ids.includes(id)) st.zones.delete(id);
-  for (const id of ids) {
-    if (st.zones.has(id)) continue;
+  const zones = new Map(), estil = estilComu();   // les zones noves («+») prenen l'estil del pis (en Lluc: s'aplica a tot el pis)
+  for (const id of idsZones()) {
     const tipus = id.replace(/\d+$/, ''), n = +(id.match(/\d+$/) || [0])[0];
-    st.zones.set(id, { id, tipus, n, on: false, opts: opcionsInicials(tipus, n) });
+    zones.set(id, st.zones.get(id) || { id, tipus, n, on: true, opts: { ...opcionsInicials(tipus, n), ...(estil ? ESTILS[FORM_DE[tipus]][estil] : {}) } });
   }
+  st.zones = zones;
   if (st.activa && !st.zones.has(st.activa)) st.activa = null;
 }
 function nomZona(z) {
@@ -167,17 +173,16 @@ function eur(n) {
 /* ── Preu d'una zona ── */
 function preuZona(z) {
   const clau = FORM_DE[z.tipus], P = PREUS[clau], o = z.opts, m2 = o.m2;
-  let total = m2 * P.obra, setm;
+  let total = m2 * P.obra;
   const detalls = [], parts = [[`${I18N.t('Obra')} · ${fmtNum(m2)} m²`, m2 * P.obra]], grups = { obra: m2 * P.obra };
   if (clau === 'estancia') {
     total += (P['suelo/m2'][o.suelo] || 0) * m2 + (P['paredes/m2'][o.paredes] || 0) * m2;
     detalls.push(`${nomGrup(clau, 'suelo')}: ${nomValor(clau, 'suelo', o.suelo)}`, `${nomGrup(clau, 'paredes')}: ${nomValor(clau, 'paredes', o.paredes)}`);
     if (o.armario && z.tipus === 'dorm') { total += P.armario; detalls.push(nomValor(clau, 'armario')); }
     if (o.ventanas && finestresZona(z)) { total += P.ventana * finestresZona(z); detalls.push(nomValor(clau, 'ventanas')); }
-    setm = 1 + (o.paredes === 'alisar' ? 1 : 0);
   } else {
     for (const [k, taula] of Object.entries(P)) {
-      if (k === 'setmanes' || k === 'obra') continue;
+      if (k === 'obra') continue;
       const [nom, perM2] = k.split('/');
       const preu = (taula[o[nom]] || 0) * (perM2 ? m2 : 1);
       total += preu;
@@ -186,9 +191,8 @@ function preuZona(z) {
       detalls.push(nomValor(clau, nom, o[nom]));
       if (preu) parts.push([nom === 'paquete' ? nomValor(clau, nom, o[nom]) : `${nomGrup(clau, nom)}: ${nomValor(clau, nom, o[nom])}`, preu]);
     }
-    setm = P.setmanes[o.paquete] + (m2 > (clau === 'cocina' ? 18 : 8) ? 1 : 0);
   }
-  return { total: Math.round(total), detalls, setm, parts, grups };
+  return { total: Math.round(total), detalls, parts, grups };
 }
 /* La part (data-part) i el grup (data-grup) de cada camp, segons on és a l'HTML */
 const LLOCS = {};
@@ -204,7 +208,7 @@ function preuPart(z, part) {
   let n = part === 'obra' ? o.m2 * P.obra : 0;
   for (const [k, taula] of Object.entries(P)) {
     const [nom, perM2] = k.split('/');
-    if (k !== 'setmanes' && k !== 'obra' && lloc(clau, nom).part === part) n += (taula[o[nom]] || 0) * (perM2 ? o.m2 : 1);
+    if (k !== 'obra' && lloc(clau, nom).part === part) n += (taula[o[nom]] || 0) * (perM2 ? o.m2 : 1);
   }
   return n;
 }
@@ -241,9 +245,7 @@ function gama(r) {
 function calcula() {
   const triades = [...st.zones.values()].filter(z => z.on);
   const linies = triades.map(z => { const p = preuZona(z); return [`${nomZona(z)} · ${fmtNum(z.opts.m2)} m²`, p.total, p, z]; });
-  const setm = linies.map(l => l[2].setm).sort((a, b) => b - a);
-  const setmanes = setm.length ? setm[0] + Math.ceil(setm.slice(1).reduce((a, b) => a + b, 0) * .5) : 0;
-  return { total: linies.reduce((a, l) => a + l[1], 0), linies, setmanes, triades };
+  return { total: linies.reduce((a, l) => a + l[1], 0), linies, triades };
 }
 
 /* ── Pintar el panell ── */
@@ -252,10 +254,15 @@ const elZones = $('[data-zones]'), elEditor = $('[data-editor]');
 let totalVist = null;
 function pintaPanell() {
   const r = calcula();
-  // Llista de zones (alternativa a tocar la maqueta; també per a teclat)
+  // Llista d'espais: la casella el treu o el torna al preu; «Editar ›» hi entra (com tocar-lo a la maqueta)
   elZones.innerHTML = [...st.zones.values()].map(z =>
-    `<button type="button" class="pn-zona${st.activa === z.id ? ' activa' : ''}" data-zona="${z.id}" aria-pressed="${z.on}">`
-    + `<span class="pn-zona-nom">${nomZona(z)}</span><span class="pn-zona-m2">${fmtNum(z.opts.m2)} m²</span></button>`).join('');
+    `<li class="pn-fila${z.on ? '' : ' off'}"><label class="pn-fila-check"><input type="checkbox" data-check-zona="${z.id}"${z.on ? ' checked' : ''}>`
+    + `<span class="pn-fila-nom">${nomZona(z)}</span><span class="pn-fila-m2">${fmtNum(z.opts.m2)} m²</span></label>`
+    + `<button type="button" class="pn-fila-edita" data-edita-zona="${z.id}" aria-label="${I18N.t('Editar')}: ${nomZona(z)}">${I18N.t('Editar')} <span aria-hidden="true">›</span></button></li>`).join('');
+  // L'estil del pis queda marcat si totes les zones marcades el porten
+  const estil = estilComu();
+  $$('[data-estil-pis]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.estilPis === estil)));
+  $('[data-compte-on]').textContent = I18N.t('{a} de {b}').replace('{a}', r.triades.length).replace('{b}', st.zones.size);
   $('[data-tot]').hidden = r.triades.length === st.zones.size;
   $$('[data-compte]').forEach(o => { o.textContent = st[o.dataset.compte]; });
   pintaTotalM2();
@@ -286,7 +293,6 @@ function pintaPanell() {
   xip.hidden = !ultimCanvi || !ultimCanvi.delta || !r.triades.length;
   if (!xip.hidden) xip.innerHTML = `<span class="pn-xip-et">${I18N.t('Último cambio')}:</span> <b>${signe(ultimCanvi.delta)}</b> · ${ultimCanvi.nom}`;
   animaTotal(r.total);
-  pintaEntrega(r.setmanes);
   $$('[data-obre-pdf], [data-whatsapp]').forEach(b => { b.disabled = !r.triades.length; });
   $('[data-cap-zona]').hidden = !!r.triades.length;
   pintaEtiquetes();
@@ -342,22 +348,13 @@ function obrePart(clau, part, enfoca = true) {
   partOberta[clau] = part;
   $$('[data-part]', f).forEach(fs => { fs.hidden = fs.dataset.part !== part; });
   $$('[data-peca]', f).forEach(b => b.setAttribute('aria-pressed', String(b.dataset.peca === part)));
-  colocaSetmanes();
   if (enfoca) { enfocaPart(part); portaALaVista($(`[data-part="${part}"]`, f)); }
-}
-/* «Cuándo empezamos»: a la cuina i el bany, dins de «Obra y fecha»; al pis, al final del panell */
-const elSetmanes = $('.pn-setmanes');
-function colocaSetmanes() {
-  const z = st.activa && st.zones.get(st.activa), clau = z && FORM_DE[z.tipus];
-  const dins = unaSola() && clau && clau !== 'estancia' && $('[data-lloc-setmanes]', forms[clau]);
-  const on = dins || $('.pn-cos');
-  if (elSetmanes.parentNode !== on) on.appendChild(elSetmanes);
 }
 /* El preu de cada opció, escrit a partir de PREUS (així sempre quadra amb el càlcul) */
 function pintaPreusOpcions() {
   for (const clau of ['cocina', 'bano']) {
     for (const [k, taula] of Object.entries(PREUS[clau])) {
-      if (k === 'setmanes' || k === 'obra') continue;
+      if (k === 'obra') continue;
       const [nom, perM2] = k.split('/'), base = ['forma', 'tipo'].includes(nom) ? Math.min(...Object.values(taula)) : 0;
       for (const inp of $$(`input[name="${nom}"]`, forms[clau])) {
         const el = $('[data-preu]', inp.closest('label'));
@@ -379,31 +376,7 @@ function pintaParts(z) {
   }
 }
 
-/* ── Setmanes d'inici: dilluns a partir de d'aquí a dues setmanes ── */
-const elDies = $('[data-setmanes]');
 function dataLang() { const l = document.documentElement.lang || 'es'; return l === 'ca' ? 'ca-ES' : l === 'en' ? 'en-GB' : 'es-ES'; }
-function preparaSetmanes() {
-  const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + 14);
-  while (d.getDay() !== 1) d.setDate(d.getDate() + 1);
-  const mes = new Intl.DateTimeFormat(dataLang(), { month: 'short' });
-  const completa = I18N.t('Completa');
-  let html = '';
-  for (let i = 0; i < 4; i++) {
-    const dd = new Date(d); dd.setDate(d.getDate() + i * 7);
-    const ple = i === 1;            // una setmana plena: es veu que l'agenda és real
-    html += `<label class="pn-dia"><input type="radio" name="setmana" value="${dd.toISOString().slice(0, 10)}"${i === 0 ? ' checked' : ''}${ple ? ' disabled' : ''}>`
-      + `<b>${dd.getDate()}</b><span>${ple ? completa : mes.format(dd).replace('.', '')}</span></label>`;
-  }
-  elDies.innerHTML = html;
-}
-function pintaEntrega(setmanes) {
-  const inp = $('input[name="setmana"]:checked', elDies);
-  if (!inp) return;
-  const d = new Date(inp.value + 'T12:00:00'); d.setDate(d.getDate() + Math.max(1, setmanes) * 7);
-  $('[data-entrega]').textContent = new Intl.DateTimeFormat(dataLang(), { day: 'numeric', month: 'long' }).format(d);
-  const ini = new Date(inp.value + 'T12:00:00');
-  $('output[data-tria="setmana"]').textContent = new Intl.DateTimeFormat(dataLang(), { day: 'numeric', month: 'long' }).format(ini);
-}
 
 /* ── Opcions que no caben en pocs m²: l'illa (16 m²) i la banyera (5 m²) ── */
 const MINIMS = {
@@ -449,8 +422,6 @@ function obreEditor(id) {
     $('[data-camp="ventanas"]', f).hidden = !finestresZona(z);
     $('[data-camp="extres"]', f).hidden = z.tipus === 'pasillo';
   } else { ajustaMinims(clau, false); construeixGraella(clau); }
-  $('[data-dins]').hidden = clau === 'estancia';
-  colocaSetmanes();
 }
 
 
@@ -851,6 +822,29 @@ function finestraCuina(W) {
   const ww = Math.min(1.4, W * .32), wx2 = W / 2 - Math.max(.35, W * .08);
   return { wx1: wx2 - ww, wx2, wy1: 1.05, wy2: 2.25 };
 }
+/* Saló i dormitoris de prop (en Lluc, 25/10/2026): la sala sola a escala real, amb dues parets tallades com la cuina,
+   la finestra (marc de la zona: grafit si són noves) i els mateixos mobles del pis. Les mides surten de la distribució. */
+function escenaEstancia(z) {
+  const r0 = plaObj.zones[z.id], W = r0.x2 - r0.x1, D = r0.z2 - r0.z1, H = 2.6, T = .12, x0 = -W / 2, z0 = -D / 2;
+  const g = new THREE.Group(), P = M.paretInt, mt = materialsZona(z);
+  caixa(W, .03, D, mt.terra, 0, -.03, 0, g).castShadow = false;
+  paret(T, H, D + T, x0 - T / 2, 0, -T / 2, g, P);
+  const zb = z0 - T / 2;
+  if (finestresZona(z)) {
+    const { wx1, wx2, wy1, wy2 } = finestraCuina(W);
+    paret(wx1 - x0 + T, H, T, (x0 - T + wx1) / 2, 0, zb, g, P);
+    paret(W / 2 - wx2, H, T, (wx2 + W / 2) / 2, 0, zb, g, P);
+    paret(wx2 - wx1, wy1, T, (wx1 + wx2) / 2, 0, zb, g, P);
+    paret(wx2 - wx1, H - wy2, T, (wx1 + wx2) / 2, wy2, zb, g, P);
+    caixa(wx2 - wx1, wy2 - wy1, .02, M.finestra, (wx1 + wx2) / 2, wy1, z0 - T * .7, g, false);
+    caixa(wx2 - wx1 + .08, .03, .16, mt.marc, (wx1 + wx2) / 2, wy1 - .03, z0 + .02, g);
+  } else paret(W + T, H, T, -T / 2, 0, zb, g, P);
+  const mb = MOBLES[z.tipus]();
+  g.add(mb.grup); mb.posa({ x1: x0, x2: -x0, z1: z0, z2: -z0 }, z.opts);
+  g.userData = { mides: { W, D, H, T }, mida: Math.max(W, D) };
+  return g;
+}
+const escenaDe = z => z.tipus === 'cocina' ? escenaCuina(z.opts) : z.tipus === 'bano' ? escenaBany(z.opts) : escenaEstancia(z);
 function escenaCuina(v) {
   const g = new THREE.Group(), mi = midesCuina(v.m2), { W, D, H, T } = mi, x0 = -W / 2, z0 = -D / 2;
   marca(caixa(W, .03, D, M.terra, 0, -.03, 0, g), 'terra').castShadow = false;
@@ -1365,6 +1359,7 @@ function pintaEtiquetes() {
     o.et.el.innerHTML = `${nomZona(z)}<small>${fmtNum(z.opts.m2)} m²</small>`;
     o.et.el.classList.toggle('pn-et-off', !z.on);
     o.et.el.classList.toggle('pn-et-activa', st.activa === id);
+    o.et.el.classList.toggle('pn-et-fora', !!st.dins && st.dins !== id);
   }
 }
 /* La distribució a la qual ha d'anar el pis (lliscant) */
@@ -1381,7 +1376,9 @@ function avancaPla(dt) {
   let mou = acostaPla(plaAra, plaObj, k) > .0005;
   if (mou || plaAra._brut) { aplicaPla(plaAra); plaAra._brut = false; }
   for (const [id, o] of Object.entries(pla.zones)) {
-    const z = st.zones.get(id), obj = z.on ? 0 : hover === id ? .3 : .5, mt = o.vel.material;
+    const z = st.zones.get(id), boira = !!st.dins && st.dins !== id && z.on, mt = o.vel.material;
+    const obj = boira ? .62 : z.on ? 0 : hover === id ? .3 : .5;
+    mt.color.setHex(boira ? 0xF3F2EE : 0x1B1F22);
     const d = obj - mt.opacity;
     if (Math.abs(d) > .002) { mt.opacity += d * (QUIET ? 1 : 1 - Math.exp(-dt * 9)); mou = true; } else mt.opacity = obj;
     o.vel.visible = mt.opacity > .003 || !z.on;
@@ -1416,13 +1413,30 @@ function vista(quina, mida = 0, asp = aspUtil()) {
   if (quina === 'bano') return { t: new THREE.Vector3(0, 1.0, -.1), r: (mida * 1.35 + 2.2) * f, pol: 1.08, az: .6 };
   return { t: new THREE.Vector3(0, 0, .25), r: (mida * 1.5 + 5) * f, pol: .8, az: .38 };
 }
+/* El passadís no té vista de prop (en Lluc, 25/10/2026): la càmera s'hi acosta dins del pis */
+function vistaSala(id, asp = aspUtil()) {
+  const r = plaObj.zones[id], f = Math.pow(Math.max(1, 1.45 / asp), .75), mida = Math.max(r.x2 - r.x1, r.z2 - r.z1);
+  return { t: new THREE.Vector3((r.x1 + r.x2) / 2, .35, (r.z1 + r.z2) / 2), r: (mida * 1.6 + 5) * f, pol: .8, az: .38 };
+}
+/* Saló i dormitoris de prop: la distància surt de l'esfera que envolta la sala (terra i parets), perquè hi càpiga
+   sencera a l'espai lliure, també amb el panell al costat o a 390 (jutge, 25/10/2026) */
+function vistaProp({ W, D, H }, asp = aspUtil()) {
+  const R = Math.hypot(W, D, H) / 2, v = THREE.MathUtils.degToRad(camera.fov) / 2;
+  const mitja = Math.min(v, Math.atan(Math.tan(v) * asp));
+  return { t: new THREE.Vector3(0, H * .38, 0), r: R / Math.sin(mitja) * 1.04, pol: 1.0, az: .6 };
+}
+function puntVista(v) {
+  return new THREE.Vector3(Math.sin(v.pol) * Math.sin(v.az), Math.cos(v.pol), Math.sin(v.pol) * Math.cos(v.az)).multiplyScalar(v.r).add(v.t);
+}
 function vistaActual(asp) {
+  if (st.dins && st.vista === 'pis') return vistaSala(st.dins, asp);
+  if (interior && FORM_DE[st.vista] === 'estancia') return vistaProp(interior.userData.mides, asp);
   const mida = st.vista === 'pis' ? (plaObj ? Math.max(plaObj.W, plaObj.D) : 10) : interior ? interior.userData.mida : 5;
   return vista(st.vista, mida, asp);
 }
 function posa(v, dur = 900) {
   const de = camera.position.clone(), deT = controls.target.clone();
-  const a = new THREE.Vector3(Math.sin(v.pol) * Math.sin(v.az), Math.cos(v.pol), Math.sin(v.pol) * Math.cos(v.az)).multiplyScalar(v.r).add(v.t);
+  const a = puntVista(v);
   const pis = st.vista === 'pis';
   controls.minAzimuthAngle = v.az - (pis ? 1.2 : .75); controls.maxAzimuthAngle = v.az + (pis ? 1.2 : .75);
   controls.minDistance = v.r * .5; controls.maxDistance = v.r * 1.4;
@@ -1666,28 +1680,17 @@ function obreInterior() {
   st.vista = z.tipus;
   if (z.tipus === 'bano') vernisBany();
   if (interior) { scene.remove(interior); allibera(interior); }
-  interior = z.tipus === 'cocina' ? escenaCuina(z.opts) : escenaBany(z.opts);
+  interior = escenaDe(z);
   interior.userData.ultim = { ...z.opts };
   scene.add(interior); creix(interior, 600);
   pla.grup.visible = false; elEtiq.hidden = true;
   $('[data-torna]').hidden = false;
-  $('[data-tota]').hidden = true; $('[data-abans]').hidden = false;
+  $('[data-tota]').hidden = true; $('[data-abans]').hidden = FORM_DE[z.tipus] === 'estancia';   // les estances no tenen «Antes»
   $$('[data-tota-sol]').forEach(el => { el.hidden = el.dataset.totaSol !== st.vista; });
   ombraPer(interior.userData.mida + 2);
   posa(vistaActual());
   aplicaMaterials();
-  $('.pn-pista').textContent = I18N.t('Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.');
-  brut = true;
-}
-function tancaInterior() {
-  if (interior) { scene.remove(interior); allibera(interior); interior = null; }
-  st.vista = 'pis';
-  pla.grup.visible = true; elEtiq.hidden = false;
-  $('[data-torna]').hidden = true; $('[data-tota]').hidden = true; $('[data-abans]').hidden = true;
-  ombraPer(Math.max(plaObj.W, plaObj.D) + 2);
-  aplicaLlum();
-  posa(vistaActual());
-  $('.pn-pista').textContent = I18N.t('Toca una zona para elegirla. Arrastra para girar el piso.');
+  $('.pn-pista').textContent = I18N.t(FORM_DE[z.tipus] === 'estancia' ? 'Arrastra para girarla.' : 'Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.');
   brut = true;
 }
 /* Canvis d'opcions amb la cuina o el bany oberts */
@@ -1700,9 +1703,9 @@ function refrescaInterior() {
     const z = st.zones.get(st.activa);
     if (!interior || !z || z.tipus !== st.vista) return;
     const v = z.opts, u = interior.userData.ultim;
-    if (v.m2 !== u.m2) {
+    if (v.m2 !== u.m2 || (FORM_DE[z.tipus] === 'estancia' && (v.armario !== u.armario || v.ventanas !== u.ventanas))) {
       scene.remove(interior); allibera(interior);
-      interior = z.tipus === 'cocina' ? escenaCuina(v) : escenaBany(v);
+      interior = escenaDe(z);
       scene.add(interior);
       radiObjectiu = vistaActual().r;
     } else if (z.tipus === 'cocina' && ['forma', 'lamparas', 'electro'].some(k => v[k] !== u[k])) {
@@ -1820,7 +1823,7 @@ function iniciaWebGL() {
       return;
     }
     const id = zonaSota(e);
-    if (id) { tocaZona(id); if (!elEditor.hidden) elEditor.scrollIntoView({ behavior: QUIET ? 'auto' : 'smooth', block: MOBIL ? 'start' : 'nearest' }); }
+    if (id && id !== st.dins) entraZona(id);
   });
   canvas.addEventListener('pointermove', e => {
     if (e.pointerType !== 'mouse' || baixa) return;
@@ -1843,7 +1846,7 @@ function iniciaWebGL() {
 function filesPerPart(z) {
   const clau = FORM_DE[z.tipus], f = forms[clau];
   return [[I18N.t('Superficie'), fmtNum(z.opts.m2) + ' m²'], ...$$('[data-part]', f).map(fs => {
-    const noms = [...new Set($$('input', fs).map(i => i.name).filter(n => n && n !== 'setmana'))];
+    const noms = [...new Set($$('input', fs).map(i => i.name).filter(Boolean))];
     return [$('legend', fs).textContent.trim(), noms.map(n => nomValor(clau, n, z.opts[n])).join(' · ')];
   })];
 }
@@ -1852,8 +1855,6 @@ function resumDisseny() {
   const sola = unaSola() && r.triades.length === 1 && FORM_DE[r.triades[0].tipus] !== 'estancia';
   if (sola) files.push(...filesPerPart(r.triades[0]));
   else for (const [nom, , p] of r.linies) files.push([nom, p.detalls.join(' · ')]);
-  files.push([I18N.t('Empezamos'), $('output[data-tria="setmana"]').textContent.trim()]);
-  files.push([I18N.t('Entrega prevista'), I18N.t('semana del {dia}', { dia: $('[data-entrega]').textContent.trim() })]);
   const desg = desglossa(r).map(([t, n]) => [t, rang(n)]), forq = r.total ? forquilla(r.total) : '';
   const totes = r.triades.length === st.zones.size;
   const modeNom = totes ? I18N.t('Todo el piso') : r.triades.map(nomZona).join(', ');
@@ -2047,9 +2048,9 @@ function enBase64(blob) {
 
 /* ── L'enllaç al disseny: presupuesto.html#d=<base64url d'un JSON versionat>. Només les tries (cap dada
    personal). Format v1: { v, t: 'casa'|'cocina'|'bano', d: dormitoris, b: banys, l: 'dia'|'nit',
-   w: setmana d'inici, a: zona oberta, e: [zones al preu], z: { zona: { opció: valor } } } — de cada zona,
+   a: zona oberta, e: [zones al preu], z: { zona: { opció: valor } } } — de cada zona,
    només el que difereix de l'inici. Les peces següents hi afegeixen camps i els vells s'ignoren; una versió
-   que no coneixem no es restaura. Si l'URL passa de ~2.000 caràcters, les opcions s'abreugen amb ENLLAC_CLAUS
+   que no coneixem no es restaura. El camp «w» (setmana d'inici) va existir fins al 25/10/2026 i ara s'ignora (en Lluc: cap termini al 3D). Si l'URL passa de ~2.000 caràcters, les opcions s'abreugen amb ENLLAC_CLAUS
    (només s'hi poden afegir noms al final: l'ordre és part del format). ── */
 const ENLLAC_V = 1, ENLLAC_MAX = 2000;
 const ENLLAC_CLAUS = ['m2', 'forma', 'tipo', 'frente', 'acabado', 'tiradores', 'encimera', 'frontal', 'suelo', 'paredes', 'lamparas',
@@ -2061,13 +2062,12 @@ function estatEnllac(compacte) {
   const z = {};
   for (const zona of st.zones.values()) {
     const ini = opcionsInicials(zona.tipus, zona.n), dif = {};
-    for (const k of Object.keys(zona.opts)) if (k !== 'setmana' && zona.opts[k] !== ini[k]) dif[compacte && ENLLAC_CLAUS.includes(k) ? ENLLAC_CLAUS.indexOf(k) : k] = zona.opts[k];
+    for (const k of Object.keys(zona.opts)) if (zona.opts[k] !== ini[k]) dif[compacte && ENLLAC_CLAUS.includes(k) ? ENLLAC_CLAUS.indexOf(k) : k] = zona.opts[k];
     if (Object.keys(dif).length) z[zona.id] = dif;
   }
-  const w = ($('input[name="setmana"]:checked', elDies) || {}).value;
   return {
     v: ENLLAC_V, ...(compacte ? { c: 1 } : {}), t: unaSola() || 'casa', d: st.dorm, b: st.banos, l: st.llum,
-    ...(w ? { w } : {}), ...(st.activa ? { a: st.activa } : {}),
+    ...(st.activa ? { a: st.activa } : {}),
     e: [...st.zones.values()].filter(x => x.on).map(x => x.id), z,
   };
 }
@@ -2113,15 +2113,12 @@ function restauraEnllac(e) {
     st.llum = e.l;
     $$('[data-llum]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.llum === st.llum)));
   }
-  const setm = typeof e.w === 'string' && $$('input[name="setmana"]', elDies).find(i => i.value === e.w && !i.disabled);
-  if (setm) setm.checked = true;
-  if (typeof e.a === 'string' && st.zones.has(e.a)) obreEditor(e.a);
+  if (typeof e.a === 'string' && st.zones.has(e.a)) { if (unaSola()) obreEditor(e.a); else entraZona(e.a); }
 }
 
 function dadesServidor(r, extra) {
   return {
     ...extra, mode: r.mode, m2: r.v.m2, total: r.total, paquete: r.v.paquete,
-    inici: ($('input[name="setmana"]:checked', elDies) || {}).value || '',
     idioma: document.documentElement.lang || 'es', files: r.files,
   };
 }
@@ -2234,23 +2231,64 @@ elPreu.addEventListener('keydown', e => {
 
 
 /* ═══ 7. ARRENCADA I ESDEVENIMENTS ═══════════════════════════════ */
-/* Tocar una zona (a la maqueta o a la llista): apagada → s'encén i s'edita;
-   encesa → s'edita; la que ja s'edita → s'apaga. */
-function tocaZona(id) {
+/* La casella de la llista: treu la zona del preu (a la maqueta es torna fosca) o l'hi torna */
+function marcaZona(id, on) {
   const z = st.zones.get(id);
-  const nova = !z.on;
-  if (!z.on) z.on = true;
-  else if (st.activa === id) z.on = false;
-  obreEditor(id);
-  if (nova && pla && pla.zones[id].mobles) creix(pla.zones[id].mobles.grup, 520);
+  if (z.on === on) return;
+  z.on = on;
+  if (on && pla && pla.zones[id].mobles) creix(pla.zones[id].mobles.grup, 520);
   refresca();
 }
+/* Entrar a una zona (clic a la maqueta o «Editar ›»; en Lluc, 25/10/2026): s'obre de prop d'un sol pas, menys el
+   passadís, que s'edita dins del pis amb boira a la resta. Si era fosca, es torna a marcar. Es desa on era la
+   càmera perquè «Volver al piso» hi torni. */
+function entraZona(id) {
+  const z = st.zones.get(id);
+  if (!z.on) marcaZona(id, true);
+  if (renderer && !st.dins) st.tornada = { p: camera.position.clone(), t: controls.target.clone() };
+  st.dins = id;
+  obreEditor(id);
+  elCos.classList.add('dins'); elCos.scrollTop = 0;
+  if (innerWidth <= 860) scrollTo({ top: elCos.getBoundingClientRect().top + scrollY - visor.offsetHeight, behavior: 'auto' });
+  $('[data-torna]').hidden = false;
+  if (renderer) {
+    if (z.tipus !== 'pasillo') obreInterior();
+    else {
+      if (interior) { scene.remove(interior); allibera(interior); interior = null; }
+      st.vista = 'pis'; pla.grup.visible = true; elEtiq.hidden = false; $('[data-abans]').hidden = true;
+      ombraPer(Math.max(plaObj.W, plaObj.D) + 2); aplicaLlum();
+      posa(vistaSala(id));
+      $('.pn-pista').textContent = I18N.t('Arrastra para girar. Toca otro espacio para entrar en él.');
+    }
+  }
+  refresca();
+}
+function tornaPis() {
+  st.dins = null; st.activa = null; elEditor.hidden = true;
+  elCos.classList.remove('dins');
+  $('[data-torna]').hidden = true;
+  if (renderer) {
+    if (interior) { scene.remove(interior); allibera(interior); interior = null; }
+    st.vista = 'pis'; pla.grup.visible = true; elEtiq.hidden = false;
+    $('[data-tota]').hidden = true; $('[data-abans]').hidden = true;
+    ombraPer(Math.max(plaObj.W, plaObj.D) + 2); aplicaLlum();
+    posa(vista('pis', Math.max(plaObj.W, plaObj.D)));          // els límits de la vista del pis
+    if (st.tornada) {                                          // i la càmera, on era abans d'entrar
+      const { p, t } = st.tornada, de = camera.position.clone(), deT = controls.target.clone();
+      tweens.clear();
+      tween(900, k => { camera.position.lerpVectors(de, p, k); controls.target.lerpVectors(deT, t, k); });
+    }
+  }
+  st.tornada = null;
+  $('.pn-pista').textContent = I18N.t('Toca un espacio para verlo de cerca. Arrastra para girar el piso.');
+  refresca();
+}
+const elCos = $('.pn-cos');
 function refresca() { if (plaAra) plaAra._brut = true; pintaPanell(); brut = true; }
 
 // Les mostres de material (llenços de 512 px) es dibuixen quan el fil queda lliure: abans era 1 s de bloqueig en mòbil
 pintaMostres();
 pintaPreusOpcions();
-preparaSetmanes();
 sincronitzaZones();
 /* La maqueta: Three.js i l'escena es preparen quan la pàgina ja s'ha pintat. Mentrestant (i si WebGL
    falla) el panell va com sense 3D: totes les crides a la maqueta comproven `renderer`. */
@@ -2273,10 +2311,14 @@ async function carrega3D() {
   // Des de «Diseña tu cocina/baño» (?tipo=cocina|bano) el panell és només d'aquella habitació: la maqueta
   // en ensenya l'interior i el pis no surt mai (en Lluc, 16/10/2026).
   const dins = !!unaSola();
-  if (!dins) posa(vista('pis', Math.max(plaObj.W, plaObj.D)), QUIET ? 0 : 1600);
+  const vPis = vista('pis', Math.max(plaObj.W, plaObj.D));
+  if (!dins) posa(vPis, QUIET ? 0 : 1600);
   aplicaMaterials();
   if (st.activa) obreEditor(st.activa);
   if (dins) obreInterior();
+  else if (st.dins) { const id = st.dins; st.dins = null; entraZona(id); st.tornada = { p: puntVista(vPis), t: vPis.t.clone() }; }
+  // Proves automàtiques (?prova): l'estat i la càmera, per comparar-los des de Playwright. Sense ?prova no hi ha res.
+  if (new URLSearchParams(location.search).has('prova')) window.__panell = { st, pla: () => pla, camera, controls, preuZona, calcula, enllacDisseny, resumDisseny, missatgeWhatsApp };
   refresca();
   pinta = true; brut = true;
 }
@@ -2284,10 +2326,22 @@ const quanLliure = window.requestIdleCallback ? f => requestIdleCallback(f, { ti
 if (document.readyState === 'complete') quanLliure(carrega3D);
 else addEventListener('load', () => quanLliure(carrega3D), { once: true });
 
-elZones.addEventListener('click', e => {
-  const b = e.target.closest('[data-zona]');
-  if (b) { tocaZona(b.dataset.zona); $(`[data-zona="${b.dataset.zona}"]`, elZones)?.focus(); }
+elZones.addEventListener('change', e => {
+  const c = e.target.closest('[data-check-zona]');
+  if (c) { marcaZona(c.dataset.checkZona, c.checked); $(`[data-check-zona="${c.dataset.checkZona}"]`, elZones)?.focus(); }
 });
+elZones.addEventListener('click', e => {
+  const b = e.target.closest('[data-edita-zona]');
+  if (b) { entraZona(b.dataset.editaZona); $('[data-torna-panell]').focus({ preventScroll: true }); }
+});
+/* Un estil per a tot el pis (en Lluc, 24/10/2026): s'aplica a les zones marcades; les fosques es queden com eren */
+$$('[data-estil-pis]').forEach(b => b.addEventListener('click', () => {
+  const e = b.dataset.estilPis;
+  for (const z of st.zones.values()) if (z.on) Object.assign(z.opts, ESTILS[FORM_DE[z.tipus]][e]);
+  ultimCanvi = null;
+  aplicaMaterials(); refresca();
+}));
+$('[data-torna-panell]').addEventListener('click', tornaPis);
 $('[data-tot]').addEventListener('click', () => {
   for (const z of st.zones.values()) z.on = true;
   if (pla) Object.values(pla.zones).forEach(o => { if (o.mobles) creix(o.mobles.grup, 520); });
@@ -2297,7 +2351,7 @@ $$('[data-compta]').forEach(b => b.addEventListener('click', () => {
   const k = b.dataset.compta;
   st[k] = Math.max(1, Math.min(k === 'dorm' ? 5 : 3, st[k] + +b.dataset.pas));
   sincronitzaZones();
-  if (st.vista !== 'pis' && !st.activa) tancaInterior();
+  if (st.dins && !st.zones.has(st.dins)) tornaPis();
   obreEditor(st.activa);
   if (renderer) { muntaPla(true); nouObjectiu(); }
   pintaPanell();
@@ -2351,7 +2405,7 @@ Object.entries(forms).forEach(([clau, f]) => {
     aplicaMaterials();
     refrescaInterior();
     const nom = e.target.name === 'm2' ? `${I18N.t('Superficie')}: ${fmtNum(z.opts.m2)} m²`
-      : e.target.name === 'setmana' ? null : `${nomGrup(clau, e.target.name)}: ${nomValor(clau, e.target.name, z.opts[e.target.name])}`;
+      : `${nomGrup(clau, e.target.name)}: ${nomValor(clau, e.target.name, z.opts[e.target.name])}`;
     if (nom) ultimCanvi = { delta: calcula().total - totalAbans, nom };
     refresca();
   });
@@ -2370,7 +2424,6 @@ Object.entries(forms).forEach(([clau, f]) => {
     refresca();
   });
 });
-$('[data-dins]').addEventListener('click', obreInterior);
 /* Controls sobre el 3D (peça 16): dia/nit, «Antes» mentre es prem, girar sola, vista inicial i «Ver toda…» */
 $$('[data-llum]').forEach(b => b.addEventListener('click', () => {
   st.llum = b.dataset.llum;
@@ -2399,15 +2452,10 @@ function portaALaVista(fs) {
   if (innerWidth <= 860) scrollTo({ top: fs.getBoundingClientRect().top + scrollY - visor.offsetHeight - 12, behavior: QUIET ? 'auto' : 'smooth' });
   else fs.scrollIntoView({ block: 'nearest', behavior: QUIET ? 'auto' : 'smooth' });
 }
-$('[data-torna]').addEventListener('click', tancaInterior);
-elDies.addEventListener('change', () => pintaPanell());
+$('[data-torna]').addEventListener('click', tornaPis);
 
 /* Canvi d'idioma: es repinta tot el que escriu el JS (noms, dates, etiquetes de la maqueta) */
 document.addEventListener('idioma-canviat', () => {
-  const i = $$('input[name="setmana"]', elDies).findIndex(x => x.checked);
-  preparaSetmanes();
-  const ara = $$('input[name="setmana"]', elDies)[i];
-  if (ara && !ara.disabled) ara.checked = true;
   if (plaAra) plaAra._brut = true;
   pintaPreusOpcions();
   for (const clau of ['cocina', 'bano']) if (!forms[clau].hidden) construeixGraella(clau);
