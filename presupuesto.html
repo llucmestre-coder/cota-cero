@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="css/fonts.css?v=20261021c">
   <link rel="stylesheet" href="css/styles.css?v=20261025b">
   <link rel="preload" href="assets/fonts/BricolageGrotesque-0.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/panell.css?v=20261026b">
+  <link rel="stylesheet" href="css/panell.css?v=20261026c">
   <script src="js/i18n.js?v=20261021c"></script>
   <!-- Des de cocinas.html i banos.html (?tipo=cocina|bano): el panell és només d'aquella habitació (en Lluc, 16/10/2026).
        Es marca abans de pintar perquè no surti el bloc del pis ni un moment. -->
@@ -217,11 +217,16 @@
         <section class="pn-editor" data-editor aria-labelledby="pn-editor-nom" hidden>
           <button type="button" class="pn-enrere" data-torna-panell>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z" fill="currentColor"/></svg>
-            Todo el piso
+            Volver al piso
           </button>
           <div class="pn-editor-cap">
             <h2 id="pn-editor-nom" class="pn-titol-grup" data-editor-nom>Cocina</h2>
             <label class="pn-interruptor"><input type="checkbox" data-incloure checked><span>Reformar esta zona</span></label>
+          </div>
+          <!-- «Reformar només aquesta sala» (peça 5): la resta de la llista es desmarca i el preu és el d'aquesta sala -->
+          <div class="pn-abast" role="group" aria-label="Qué reformamos">
+            <button type="button" data-abast="sala" aria-pressed="false">Solo esta sala</button>
+            <button type="button" data-abast="pis" aria-pressed="true">Todo el piso</button>
           </div>
 
         <!-- ── Cocina: la mida, tres estils i les parts (només la triada és oberta). Els preus de cada
@@ -577,9 +582,9 @@
     </form>
   </dialog>
 
-  <script src="js/traduccions.js?v=20261026b" defer></script>
+  <script src="js/traduccions.js?v=20261026c" defer></script>
   <script src="js/main.js?v=20261021c" defer></script>
   <!-- Mòdul: s'executa després de traduccions.js (I18N ja llest) -->
-  <script type="module" src="js/panell.js?v=20261026e"></script>
+  <script type="module" src="js/panell.js?v=20261026f"></script>
 </body>
 </html>

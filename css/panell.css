@@ -179,10 +179,18 @@
 }
 .pn-modes button[aria-pressed="true"] { background: var(--blanc); color: var(--text); box-shadow: 0 1px 3px rgb(22 25 27 / .16); }
 .pn-modes button:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
+/* Solo esta sala | Todo el piso (peça 5): el mateix segmentat, a tota l'amplada de l'editor */
+.pn-abast { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 3px; margin: -.2rem 0 1rem; border-radius: 999px; background: var(--superficie-2); }
+.pn-abast button {
+  font: 600 var(--t-xs)/1.15 var(--f-titol); padding: .6rem .5rem; border: 0; border-radius: 999px;
+  background: transparent; color: var(--text-suau); cursor: pointer; transition: background-color .25s, color .25s;
+}
+.pn-abast button[aria-pressed="true"] { background: var(--blanc); color: var(--text); box-shadow: 0 1px 3px rgb(22 25 27 / .16); }
+.pn-abast button:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
 
 /* ── Només una habitació (?tipo=cocina|bano): sense res del pis ── */
 :root:not([data-sol]) .pn-modes,
-[data-sol] .pn-pis, [data-sol] .pn-editor-cap, [data-sol] .pn-enrere,
+[data-sol] .pn-pis, [data-sol] .pn-editor-cap, [data-sol] .pn-abast, [data-sol] .pn-enrere,
 [data-sol] .pn-torna, [data-sol] .pn-etiquetes, [data-sol] .pn-cap-zona { display: none; }
 [data-sol] .pn-editor { border-top: 0; padding-top: 0; }
 [data-titol-sol] { display: none; }

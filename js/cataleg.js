@@ -404,9 +404,11 @@ export function creaCataleg(ctx) {
   }
   function baixa(e) {
     if (!grup || !zona || e.button > 0) return;
+    if (drag && !drag.tap && e.pointerId !== drag.id) { deixa(drag); return; }   // un segon dit (pessic): l'objecte es queda on és
     const o = objecteSota(e);
-    // Al mòbil, un toc tria i després s'arrossega: tocar un objecte que no és el triat deixa girar la càmera
-    if (!o || (e.pointerType === 'touch' && o !== sel)) { drag = { tap: true, o, x: e.clientX, y: e.clientY }; return; }
+    // Primer es tria (clic o toc) i després s'arrossega, també amb el ratolí (en Lluc, 25/10/2026): arrossegar un objecte
+    // que no és el triat fa girar la càmera, com arrossegar el buit
+    if (!o || o !== sel) { drag = { tap: true, o, x: e.clientX, y: e.clientY }; return; }
     e.stopImmediatePropagation(); e.preventDefault();
     const p = puntTerra(e);
     drag = { o, dx: p ? o.x - p.x : 0, dz: p ? o.z - p.z : 0, x: e.clientX, y: e.clientY, mogut: false, id: e.pointerId };
@@ -416,7 +418,7 @@ export function creaCataleg(ctx) {
   }
   function arrossega(e) {
     if (!drag || drag.tap || e.pointerId !== drag.id) {
-      if (!drag && e.pointerType === 'mouse' && grup) ctx.canvas.style.cursor = objecteSota(e) ? 'move' : '';
+      if (!drag && e.pointerType === 'mouse' && grup) { const o = objecteSota(e); ctx.canvas.style.cursor = !o ? '' : o === sel ? 'move' : 'pointer'; }
       return;
     }
     if (!drag.mogut && Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 4) return;

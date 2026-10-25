@@ -10,7 +10,7 @@
 // funcionen de seguida i la maqueta arriba un moment després (Lighthouse mòbil, 15/10/2026).
 let THREE, OrbitControls;
 // El catàleg «Obra» i «Muebles» de les estances i moure objectes (peça 3) és un mòdul a part
-import { creaCataleg, preuObjectes, obraDe, OBJECTES } from './cataleg.js?v=20261026d';
+import { creaCataleg, preuObjectes, obraDe, OBJECTES } from './cataleg.js?v=20261026e';
 // El pis en 3D (textures, materials, escena, peces i distribució) és a pis3d.js: també el fa servir la home (peça 4)
 import { carregaThree, iniciaEscena, distribucio, creaPis, aplicaPis, vista as vistaPis, puntVista, tex, llenc, DIBUIX,
   azulejo, M, caixa, cilindre, paret, caixaR, planta, cadira, llit, uvMetres, HM, PASS, TE, TI, GEO, caixaU, posaCaixa,
@@ -87,7 +87,7 @@ const GAMES = { cocina: [900, 1300], bano: [1200, 1700], estancia: [150, 260] };
 const FORM_DE = { salon: 'estancia', pasillo: 'estancia', dorm: 'estancia', cocina: 'cocina', bano: 'bano' };
 const RANG = { salon: [14, 40, .5], dorm: [7, 20, .5], cocina: [6, 30, 1], bano: [4, 12, .5] };
 const forms = Object.fromEntries($$('.pn-opcions').map(f => [f.dataset.per, f]));
-const st = { dorm: 2, banos: 1, zones: new Map(), activa: null, dins: null, tornada: null, vista: 'pis', llum: 'dia', abans: false, gir: false };
+const st = { dorm: 2, banos: 1, zones: new Map(), activa: null, dins: null, tornada: null, vista: 'pis', llum: 'dia', abans: false, gir: false, vol: null, sola: null };
 /* 'cocina' o 'bano' quan el panell és d'una sola habitació (l'script del <head> ho marca a <html>); si no, null */
 const unaSola = () => document.documentElement.dataset.sol || null;
 
@@ -283,6 +283,8 @@ function pintaPanell() {
     const clau = FORM_DE[z.tipus];
     $('[data-editor-nom]').textContent = nomZona(z);
     $('[data-incloure]').checked = z.on;
+    const sola = nomesSala(z.id);
+    $$('[data-abast]').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.abast === 'sala') === sola)));
     $$(`output[data-tria^="${clau}."]`).forEach(o => {
       const nom = o.dataset.tria.split('.')[1];
       o.textContent = nom === 'm2' ? fmtNum(z.opts.m2) + ' m²' : nomValor(clau, nom, z.opts[nom]);
@@ -862,6 +864,7 @@ function etiqueta(cls) {
   const e = { pos: new THREE.Vector3(), el }; etiquetes.push(e); return e;
 }
 function muntaPla(anima) {
+  acabaVol();
   if (pla) { scene.remove(pla.grup); allibera(pla.grup); }
   elEtiq.replaceChildren(); etiquetes = [];
   const P = creaPis({ zones: st.zones, dorm: st.dorm, fons: ordreFons(), mobles: moblesZona });
@@ -901,6 +904,17 @@ function nouObjectiu() {
   radiObjectiu = vista('pis', Math.max(plaObj.W, plaObj.D)).r;
   brut = true;
 }
+/* El vel d'una zona: boira clara a la resta mentre s'edita el passadís; fosc si és fora del preu */
+function objectiuVel(id) {
+  const z = st.zones.get(id), boira = !!st.dins && st.dins !== id && z.on;
+  return [boira ? .62 : z.on ? 0 : hover === id ? .3 : .5, boira ? 0xF3F2EE : 0x1B1F22];
+}
+function posaVels() {
+  for (const [id, o] of Object.entries(pla.zones)) {
+    const [obj, color] = objectiuVel(id), mt = o.vel.material;
+    mt.opacity = obj; mt.color.setHex(color); o.vel.visible = obj > .003;
+  }
+}
 /* Un pas cap a l'objectiu: distribució, vels de les zones i distància de la càmera */
 function avancaPla(dt) {
   if (!pla) return false;
@@ -908,9 +922,9 @@ function avancaPla(dt) {
   let mou = acostaPla(plaAra, plaObj, k) > .0005;
   if (mou || plaAra._brut) { aplicaPla(plaAra); plaAra._brut = false; }
   for (const [id, o] of Object.entries(pla.zones)) {
-    const z = st.zones.get(id), boira = !!st.dins && st.dins !== id && z.on, mt = o.vel.material;
-    const obj = boira ? .62 : z.on ? 0 : hover === id ? .3 : .5;
-    mt.color.setHex(boira ? 0xF3F2EE : 0x1B1F22);
+    if (st.vol) break;              // durant el vol, els vels van amb la resta del pis (posaVels)
+    const z = st.zones.get(id), mt = o.vel.material, [obj, color] = objectiuVel(id);
+    mt.color.setHex(color);
     const d = obj - mt.opacity;
     if (Math.abs(d) > .002) { mt.opacity += d * (QUIET ? 1 : 1 - Math.exp(-dt * 9)); mou = true; } else mt.opacity = obj;
     o.vel.visible = mt.opacity > .003 || !z.on;
@@ -925,6 +939,8 @@ function avancaPla(dt) {
 /* ── Animació (tweens petits, sense biblioteca) ── */
 const tweens = new Set();
 const ease = k => 1 - Math.pow(1 - k, 3);
+const suau = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(2 - 2 * k, 3) / 2;   // comença i acaba suau (el vol)
+const lerp = (a, b, k) => a + (b - a) * k;
 function tween(dur, fn) {
   if (QUIET || !dur) { fn(1); brut = true; return; }
   tweens.add({ t0: performance.now(), dur, fn });
@@ -958,19 +974,211 @@ function vistaActual(asp) {
   const mida = st.vista === 'pis' ? (plaObj ? Math.max(plaObj.W, plaObj.D) : 10) : interior ? interior.userData.mida : 5;
   return vista(st.vista, mida, asp);
 }
-function posa(v, dur = 900) {
-  const de = camera.position.clone(), deT = controls.target.clone();
-  const a = puntVista(v);
+/* Límits de l'òrbita al voltant de la vista v. Dins d'una sala el zoom és propi (zoomSala): de ben a prop d'un objecte
+   fins a la sala sencera (en Lluc, 25/10/2026) */
+function limits(v) {
   const pis = st.vista === 'pis';
   controls.minAzimuthAngle = v.az - (pis ? 1.2 : .75); controls.maxAzimuthAngle = v.az + (pis ? 1.2 : .75);
-  controls.minDistance = v.r * .5; controls.maxDistance = v.r * 1.4;
+  controls.minDistance = pis ? v.r * .5 : .1; controls.maxDistance = pis ? v.r * 1.4 : v.r;
   controls.minPolarAngle = pis ? .2 : .7; controls.maxPolarAngle = pis ? 1.15 : 1.38;
+}
+function posa(v, dur = 900) {
+  acabaVol();
+  const de = camera.position.clone(), deT = controls.target.clone();
+  const a = puntVista(v);
+  limits(v);
   radiObjectiu = null;
   tween(dur, k => { camera.position.lerpVectors(de, a, k); controls.target.lerpVectors(deT, v.t, k); });
 }
-function ombraPer(mida) {
+/* L'ombra del sol cobreix un quadrat de costat «mida» centrat a (cx, cz) */
+let SOL0;
+function ombraPer(mida, cx = 0, cz = 0) {
   const c = sol.shadow.camera, s = mida / 2 + 2;
+  sol.position.set(SOL0.x + cx, SOL0.y, SOL0.z + cz); sol.target.position.set(cx, 0, cz); sol.target.updateMatrixWorld();
   c.left = c.bottom = -s; c.right = c.top = s; c.far = 50; c.updateProjectionMatrix();
+}
+
+/* ── Entrar i sortir d'una sala: un sol vol de càmera (peça 5, en Lluc 25/10/2026) ──
+   1,2 s que comencen i acaben suau. La càmera va de la vista del pis a la de prop sense cap tall: l'interior es munta al
+   lloc de la sala dins del pis (la cuina i el bany, amb la planta de la sala, que s'eixampla fins a la seva), el tall de
+   les parets puja d'1,1 m a l'alçada del sostre i la resta del pis s'esvaeix mentre volem. En arribar, l'interior torna
+   a l'origen i la càmera amb ell (el mateix fotograma). «Volver al piso», el mateix a la inversa. */
+const VOL = 1200;
+function volable(id) {
+  const z = st.zones.get(id);
+  return !!renderer && pinta && !QUIET && !!z && z.tipus !== 'pasillo';
+}
+function vola(o) {
+  st.vol = { ms: 0, ant: null, tall: HM + .06, ...o };
+  controls.enabled = false; posaGir(false); radiObjectiu = null; brut = true;
+}
+/* El rellotge del vol comença al primer fotograma i avança com a molt 50 ms per fotograma: si un fotograma s'encalla
+   (compilar l'interior la primera vegada), el vol s'allarga una mica en lloc de fer un salt */
+function pasVol(t) {
+  const v = st.vol;
+  if (v.ant != null) v.ms += Math.min(50, t - v.ant);
+  v.ant = t;
+  const k = st.volK ?? Math.min(1, v.ms / VOL);   // st.volK: només les proves (?prova), per fer fotos a mig vol
+  v.pas(suau(k), k);
+  if (k >= 1) { st.vol = null; v.fi(); controls.enabled = true; }
+}
+function acabaVol() {      // un altre canvi a mig vol: el vol s'acaba de cop
+  const v = st.vol;
+  if (!v) return;
+  v.pas(1, 1); st.vol = null; v.fi(); controls.enabled = true;
+}
+/* La resta del pis s'esvaeix dins del temps del vol, no abans ni després */
+const esvaiK = k => { const x = Math.min(1, Math.max(0, (k - .05) / .8)); return x * x * (3 - 2 * x); };
+/* Còpies transparents dels materials del pis: els originals són compartits amb l'interior i no es toquen. Les còpies es
+   guarden d'un vol a l'altre (i es posen al dia), així el shader transparent només es compila una vegada. */
+const COPIES = new WeakMap();
+function esvaeix(grup) {
+  const usades = new Set(), malles = [];
+  const copia = m => {
+    let c = COPIES.get(m);
+    if (!c) { c = m.clone(); COPIES.set(m, c); } else if (!usades.has(c)) { c.copy(m); c.needsUpdate = true; }
+    if (!usades.has(c)) { c.transparent = true; c.userData.op = m.opacity; usades.add(c); }
+    return c;
+  };
+  grup.traverse(o => {
+    if (!o.isMesh || !o.material) return;
+    malles.push([o, o.material]);
+    o.material = Array.isArray(o.material) ? o.material.map(copia) : copia(o.material);
+  });
+  return {
+    posa(f) { for (const c of usades) c.opacity = c.userData.op * f; },
+    restaura() { for (const [o, m] of malles) o.material = m; },
+  };
+}
+/* Al primer gest sobre la maqueta (abans del primer clic a una sala), el navegador compila de fons els shaders
+   transparents del vol. En carregar, no: seria feina al fil principal per a qui no entra mai a cap sala. */
+let escalfat = false;
+function escalfaVol() {
+  if (escalfat || !renderer || !pla || QUIET || st.vista !== 'pis' || st.vol) return;
+  escalfat = true;
+  const fos = esvaeix(pla.grup);
+  renderer.compileAsync(scene, camera).catch(() => {});
+  fos.restaura();
+}
+/* Un sol recorregut: el punt on mira va en línia recta; la distància (en escala logarítmica), l'altura i el gir, de mica
+   en mica. a: { t, r, pol, az } */
+function camiCamera(de, deT, a) {
+  const s0 = new THREE.Spherical().setFromVector3(de.clone().sub(deT));
+  const dAz = Math.atan2(Math.sin(a.az - s0.theta), Math.cos(a.az - s0.theta));
+  const sph = new THREE.Spherical(), off = new THREE.Vector3();
+  return e => {
+    controls.target.lerpVectors(deT, a.t, e);
+    sph.set(s0.radius * Math.pow(a.r / s0.radius, e), lerp(s0.phi, a.pol, e), s0.theta + dAz * e);
+    camera.position.copy(controls.target).add(off.setFromSpherical(sph));
+    camera.lookAt(controls.target);
+  };
+}
+function centreSala(id) { const r = plaObj.zones[id]; return new THREE.Vector3((r.x1 + r.x2) / 2, 0, (r.z1 + r.z2) / 2); }
+/* La planta de la sala al pis, en proporció de la de l'interior (la cuina i el bany tenen mides pròpies) */
+function plantaSala(id) {
+  const r = plaObj.zones[id], { W, D } = interior.userData.mides;
+  return [(r.x2 - r.x1) / W, (r.z2 - r.z1) / D];
+}
+function volaDins(id) {
+  const c = centreSala(id), [sx, sz] = plantaSala(id), H = interior.userData.mides.H, o = pla.zones[id];
+  const sPis = Math.max(plaObj.W, plaObj.D) + 2, sSala = interior.userData.mida + 2;
+  const v = vistaActual(), a = { t: v.t.clone().add(c), r: v.r, pol: v.pol, az: v.az };
+  const cami = camiCamera(camera.position.clone(), controls.target.clone(), a);
+  interior.position.copy(c); interior.scale.set(sx, 1, sz);
+  o.terra.visible = false; o.vel.visible = false;          // el terra de la sala ja és el de l'interior
+  const fos = esvaeix(pla.grup);
+  aplicaLlum();                                            // els llums de nit, on és ara l'interior
+  vola({
+    pas(e, k) {
+      cami(e);
+      const f = esvaiK(k); fos.posa(1 - f); elEtiq.style.opacity = 1 - f;
+      interior.scale.set(lerp(sx, 1, e), 1, lerp(sz, 1, e));
+      st.vol.tall = lerp(HM + .06, H + .5, e);
+      ombraPer(lerp(sPis, sSala, e), c.x * e, c.z * e);
+    },
+    fi() {
+      fos.restaura(); o.terra.visible = true;
+      pla.grup.visible = false; elEtiq.hidden = true; elEtiq.style.opacity = '';
+      interior.position.set(0, 0, 0); interior.scale.set(1, 1, 1);
+      camera.position.sub(c); controls.target.sub(c);
+      ombraPer(sSala); limits(v); aplicaLlum();
+    },
+  });
+}
+function volaFora(id) {
+  const c = centreSala(id), [sx, sz] = plantaSala(id), H = interior.userData.mides.H, o = pla.zones[id];
+  const sPis = Math.max(plaObj.W, plaObj.D) + 2, sSala = interior.userData.mida + 2;
+  const vPis = vista('pis', Math.max(plaObj.W, plaObj.D));
+  // On era la càmera abans d'entrar, dins dels límits del pis (els dormitoris o els banys poden haver canviat)
+  const { p, t } = st.tornada || { p: puntVista(vPis), t: vPis.t.clone() };
+  const s = new THREE.Spherical().setFromVector3(p.clone().sub(t));
+  const a = { t: t.clone(), r: Math.min(vPis.r * 1.4, Math.max(vPis.r * .5, s.radius)), pol: s.phi, az: s.theta };
+  interior.position.copy(c); camera.position.add(c); controls.target.add(c);   // el mateix fotograma, al lloc de la sala
+  const cami = camiCamera(camera.position.clone(), controls.target.clone(), a);
+  pla.grup.visible = true; elEtiq.hidden = false; elEtiq.style.opacity = 0;
+  posaVels(); o.terra.visible = false; o.vel.visible = false;
+  const fos = esvaeix(pla.grup); fos.posa(0);
+  aplicaLlum();
+  vola({
+    tall: H + .5,
+    pas(e, k) {
+      cami(e);
+      const f = esvaiK(k); fos.posa(f); elEtiq.style.opacity = f;
+      interior.scale.set(lerp(1, sx, e), 1, lerp(1, sz, e));
+      st.vol.tall = lerp(H + .5, HM + .06, e);
+      ombraPer(lerp(sSala, sPis, e), c.x * (1 - e), c.z * (1 - e));
+    },
+    fi() {
+      fos.restaura(); o.terra.visible = true; elEtiq.style.opacity = '';
+      if (interior) { scene.remove(interior); allibera(interior); interior = null; }
+      posaVels(); ombraPer(sPis); limits(vPis); aplicaLlum();
+    },
+  });
+}
+
+/* ── Zoom dins d'una sala (peça 5): roda i pessic cap al que hi ha sota el punter, des de ben a prop d'un objecte fins a
+   la sala sencera, sense travessar les parets ── */
+const PROP = .6;   // m: el més a prop que la càmera pot quedar del que hi ha sota el punter
+function puntSota(x, y) {
+  const r = canvas.getBoundingClientRect();
+  punter.set((x - r.left) / r.width * 2 - 1, -(y - r.top) / r.height * 2 + 1);
+  ray.setFromCamera(punter, camera);
+  const h = ray.intersectObject(interior, true).find(h => h.object.visible && h.object.parent.visible);
+  return h ? h.point : ray.ray.at(camera.position.distanceTo(controls.target), new THREE.Vector3());
+}
+function zoomSala(s, x, y) {
+  if (!interior || st.vol || !s || s === 1) return;
+  posaGir(false); radiObjectiu = null; tweens.clear();
+  const off = camera.position.clone().sub(controls.target), r = off.length();
+  if (s < 1) {          // apropar-se: la càmera i el punt on mira s'acosten al que hi ha sota el punter
+    const P = puntSota(x, y), cap = (q, k) => q.clone().sub(P).multiplyScalar(k).add(P);
+    let k = Math.max(s, PROP / Math.max(1e-3, camera.position.distanceTo(P)));
+    // A tocar d'una paret, el zoom s'atura (no fa lliscar la càmera, que canviaria l'angle)
+    for (let i = 0; i < 8 && k < 1 && !dinsSala(cap(camera.position, k), cap(controls.target, k)); i++) k = (k + 1) / 2;
+    if (k > .999 || !dinsSala(cap(camera.position, k), cap(controls.target, k))) return;
+    camera.position.copy(cap(camera.position, k)); controls.target.copy(cap(controls.target, k));
+  } else {              // allunyar-se: cap a la sala sencera, des del mateix angle
+    const v = vistaActual(), nr = Math.min(v.r, r * s);
+    if (nr <= r + 1e-4) return;
+    controls.target.lerp(v.t, (nr - r) / Math.max(1e-3, v.r - r));
+    camera.position.copy(controls.target).add(off.setLength(nr));
+  }
+  dinsParets(); camera.lookAt(controls.target); brut = true;
+}
+/* La càmera no passa de les dues parets del fons ni del terra, i el punt on mira és dins de la sala */
+const MARGE = .2;
+function dinsSala(p, t) {
+  const { W, D, H } = interior.userData.mides, m = MARGE, e = 1e-6;
+  return p.x >= -W / 2 + m - e && p.z >= -D / 2 + m - e && p.y >= .15 - e
+    && t.x >= -W / 2 + m - e && t.x <= W / 2 + e && t.z >= -D / 2 + m - e && t.z <= D / 2 + e && t.y >= -e && t.y <= H + e;
+}
+/* Si cal, hi torna (girant a tocar d'una paret, la càmera hi llisca). Torna si ha calgut. */
+function dinsParets() {
+  const { W, D, H } = interior.userData.mides, m = MARGE, p = camera.position, t = controls.target;
+  const abans = [p.x, p.y, p.z, t.x, t.y, t.z].join();
+  t.set(Math.min(W / 2, Math.max(-W / 2 + m, t.x)), Math.min(H, Math.max(0, t.y)), Math.min(D / 2, Math.max(-D / 2 + m, t.z)));
+  p.set(Math.max(-W / 2 + m, p.x), Math.max(.15, p.y), Math.max(-D / 2 + m, p.z));
+  return abans !== [p.x, p.y, p.z, t.x, t.y, t.z].join();
 }
 
 /* ── Materials segons les opcions de cada zona ── */
@@ -1146,6 +1354,7 @@ function reinicia() {
 /* ── Acostar la càmera a una part (clicada al 3D o triada a la graella) ── */
 function enfocaPart(part, punt) {
   if (!renderer || !interior) return;
+  acabaVol();
   const caixaP = new THREE.Box3();
   interior.updateMatrixWorld();
   interior.traverse(o => { if (o.isMesh && o.userData.part === part) caixaP.expandByObject(o); });
@@ -1156,7 +1365,6 @@ function enfocaPart(part, punt) {
   posaGir(false);
   const deT = controls.target.clone(), de = camera.position.clone();
   const a = c.clone().add(de.clone().sub(deT).normalize().multiplyScalar(r));
-  controls.minDistance = r * .6;
   radiObjectiu = null;
   tween(800, k => { camera.position.lerpVectors(de, a, k); controls.target.lerpVectors(deT, c, k); });
   $('[data-tota]').hidden = false;
@@ -1198,23 +1406,24 @@ function vernisBany() {
   M.pica = new THREE.MeshPhysicalMaterial({ color: 0xF6F6F3, ...v, side: THREE.DoubleSide });
   M.wc = new THREE.MeshPhysicalMaterial({ color: M.wc.color.getHex(), ...v, side: THREE.DoubleSide });
 }
-function obreInterior() {
+/* vol: s'hi arriba volant des del pis (volaDins), que s'encarrega de la càmera, l'ombra i d'amagar el pis */
+function obreInterior(vol = false) {
   const z = st.zones.get(st.activa);
   if (!z || !renderer) return;
+  acabaVol();
   st.vista = z.tipus;
   if (z.tipus === 'bano') vernisBany();
   if (interior) { scene.remove(interior); allibera(interior); }
   interior = escenaDe(z);
   interior.userData.ultim = { ...z.opts };
-  scene.add(interior); creix(interior, 600);
-  pla.grup.visible = false; elEtiq.hidden = true;
+  scene.add(interior);
+  if (!vol) { creix(interior, 600); pla.grup.visible = false; elEtiq.hidden = true; }
   $('[data-torna]').hidden = false;
   $('[data-tota]').hidden = true; $('[data-abans]').hidden = FORM_DE[z.tipus] === 'estancia';   // les estances no tenen «Antes»
   $$('[data-tota-sol]').forEach(el => { el.hidden = el.dataset.totaSol !== st.vista; });
-  ombraPer(interior.userData.mida + 2);
-  posa(vistaActual());
+  if (!vol) { ombraPer(interior.userData.mida + 2); posa(vistaActual()); }
   aplicaMaterials();
-  $('.pn-pista').textContent = I18N.t(FORM_DE[z.tipus] === 'estancia' ? 'Arrastra un objeto para moverlo; el suelo, para girar la sala.' : 'Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.');
+  $('.pn-pista').textContent = I18N.t(FORM_DE[z.tipus] === 'estancia' ? 'Toca un objeto para elegirlo y después arrástralo. Acércate con la rueda o pellizcando.' : 'Toca cualquier cosa de la maqueta para cambiarla. Arrastra para girarla.');
   brut = true;
 }
 /* Canvis d'opcions amb la cuina o el bany oberts */
@@ -1224,6 +1433,7 @@ function refrescaInterior() {
   refrescPendent = true;
   requestAnimationFrame(() => {
     refrescPendent = false;
+    acabaVol();
     const z = st.zones.get(st.activa);
     if (!interior || !z || z.tipus !== st.vista) return;
     const v = z.opts, u = interior.userData.ultim;
@@ -1272,6 +1482,7 @@ function iniciaWebGL() {
   renderer.shadowMap.type = MOBIL ? THREE.PCFShadowMap : THREE.PCFSoftShadowMap;
 
   ({ scene, sol, hemi, entorn } = iniciaEscena(renderer, MOBIL));
+  SOL0 = sol.position.clone();
 
   camera = new THREE.PerspectiveCamera(30, 1, .1, 200);
   camera.position.set(8, 14, 12);
@@ -1300,13 +1511,19 @@ function iniciaWebGL() {
       camera.position.copy(controls.target).add(off.setFromSpherical(sph));
       brut = true;
     }
-    if (controls.update()) brut = true;
+    if (st.vol) { pasVol(t); brut = true; }       // el vol mou la càmera: l'òrbita no hi toca
+    else {
+      controls.enableZoom = !interior;           // dins d'una sala, el zoom és zoomSala
+      if (controls.update()) brut = true;
+      if (interior && dinsParets()) { camera.lookAt(controls.target); brut = true; }
+    }
     if (!brut) return;
     brut = false;
-    TALL.constant = st.vista === 'pis' ? HM + .06 : 1e5;   // al pis, res per sobre del tall de les parets
+    // Al pis, res per sobre del tall de les parets; durant el vol, el tall puja o baixa amb la càmera
+    TALL.constant = st.vol ? st.vol.tall : st.vista === 'pis' ? HM + .06 : 1e5;
     renderer.render(scene, camera);
     cat.posaBarra();
-    if (st.vista === 'pis' && etiquetes.length) {
+    if ((st.vista === 'pis' || st.vol) && etiquetes.length) {
       const w = visor.clientWidth, h = visor.clientHeight, sy = pla ? pla.grup.scale.y : 1;
       for (const e of etiquetes) {
         v3.copy(e.pos).project(camera);
@@ -1318,11 +1535,11 @@ function iniciaWebGL() {
 
   // Tocar: un clic sense arrossegar tria la zona; el ratolí per sobre la il·lumina
   let baixa = null;
-  canvas.addEventListener('pointerdown', e => { baixa = { x: e.clientX, y: e.clientY }; });
+  canvas.addEventListener('pointerdown', e => { escalfaVol(); baixa = pessic ? null : { x: e.clientX, y: e.clientY }; });
   canvas.addEventListener('pointerup', e => {
     if (!baixa) return;
     const mou = Math.hypot(e.clientX - baixa.x, e.clientY - baixa.y); baixa = null;
-    if (mou > 6) return;
+    if (mou > 6 || st.vol) return;
     if (interior) {        // dins de la cuina o el bany: clicar una cosa obre la seva part i s'hi acosta
       const h = partSota(e);
       if (h) obrePartDes3D(FORM_DE[st.vista], h.part, h.punt);
@@ -1332,12 +1549,41 @@ function iniciaWebGL() {
     if (id && id !== st.dins) entraZona(id);
   });
   canvas.addEventListener('pointermove', e => {
+    escalfaVol();
     if (e.pointerType !== 'mouse' || baixa) return;
     if (interior) { canvas.style.cursor = partSota(e) ? 'pointer' : ''; return; }
     const id = zonaSota(e);
     if (id !== hover) { hover = id; canvas.style.cursor = id ? 'pointer' : ''; brut = true; }
   });
   canvas.addEventListener('pointerleave', () => { if (hover) { hover = null; canvas.style.cursor = ''; brut = true; } });
+
+  // Zoom dins d'una sala: la roda (la pàgina no fa scroll mentre el punter és sobre la maqueta; al pis, OrbitControls)
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (!interior) return;
+    const px = e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1);
+    zoomSala(Math.exp(Math.max(-200, Math.min(200, px)) * .0016), e.clientX, e.clientY);
+  }, { passive: false });
+  // i el pessic: dos dits sobre la maqueta. En captura i abans que el catàleg, que atura els tocs sobre l'objecte triat.
+  const dits = new Map(), separacio = () => { const [a, b] = [...dits.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+  let pessic = false;                            // un pessic no acaba en toc (ni entra a cap sala)
+  canvas.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch') return;
+    dits.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (dits.size > 1) { pessic = true; baixa = null; }
+  }, { capture: true });
+  canvas.addEventListener('pointermove', e => {
+    if (!dits.has(e.pointerId)) return;
+    const abans = dits.size === 2 ? separacio() : 0;
+    dits.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (dits.size !== 2 || !abans || !interior) return;
+    const [a, b] = [...dits.values()];
+    zoomSala(abans / Math.max(1, separacio()), (a.x + b.x) / 2, (a.y + b.y) / 2);
+  }, { capture: true });
+  ['pointerup', 'pointercancel'].forEach(t => canvas.addEventListener(t, e => {
+    dits.delete(e.pointerId);
+    if (!dits.size) pessic = false;
+  }, { capture: true }));
 
   // Pla de tall del pis: els objectes alts del catàleg (armaris, làmpades) no passen dels 1,1 m de la maqueta
   TALL = new THREE.Plane(new THREE.Vector3(0, -1, 0), 1e5); renderer.clippingPlanes = [TALL];
@@ -1579,6 +1825,8 @@ function estatEnllac(compacte) {
     v: ENLLAC_V, ...(compacte ? { c: 1 } : {}), t: unaSola() || 'casa', d: st.dorm, b: st.banos, l: st.llum,
     ...(st.activa ? { a: st.activa } : {}),
     e: [...st.zones.values()].filter(x => x.on).map(x => x.id), z,
+    // «Solo esta sala» (peça 5): la sala i què hi havia marcat abans, perquè «Todo el piso» ho torni
+    ...(st.sola && nomesSala(st.sola.id) ? { s: { z: st.sola.id, a: st.sola.abans } } : {}),
     // Objectes de les sales que s'han tocat: [tipus (en compacte, el número), x i z en cm des del centre, gir]
     o: Object.fromEntries([...st.zones.values()].filter(x => x.tocat && x.objs).map(x => [x.id, x.objs.map(b => [compacte ? TIPUS_OBJ.indexOf(b.t) : b.t, Math.round(b.x * 100), Math.round(b.z * 100), b.r])])),
   };
@@ -1631,6 +1879,9 @@ function restauraEnllac(e) {
       .slice(0, 40).map(([t, x, zz, r]) => ({ t, x: x / 100, z: zz / 100, r }));
     z.tocat = true; z.opts.armario = false;
   }
+  st.sola = null;
+  if (e.s && typeof e.s === 'object' && st.zones.has(e.s.z) && Array.isArray(e.s.a) && nomesSala(e.s.z))
+    st.sola = { id: e.s.z, abans: e.s.a.filter(id => typeof id === 'string' && st.zones.has(id)) };
   if (e.l === 'nit' || e.l === 'dia') {
     st.llum = e.l;
     $$('[data-llum]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.llum === st.llum)));
@@ -1757,7 +2008,7 @@ elPreu.addEventListener('keydown', e => {
 function marcaZona(id, on) {
   const z = st.zones.get(id);
   if (z.on === on) return;
-  z.on = on;
+  z.on = on; st.sola = null;          // la llista tocada a mà: «Todo el piso» ja no té res a tornar
   if (on && pla && pla.zones[id].mobles) creix(pla.zones[id].mobles.grup, 520);
   refresca();
 }
@@ -1765,43 +2016,50 @@ function marcaZona(id, on) {
    passadís, que s'edita dins del pis amb boira a la resta. Si era fosca, es torna a marcar. Es desa on era la
    càmera perquè «Volver al piso» hi torni. */
 function entraZona(id) {
+  acabaVol();
   cat.surt();
   const z = st.zones.get(id);
   if (!z.on) marcaZona(id, true);
   if (renderer && !st.dins) st.tornada = { p: camera.position.clone(), t: controls.target.clone() };
+  const vol = volable(id) && st.vista === 'pis' && !interior;   // des del pis (o el passadís): un sol vol
   st.dins = id;
   obreEditor(id);
   elCos.classList.add('dins'); elCos.scrollTop = 0;
   if (innerWidth <= 860) scrollTo({ top: elCos.getBoundingClientRect().top + scrollY - visor.offsetHeight, behavior: 'auto' });
   $('[data-torna]').hidden = false;
   if (renderer) {
-    if (z.tipus !== 'pasillo') obreInterior();
+    if (z.tipus !== 'pasillo') { obreInterior(vol); if (vol) volaDins(id); }
     else {
       if (interior) { scene.remove(interior); allibera(interior); interior = null; }
       st.vista = 'pis'; pla.grup.visible = true; elEtiq.hidden = false; $('[data-abans]').hidden = true;
       ombraPer(Math.max(plaObj.W, plaObj.D) + 2); aplicaLlum();
       posa(vistaSala(id));
       muntaPassadis();
-      $('.pn-pista').textContent = I18N.t('Arrastra un objeto para moverlo. Toca otro espacio para entrar en él.');
+      $('.pn-pista').textContent = I18N.t('Toca un objeto para elegirlo y después arrástralo. Toca otro espacio para entrar en él.');
     }
   }
   refresca();
 }
 function tornaPis() {
+  acabaVol();
   cat.surt();
+  const id = st.dins, vol = !!interior && !!id && volable(id);
   st.dins = null; st.activa = null; elEditor.hidden = true;
   elCos.classList.remove('dins');
   $('[data-torna]').hidden = true;
   if (renderer) {
-    if (interior) { scene.remove(interior); allibera(interior); interior = null; }
-    st.vista = 'pis'; pla.grup.visible = true; elEtiq.hidden = false;
     $('[data-tota]').hidden = true; $('[data-abans]').hidden = true;
-    ombraPer(Math.max(plaObj.W, plaObj.D) + 2); aplicaLlum();
-    posa(vista('pis', Math.max(plaObj.W, plaObj.D)));          // els límits de la vista del pis
-    if (st.tornada) {                                          // i la càmera, on era abans d'entrar
-      const { p, t } = st.tornada, de = camera.position.clone(), deT = controls.target.clone();
-      tweens.clear();
-      tween(900, k => { camera.position.lerpVectors(de, p, k); controls.target.lerpVectors(deT, t, k); });
+    if (vol) { st.vista = 'pis'; volaFora(id); }              // un sol vol fins on era la càmera abans d'entrar
+    else {
+      if (interior) { scene.remove(interior); allibera(interior); interior = null; }
+      st.vista = 'pis'; pla.grup.visible = true; elEtiq.hidden = false;
+      ombraPer(Math.max(plaObj.W, plaObj.D) + 2); aplicaLlum();
+      posa(vista('pis', Math.max(plaObj.W, plaObj.D)));          // els límits de la vista del pis
+      if (st.tornada) {                                          // i la càmera, on era abans d'entrar
+        const { p, t } = st.tornada, de = camera.position.clone(), deT = controls.target.clone();
+        tweens.clear();
+        tween(900, k => { camera.position.lerpVectors(de, p, k); controls.target.lerpVectors(deT, t, k); });
+      }
     }
   }
   st.tornada = null;
@@ -1837,7 +2095,7 @@ async function carrega3D() {
   if (dins) obreInterior();
   else if (st.dins) { const id = st.dins; st.dins = null; entraZona(id); st.tornada = { p: puntVista(vPis), t: vPis.t.clone() }; }
   // Proves automàtiques (?prova): l'estat i la càmera, per comparar-los des de Playwright. Sense ?prova no hi ha res.
-  if (new URLSearchParams(location.search).has('prova')) window.__panell = { st, cat, OBJECTES, pla: () => pla, camera, controls, preuZona, calcula, enllacDisseny, resumDisseny, missatgeWhatsApp, preparaPdf };
+  if (new URLSearchParams(location.search).has('prova')) window.__panell = { st, cat, OBJECTES, pla: () => pla, plaObj: () => plaObj, interior: () => interior, vistaActual, centreSala, camera, controls, preuZona, calcula, enllacDisseny, resumDisseny, missatgeWhatsApp, preparaPdf };
   refresca();
   pinta = true; brut = true;
 }
@@ -1849,6 +2107,7 @@ elZones.addEventListener('change', e => {
   const c = e.target.closest('[data-check-zona]');
   if (c) { marcaZona(c.dataset.checkZona, c.checked); $(`[data-check-zona="${c.dataset.checkZona}"]`, elZones)?.focus(); }
 });
+['pointerover', 'focusin'].forEach(t => elZones.addEventListener(t, escalfaVol));   // «Editar ›» també entra volant
 elZones.addEventListener('click', e => {
   const b = e.target.closest('[data-edita-zona]');
   if (b) { entraZona(b.dataset.editaZona); $('[data-torna-panell]').focus({ preventScroll: true }); }
@@ -1863,13 +2122,14 @@ $$('[data-estil-pis]').forEach(b => b.addEventListener('click', () => {
 $('[data-torna-panell]').addEventListener('click', tornaPis);
 $('[data-tot]').addEventListener('click', () => {
   for (const z of st.zones.values()) z.on = true;
+  st.sola = null;
   if (pla) Object.values(pla.zones).forEach(o => { if (o.mobles) creix(o.mobles.grup, 520); });
   refresca();
 });
 $$('[data-compta]').forEach(b => b.addEventListener('click', () => {
   const k = b.dataset.compta;
   st[k] = Math.max(1, Math.min(k === 'dorm' ? 5 : 3, st[k] + +b.dataset.pas));
-  sincronitzaZones();
+  sincronitzaZones(); st.sola = null;
   if (st.dins && !st.zones.has(st.dins)) tornaPis();
   obreEditor(st.activa);
   if (renderer) { muntaPla(true); nouObjectiu(); }
@@ -1907,8 +2167,32 @@ elM2Total.addEventListener('input', () => {
 });
 $('[data-incloure]').addEventListener('change', e => {
   const z = st.zones.get(st.activa);
-  if (z) { z.on = e.target.checked; refresca(); }
+  if (z) { z.on = e.target.checked; st.sola = null; refresca(); }
 });
+/* «Solo esta sala | Todo el piso» (peça 5, en Lluc 25/10/2026). «Solo esta sala» desmarca la resta de la llista (a la
+   maqueta del pis surten fosques) i desa què hi havia marcat; «Todo el piso» ho torna a marcar. Si no hi ha res desat
+   (s'ha tocat la llista a mà, o l'enllaç no ho portava), «Todo el piso» marca tot el pis. */
+function nomesSala(id) { return [...st.zones.values()].every(z => z.on === (z.id === id)); }
+function posaAbast(sola) {
+  const id = st.activa;
+  if (!id || sola === nomesSala(id)) return;
+  const totalAbans = calcula().total;
+  if (sola) {
+    st.sola = { id, abans: st.sola?.abans || [...st.zones.values()].filter(z => z.on).map(z => z.id) };
+    for (const z of st.zones.values()) z.on = z.id === id;
+  } else {
+    const abans = st.sola?.abans;
+    for (const z of st.zones.values()) {
+      const on = abans ? abans.includes(z.id) || z.id === id : true;
+      if (on && !z.on && pla?.zones[z.id].mobles) creix(pla.zones[z.id].mobles.grup, 520);   // com marcaZona
+      z.on = on;
+    }
+    st.sola = null;
+  }
+  ultimCanvi = { delta: calcula().total - totalAbans, nom: I18N.t(sola ? 'Solo esta sala' : 'Todo el piso') };
+  refresca();
+}
+$$('[data-abast]').forEach(b => b.addEventListener('click', () => posaAbast(b.dataset.abast === 'sala')));
 Object.entries(forms).forEach(([clau, f]) => {
   f.addEventListener('submit', e => e.preventDefault());
   f.addEventListener('input', e => {
@@ -1988,6 +2272,7 @@ function triaSol(tipus) {
   document.documentElement.dataset.sol = tipus;
   const id = tipus === 'cocina' ? 'cocina' : 'bano1';
   for (const z of st.zones.values()) z.on = z.id === id;
+  st.sola = null;
   obreEditor(id);
   $$('[data-sol-boto]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.solBoto === tipus)));
   const url = new URL(location.href); url.searchParams.set('tipo', tipus); url.hash = '';
