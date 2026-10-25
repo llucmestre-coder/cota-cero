@@ -1,0 +1,78 @@
+/* =========================================================================
+   COTA CERO — la maqueta del pis a la home i la cuina i el bany (peça 4; en Lluc, 24 i 26/10/2026).
+   La secció fa una pantalla més RITME (js/maqueta-home.js); l'interior és sticky, com la sala i el carril.
+   Sense moviment o sense WebGL (.maqueta-quieta): una pantalla amb la imatge fixa del mateix 3D.
+   ========================================================================= */
+.maqueta { position: relative; z-index: 7; height: calc(100svh * (1 + var(--ritme, 1))); background: var(--superficie-2); }
+/* Com abans les portes: la maqueta puja per sobre de la sala acabada, que es queda fixa una pantalla */
+.sala-moviment .maqueta { margin-top: -100svh; box-shadow: 0 -30px 60px -20px rgb(var(--sala-fosc) / .35); }
+.maqueta-fixe {
+  position: sticky; top: 0; height: 100svh; overflow: hidden;
+  background: radial-gradient(110% 90% at 38% 32%, var(--grafit-50) 0%, var(--superficie-2) 100%);   /* el fons del visor del panell */
+}
+.maqueta-text {
+  position: absolute; z-index: 2; top: calc(var(--cap-h) + clamp(1rem, 5svh, 3.5rem)); left: var(--gutter); right: var(--gutter);
+  max-width: 31rem; pointer-events: none;
+}
+.maqueta-text h2 { font-size: var(--t-xl); letter-spacing: -0.03em; text-wrap: balance; }
+.maqueta-text p { margin-top: .75rem; max-width: 27rem; color: var(--text-suau); font: 500 var(--t-s)/1.45 var(--f-titol); text-wrap: pretty; }
+.maqueta-render { position: absolute; inset: 0; display: block; cursor: grab; touch-action: pan-y; -webkit-tap-highlight-color: transparent; }
+.maqueta-render:active { cursor: grabbing; }
+.maqueta-render:focus-visible { outline: 3px solid var(--marca); outline-offset: -8px; }
+.maqueta-render picture, .maqueta-poster, .maqueta-3d { position: absolute; inset: 0; width: 100%; height: 100%; }
+.maqueta-poster { object-fit: contain; transition: opacity .6s; }
+.maqueta-3d { display: block; opacity: 0; transition: opacity .6s; }
+.maqueta-viva .maqueta-3d { opacity: 1; }
+.maqueta-viva .maqueta-poster { opacity: 0; }
+.maqueta-crida {
+  position: absolute; left: 50%; bottom: clamp(1.5rem, 7svh, 4rem); transform: translate(-50%, .6rem); opacity: 0;
+  padding: .9rem 1.5rem; border-radius: 999px; background: var(--boto); color: var(--text); white-space: nowrap;
+  font: 600 var(--t-s)/1 var(--f-titol); box-shadow: 0 10px 24px -14px rgb(40 32 24 / .55);
+  transition: opacity .5s, transform .5s, background-color .2s;
+}
+.maqueta-feta .maqueta-crida, .maqueta-quieta .maqueta-crida { opacity: 1; transform: translate(-50%, 0); }
+.maqueta-render:hover .maqueta-crida { background: var(--boto-hover); }
+.maqueta-quieta { height: auto; }
+.maqueta-quieta .maqueta-fixe { position: relative; height: min(100svh, 54rem); }
+.maqueta-quieta .maqueta-render { cursor: pointer; }
+@media (min-width: 1000px) {   /* el pis a la dreta del text */
+  .maqueta-render picture, .maqueta-poster, .maqueta-3d { left: 26%; width: 74%; }
+  .maqueta-crida { left: 63%; }
+}
+@media (max-width: 760px) {   /* el pis sota el text, i la invitació per sobre del botó de WhatsApp */
+  .maqueta-render picture, .maqueta-poster, .maqueta-3d { top: 9rem; height: calc(100% - 9rem); }
+  .maqueta-crida { bottom: 5.5rem; }
+}
+
+/* Cuina i bany: imatges del mateix 3D; amb el ratolí a sobre, «Antes» */
+.cases { position: relative; z-index: 7; background: var(--fons); padding-block: var(--seccio); }
+.cases-in { max-width: var(--ample); margin: 0 auto; padding-inline: var(--gutter); }
+.cases h2 { font-size: var(--t-l); letter-spacing: -0.02em; }
+.cases-parell { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(.75rem, 2.5vw, 2rem); margin-top: clamp(1.25rem, 3vw, 2rem); }
+.casa { display: grid; gap: .75rem; color: var(--text); text-decoration: none; }
+.casa-foto {
+  position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--radi);
+  background: radial-gradient(110% 90% at 38% 32%, var(--grafit-50) 0%, var(--superficie-2) 100%);
+}
+.casa-foto img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .45s; }
+.casa-antes { opacity: 0; }
+.casa-et {
+  position: absolute; top: .75rem; left: .75rem; padding: .35rem .65rem; border-radius: 999px; background: var(--fons);
+  font: 600 var(--t-xs)/1 var(--f-titol); opacity: 0; transition: opacity .3s;
+}
+.casa-nom { font: 600 var(--t-m)/1.2 var(--f-titol); text-decoration: underline; text-decoration-color: var(--marca); text-decoration-thickness: 2px; text-underline-offset: .3em; }
+.casa:focus-visible { outline: none; }
+.casa:focus-visible .casa-foto { outline: 3px solid var(--marca); outline-offset: 3px; }
+.casa-abans .casa-antes, .casa-abans .casa-et { opacity: 1; }
+.casa-abans .casa-despues { opacity: 0; }
+@media (hover: hover) {
+  .casa:hover .casa-antes, .casa:hover .casa-et, .casa:focus-visible .casa-antes, .casa:focus-visible .casa-et { opacity: 1; }
+  .casa:hover .casa-despues, .casa:focus-visible .casa-despues { opacity: 0; }
+}
+@media (max-width: 760px) {
+  .casa-nom { font-size: var(--t-s); }
+  .casa-et { top: .5rem; left: .5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .maqueta-poster, .maqueta-3d, .maqueta-crida, .casa-foto img, .casa-et { transition: none; }
+}

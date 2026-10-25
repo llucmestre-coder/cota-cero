@@ -175,10 +175,10 @@
       gsap.set(traç, { strokeDasharray: 1, strokeDashoffset: 1 });
       gsap.set(partides, { opacity: 0, y: 14 });
       gsap.set(segell, { opacity: 0, scale: 1.8 });
-      // En Lluc (16/10/2026): la sala acabada no es mou; quan les portes marxen, l'explicació apareix a l'esquerra
-      // i el full entra des de la dreta. Comença quan les portes ja deixen veure la sala.
+      // En Lluc (16/10/2026): la sala acabada no es mou; quan la cuina i el bany marxen (abans, les portes), l'explicació
+      // apareix a l'esquerra i el full entra des de la dreta. Comença quan ja deixen veure la sala.
       gsap.timeline({
-        scrollTrigger: { trigger: '.portes', start: 'bottom 45%', endTrigger: contracte, end: 'bottom bottom', scrub: true },
+        scrollTrigger: { trigger: '.cases', start: 'bottom 45%', endTrigger: contracte, end: 'bottom bottom', scrub: true },
         defaults: { ease: 'none' }
       })
         .fromTo(explica, { autoAlpha: 0, x: -40 }, { autoAlpha: 1, x: 0, duration: 0.16, ease: 'power2.out' }, 0)
@@ -215,11 +215,14 @@
           fotosCarril[i].style.opacity = (0.45 + 0.55 * e).toFixed(3);
         });
       };
-      mesura(); pintaCarril(0);
+      // La secció fa l'alçada del recorregut i el carril hi és sticky (css/sala.css). Abans era el pin de ScrollTrigger,
+      // que el passava a position: fixed i feia saltar el CLS (1,39 al mòbil, 25/10/2026).
+      var altCarril = function () { mesura(); carril.style.height = (recorregut + fixe.offsetHeight) + 'px'; };
+      altCarril(); pintaCarril(0);
+      ScrollTrigger.addEventListener('refreshInit', altCarril);
       var stCarril = ScrollTrigger.create({
-        trigger: fixe, pin: true, start: 'top top', end: function () { mesura(); return '+=' + recorregut; },
-        scrub: true, invalidateOnRefresh: true, onRefresh: function (s) { pintaCarril(s.progress); },
-        onUpdate: function (s) { pintaCarril(s.progress); }
+        trigger: carril, start: 'top top', end: 'bottom bottom',
+        onRefresh: function (s) { pintaCarril(s.progress); }, onUpdate: function (s) { pintaCarril(s.progress); }
       });
       // Teclat: en enfocar una foto, l'scroll porta el carril fins a ella
       pista.addEventListener('focusin', function (ev) {
