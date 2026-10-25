@@ -5,13 +5,13 @@ const euros = (n) => (Number(n) || 0).toLocaleString('es-ES', { useGrouping: 'al
 
 export async function onRequestGet({ env }) {
   const { results } = await env.LEADS.prepare(
-    'SELECT id, creat, correu, idioma, tipo, m2, inclou, acabats, inici, minim, maxim, estat FROM leads ORDER BY id DESC LIMIT 500'
+    'SELECT id, creat, correu, idioma, tipo, m2, inclou, acabats, minim, maxim, estat FROM leads ORDER BY id DESC LIMIT 500'
   ).all();
 
   const files = results.map((l) => `<tr>
     <td>${esc(l.creat)}</td><td><a href="mailto:${esc(l.correu)}">${esc(l.correu)}</a></td>
     <td>${esc(l.tipo)}</td><td>${esc(l.m2)} m²</td><td>${esc(l.inclou)}</td><td>${esc(l.acabats)}</td>
-    <td>${esc(l.inici)}</td><td>${euros(l.minim)} – ${euros(l.maxim)}</td><td>${esc(l.idioma)}</td></tr>`).join('');
+    <td>${euros(l.minim)} – ${euros(l.maxim)}</td><td>${esc(l.idioma)}</td></tr>`).join('');
 
   const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow">
@@ -25,8 +25,8 @@ export async function onRequestGet({ env }) {
 </style></head><body>
 <h1>Contactos de la calculadora</h1>
 <p>${results.length} registros (máximo 500 en pantalla) · <a href="/admin/leads.csv">Descargar CSV</a></p>
-<div class="taula"><table><thead><tr><th>Fecha (UTC)</th><th>Correo</th><th>Obra</th><th>Tamaño</th><th>Distribución</th><th>Acabados</th><th>Empezar</th><th>Estimación</th><th>Idioma</th></tr></thead>
-<tbody>${files || '<tr><td colspan="9">Todavía no hay contactos.</td></tr>'}</tbody></table></div>
+<div class="taula"><table><thead><tr><th>Fecha (UTC)</th><th>Correo</th><th>Obra</th><th>Tamaño</th><th>Distribución</th><th>Acabados</th><th>Estimación</th><th>Idioma</th></tr></thead>
+<tbody>${files || '<tr><td colspan="8">Todavía no hay contactos.</td></tr>'}</tbody></table></div>
 </body></html>`;
 
   return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } });

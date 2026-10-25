@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS leads (
   m2       REAL,
   inclou   TEXT,
   acabats  TEXT,
-  inici    TEXT,
+  inici    TEXT,            -- en desús des del 25/10/2026: no hi ha terminis al panell (no s'hi escriu ni es mostra)
   minim    INTEGER,
   maxim    INTEGER,
   estat    TEXT NOT NULL DEFAULT 'nou'

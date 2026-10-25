@@ -9,9 +9,9 @@ const camp = (v) => {
 
 export async function onRequestGet({ env }) {
   const { results } = await env.LEADS.prepare(
-    'SELECT id, creat, correu, idioma, tipo, m2, inclou, acabats, inici, minim, maxim, estat FROM leads ORDER BY id DESC'
+    'SELECT id, creat, correu, idioma, tipo, m2, inclou, acabats, minim, maxim, estat FROM leads ORDER BY id DESC'
   ).all();
-  const capcalera = ['id', 'creat', 'correu', 'idioma', 'tipo', 'm2', 'inclou', 'acabats', 'inici', 'minim', 'maxim', 'estat'];
+  const capcalera = ['id', 'creat', 'correu', 'idioma', 'tipo', 'm2', 'inclou', 'acabats', 'minim', 'maxim', 'estat'];
   const linies = [capcalera.join(',')].concat(results.map((l) => capcalera.map((c) => camp(l[c])).join(',')));
   return new Response('﻿' + linies.join('\r\n'), {
     headers: {

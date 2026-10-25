@@ -363,6 +363,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .cta-final .cta-tel { font: 700 var(--t-l)/1 var(--f-titol); color: var(--accent); text-decoration: none; }
 .cta-final .cta-tel:hover { text-decoration: underline; }
 @media (max-width: 860px) { .cta-final-in { grid-template-columns: 1fr; } }
+/* Al mòbil, el títol no passa per sota del WhatsApp flotant (1rem + 3,5rem de la vora dreta, i una mica d'aire) */
+@media (max-width: 560px) { .cta-final h2 { max-width: min(16ch, calc(100vw - var(--gutter) - 5rem)); } }
 
 .peu { background: var(--bloc-fosc); color: var(--superficie-2); padding-block: 3.5rem 2rem; border-top: 1px solid var(--bloc-fosc-2); font-size: 1rem; }
 .peu-in { display: grid; grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)); gap: 2rem; }
