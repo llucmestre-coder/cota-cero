@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="css/fonts.css?v=20261021c">
   <link rel="stylesheet" href="css/styles.css?v=20261025b">
   <link rel="preload" href="assets/fonts/BricolageGrotesque-0.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="css/panell.css?v=20261025d">
+  <link rel="stylesheet" href="css/panell.css?v=20261026b">
   <script src="js/i18n.js?v=20261021c"></script>
   <!-- Des de cocinas.html i banos.html (?tipo=cocina|bano): el panell és només d'aquella habitació (en Lluc, 16/10/2026).
        Es marca abans de pintar perquè no surti el bloc del pis ni un moment. -->
@@ -38,6 +38,20 @@
     <!-- ═══ VISOR 3D: darrere de tot ═══ -->
     <section class="pn-visor" aria-label="Vista 3D de tu reforma">
       <canvas class="pn-canvas" aria-hidden="true"></canvas>
+      <!-- Objecte triat (peça 3; en Lluc, 25/10/2026): pastilla petita d'icones a sobre de l'objecte: girar 90°, treure
+           (vermell) i confirmar (verd: es queda on és). Només icones: el nom de l'objecte va a l'aria-label i al title. -->
+      <div class="pn-sel" data-sel role="toolbar" aria-label="Objeto elegido" hidden>
+        <button type="button" class="pn-sel-boto pn-sel-gira" data-gira aria-label="Girar 90°" title="Girar 90°">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="10.5" y="10.5" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4.5 13A8.5 8.5 0 0 1 13 4.5M10.4 2 13 4.5l-2.6 2.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="pn-sel-boto pn-sel-treu" data-treu aria-label="Quitar de la sala" title="Quitar de la sala">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12M10.5 11v5M13.5 11v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="pn-sel-boto pn-sel-ok" data-confirma aria-label="Dejarlo así" title="Dejarlo así">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <p class="pn-cat-avis" data-cat-avis role="status" hidden></p>
       <div class="pn-etiquetes" aria-hidden="true"></div>
       <p class="pn-estat" data-estat="carrega">Montando la maqueta…</p>
 
@@ -490,6 +504,18 @@
             <div class="pn-rang-escala" aria-hidden="true"><span data-rang-min></span><span data-rang-max></span></div>
           </fieldset>
           <p class="pn-nota" data-camp="pasillo">El pasillo mide lo que deja el resto del piso.</p>
+          <!-- Catàleg (peça 3, en Lluc 24–25/10/2026): «Obra» té preu i mou la forquilla; «Muebles», no. Les fitxes les
+               pinta js/cataleg.js, amb la miniatura de cada objecte feta amb la mateixa maqueta. -->
+          <fieldset class="pn-grup pn-cataleg" data-camp="cataleg">
+            <legend>Añadir a la sala</legend>
+            <div class="pn-pestanyes" role="tablist" aria-label="Catálogo">
+              <button type="button" role="tab" class="pn-pestanya" data-pestanya="obra" aria-selected="true" aria-controls="pn-objectes"><span data-nomes-idioma="es ca">Obra</span><span data-nomes-idioma="en" data-sense-traduir>Building work</span></button>
+              <button type="button" role="tab" class="pn-pestanya" data-pestanya="moble" aria-selected="false" aria-controls="pn-objectes" tabindex="-1"><span data-nomes-idioma="es ca">Muebles</span><span data-nomes-idioma="en" data-sense-traduir>Furniture</span></button>
+            </div>
+            <p class="pn-cat-nota" data-cat-nota></p>
+            <div class="pn-objectes" id="pn-objectes" role="tabpanel" data-objectes></div>
+            <p class="pn-cat-nota pn-cat-com">En la maqueta, toca un objeto para elegirlo y arrástralo por el suelo.</p>
+          </fieldset>
           <fieldset class="pn-grup">
             <legend>Suelo <output data-tria="estancia.suelo"></output></legend>
             <div class="pn-targetes pn-targetes-4">
@@ -510,7 +536,7 @@
           <fieldset class="pn-grup" data-camp="extres">
             <legend>Extras</legend>
             <div class="pn-paquets">
-              <label class="pn-check" data-camp="armario"><input type="checkbox" name="armario"><b>Armario empotrado</b><small>+1.400 €</small></label>
+              <label class="pn-check" data-camp="armario" hidden><input type="checkbox" name="armario"><b>Armario empotrado</b><small>+1.400 €</small></label>
               <label class="pn-check" data-camp="ventanas"><input type="checkbox" name="ventanas"><b>Ventanas nuevas</b><small>+900 € por ventana</small></label>
             </div>
           </fieldset>
@@ -551,9 +577,9 @@
     </form>
   </dialog>
 
-  <script src="js/traduccions.js?v=20261025e" defer></script>
+  <script src="js/traduccions.js?v=20261026a" defer></script>
   <script src="js/main.js?v=20261021c" defer></script>
   <!-- Mòdul: s'executa després de traduccions.js (I18N ja llest) -->
-  <script type="module" src="js/panell.js?v=20261025e"></script>
+  <script type="module" src="js/panell.js?v=20261026d"></script>
 </body>
 </html>
