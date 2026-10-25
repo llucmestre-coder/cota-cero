@@ -253,6 +253,9 @@ html.sala-moviment { scrollbar-gutter: stable; }
 .galeria-carril .galeria figcaption span { color: var(--marca); }
 .sala-moviment .galeria-carril { padding-block: 0; }
 .sala-moviment .carril-fixe {
+  /* Sticky i no el pin de ScrollTrigger: el pin el passava a position: fixed en entrar i en sortir, i cada canvi
+     contava com un salt de tota la pantalla (CLS 1,39 al mòbil i 1,51 a l'ordinador, 25/10/2026) */
+  position: sticky; top: 0;
   height: 100svh; min-height: 34rem; overflow: hidden; display: flex; flex-direction: column; justify-content: center;
   padding-top: var(--cap-h);
 }
@@ -267,81 +270,6 @@ html.sala-moviment { scrollbar-gutter: stable; }
 .sala-moviment .galeria-carril .galeria button:hover img { transform: none; }
 .sala-moviment .galeria-carril .galeria figcaption { max-width: 100%; }
 
-/* =========================================================================
-   LES DUES PORTES (en Lluc, 16/10/2026): acabada la sala, es tria cuina o bany.
-   Cada porta és un enllaç a la pàgina del servei; amb JS (js/portes.js) obre la
-   seva habitació a pantalla completa, sortint del forat de la porta.
-   ========================================================================= */
-.portes { position: relative; z-index: 7; background: var(--fons); padding-block: var(--seccio); overflow: hidden; }
-.portes-in { max-width: var(--ample); margin: 0 auto; padding-inline: var(--gutter); text-align: center; }
-.portes h2 { font-size: var(--t-xl); letter-spacing: -0.03em; text-wrap: balance; }
-.portes-sub { margin-top: .75rem; color: var(--text-suau); font: 500 var(--t-s)/1.4 var(--f-titol); }
-.portes-parell {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 15rem)); justify-content: center;
-  gap: clamp(1.5rem, 9vw, 8rem); margin-top: clamp(2rem, 5vw, 3.5rem);
-  /* el sòcol: una línia de terra sota les dues portes */
-  background: linear-gradient(var(--vora-suau), var(--vora-suau)) bottom 2.6rem left 0 / 100% 1px no-repeat;
-}
-.porta { display: grid; justify-items: center; gap: 1rem; color: var(--text); text-decoration: none; }
-.porta-marc {
-  position: relative; display: block; height: min(52svh, 30rem); max-width: 100%; aspect-ratio: 5 / 11; overflow: hidden;
-  background: var(--bloc-fosc); border: .7rem solid var(--blanc); border-bottom: 0;
-  box-shadow: 0 0 0 1px var(--vora-suau), 0 30px 50px -30px rgb(var(--sala-fosc) / .45);
-  perspective: 900px;
-}
-.porta-marc img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.06); filter: brightness(.9); transition: transform .8s var(--entra), filter .8s var(--entra); }
-/* La fulla de la porta, entreoberta; s'obre més quan hi passes per sobre */
-.porta-marc::after {
-  content: ""; position: absolute; inset: 0; transform-origin: 0 50%;
-  background: linear-gradient(90deg, var(--blanc), var(--grafit-100));
-  box-shadow: inset -1px 0 0 var(--vora-suau), 12px 0 24px -12px rgb(var(--sala-fosc) / .35);
-  transform: rotateY(-72deg); transition: transform .8s var(--entra);
-}
-.porta-nom { display: inline-flex; align-items: center; gap: .5rem; font: 600 1.2rem/1 var(--f-titol); }
-.porta-nom::after { content: "→"; color: var(--marca); transition: transform .4s var(--entra); }
-.porta:focus-visible { outline: none; }
-.porta:focus-visible .porta-marc { outline: 2px solid var(--marca); outline-offset: 4px; }
-@media (hover: hover) {
-  .porta:hover .porta-marc::after { transform: rotateY(-84deg); }
-  .porta:hover .porta-marc img { transform: scale(1); filter: none; }
-  .porta:hover .porta-nom::after { transform: translateX(4px); }
-}
-.porta:focus-visible .porta-marc::after { transform: rotateY(-84deg); }
-@media (max-width: 520px) {
-  .portes-parell { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
-  .porta-marc { border-width: .5rem; }
-}
-
-/* L'habitació oberta: foto a pantalla completa i un full blanc amb el que s'hi fa */
-.habitacio {
-  position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none;
-  margin: 0; padding: 0; border: 0; background: transparent; color: var(--text); overflow: hidden;
-}
-.habitacio::backdrop { background: rgb(var(--sala-fosc) / .55); }
-.habitacio-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.habitacio-text {
-  position: absolute; right: var(--gutter); bottom: var(--gutter); width: min(27rem, calc(100% - 2 * var(--gutter)));
-  max-height: calc(100% - 6rem); overflow: auto;
-  padding: clamp(1.25rem, 3vw, 2rem); background: var(--blanc); border-radius: 3px;
-  box-shadow: 0 30px 60px -20px rgb(var(--sala-fosc) / .55);
-}
-.habitacio-etiqueta { font: 700 var(--t-xs)/1 var(--f-titol); letter-spacing: .12em; text-transform: uppercase; color: var(--marca); }
-.habitacio-text h3 { margin-top: .6rem; font-size: clamp(1.4rem, 1.1rem + 1vw, 1.9rem); line-height: 1.08; letter-spacing: -0.025em; text-wrap: balance; }
-.habitacio-text ul { list-style: none; margin: 1rem 0 0; padding: 0; border-top: 2px solid var(--text); }
-.habitacio-text li { padding: .6rem 0; border-bottom: 1px dashed var(--vora-suau); font: 500 var(--t-s)/1.4 var(--f-titol); }
-.habitacio-text .botons { margin-top: 1.25rem; }
-.habitacio-tanca {
-  position: absolute; top: var(--gutter); left: var(--gutter); padding: .7rem 1.1rem; border: 0; border-radius: 999px;
-  background: var(--blanc); color: var(--text); font: 600 var(--t-s)/1 var(--f-titol); cursor: pointer;
-  box-shadow: 0 10px 30px -10px rgb(var(--sala-fosc) / .6);
-}
-.habitacio-tanca::before { content: "← "; }
-.habitacio-tanca:focus-visible { outline: 2px solid var(--marca); outline-offset: 3px; }
-@media (max-width: 600px) {
-  .habitacio-text { left: var(--gutter); right: var(--gutter); width: auto; max-height: 62%; }
-}
-html.habitacio-oberta { overflow: hidden; }
-
 /* El contracte, en una secció pròpia (16/10/2026): el full sobre la sala acabada */
 .contracte-seccio { position: relative; z-index: 7; isolation: isolate; overflow-x: clip;   /* el segell, abans de caure, és més gran i sobresortiria */ background: var(--bloc-fosc); padding-block: var(--seccio); }
 .contracte-fons { position: absolute; inset: 0; z-index: -1; }
@@ -349,9 +277,6 @@ html.habitacio-oberta { overflow: hidden; }
 .contracte-seccio .fase-contracte { margin-top: 0; }
 .sala-moviment .contracte-seccio { padding-block: 0; }
 .sala-moviment .contracte-fons { position: sticky; top: 0; height: 100svh; margin-bottom: -100svh; }
-@media (prefers-reduced-motion: reduce) {
-  .porta-marc img, .porta-marc::after, .porta-nom::after { transition: none; }
-}
 /* La regla de fases, sobre les fases clares (4-6): grafit */
 .sala-moviment .sala-regla { transition: color .3s, opacity .3s; }
 .sala-moviment .sala-regla.regla-clara { color: rgb(22 25 28 / .55); text-shadow: 0 1px 0 rgb(255 255 255 / .7); }
@@ -360,22 +285,12 @@ html.habitacio-oberta { overflow: hidden; }
 .sala-regla.regla-clara li.activa::before { background: var(--marca); }
 
 
-/* Portes més grans (en Lluc, 16/10/2026) */
-.portes-parell { grid-template-columns: repeat(2, minmax(0, 20rem)); }
-.porta-marc { height: min(66svh, 40rem); }
-@media (max-width: 520px) {
-  .portes-parell { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .porta-marc { height: min(58svh, 30rem); }
-}
-
-
-/* La sala acabada es queda fixa de fons i les portes hi pugen per sobre (en Lluc, 16/10/2026): la secció de la sala
-   s'allarga una pantalla (l'espai) i les portes la tapen pujant aquesta mateixa pantalla. */
+/* La sala acabada es queda fixa de fons i la maqueta del pis hi puja per sobre (abans les portes; en Lluc, 16/10/2026):
+   la secció de la sala s'allarga una pantalla (l'espai) i la maqueta la tapa pujant aquesta mateixa pantalla (css/maqueta.css). */
 .sala-final-espai { display: none; }
 .sala-moviment .sala-final-espai { display: block; height: 100svh; }
-.sala-moviment .portes { margin-top: -100svh; box-shadow: 0 -30px 60px -20px rgb(var(--sala-fosc) / .35); }
-/* El pressupost (en Lluc, 16/10/2026): la sala acabada no es mou. La secció comença una pantalla abans, sota les
-   portes, amb el fons ja fix; quan les portes marxen, a l'esquerra hi ha l'explicació i el full entra per la dreta. */
+/* El pressupost (en Lluc, 16/10/2026): la sala acabada no es mou. La secció comença una pantalla abans, sota la
+   cuina i el bany, amb el fons ja fix; quan marxen, a l'esquerra hi ha l'explicació i el full entra per la dreta. */
 .sala-moviment .contracte-seccio { margin-top: -100svh; z-index: 6; }
 .sala-moviment .fase-contracte { min-height: 300svh; }
 .contracte-fixe {
@@ -401,17 +316,6 @@ html.habitacio-oberta { overflow: hidden; }
 .contracte-espai { display: none; }
 .sala-moviment .contracte-espai { display: block; height: 100svh; }
 .sala-moviment .contracte-seccio + .plano { position: relative; z-index: 8; margin-top: -100svh; box-shadow: 0 -30px 60px -20px rgb(var(--sala-fosc) / .35); }
-
-/* Portes encara més grans (en Lluc, 16/10/2026: «segueixen sent molt petites»): més amples, gairebé tota la pantalla */
-.portes-in { max-width: none; }
-.portes-parell { grid-template-columns: repeat(2, minmax(0, 40rem)); gap: clamp(1.25rem, 4vw, 4rem); }
-.porta { justify-items: stretch; }
-.porta-nom { justify-self: center; }
-.porta-marc { width: min(100%, calc(72svh * 4 / 5)); height: auto; aspect-ratio: 4 / 5; justify-self: center; border-width: 1rem; }
-@media (max-width: 520px) {
-  .portes-parell { grid-template-columns: 1fr; gap: 2rem; }
-  .porta-marc { width: 100%; height: auto; aspect-ratio: 4 / 5; border-width: .75rem; }
-}
 
 /* =========================================================================
    L'OBRA ES CONSTRUEIX AMB L'SCROLL (en Lluc, 21-22/10/2026; peces 13 i 15). La sala queda fixa i cada fase en fon la
