@@ -8,9 +8,17 @@ export async function onRequestGet({ env }) {
     'SELECT id, creat, correu, idioma, tipo, m2, inclou, acabats, minim, maxim, estat FROM leads ORDER BY id DESC LIMIT 500'
   ).all();
 
+  // «acabats» porta el resum de les opcions i, a l'última línia, l'enllaç al disseny (https://…/presupuesto.html#d=…,
+  // de fins a 2.300 caràcters): el resum es plega en línies i l'enllaç és un botó curt, no la URL sencera.
+  const acabats = (txt) => {
+    const brut = String(txt == null ? '' : txt), m = /\n?Enlace: (https?:\/\/\S+)\s*$/.exec(brut);
+    const cos = (m ? brut.slice(0, m.index) : brut).trim();
+    return esc(cos).replace(/\n/g, '<br>') + (m ? (cos ? '<br>' : '') + `<a href="${esc(m[1])}" target="_blank" rel="noopener">Abrir diseño</a>` : '');
+  };
+
   const files = results.map((l) => `<tr>
     <td>${esc(l.creat)}</td><td><a href="mailto:${esc(l.correu)}">${esc(l.correu)}</a></td>
-    <td>${esc(l.tipo)}</td><td>${esc(l.m2)} m²</td><td>${esc(l.inclou)}</td><td>${esc(l.acabats)}</td>
+    <td>${esc(l.tipo)}</td><td>${esc(l.m2)} m²</td><td>${esc(l.inclou)}</td><td class="ac">${acabats(l.acabats)}</td>
     <td>${euros(l.minim)} – ${euros(l.maxim)}</td><td>${esc(l.idioma)}</td></tr>`).join('');
 
   const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
@@ -21,6 +29,7 @@ export async function onRequestGet({ env }) {
   h1{font-size:1.4rem;margin:0 0 .25rem} p{margin:0 0 1rem;color:#5F6661}
   a{color:#2A4BD7} .taula{overflow-x:auto;background:#fff;border-radius:6px}
   table{border-collapse:collapse;width:100%;min-width:900px} th,td{padding:.55rem .7rem;text-align:left;border-bottom:1px solid #DADDD6;white-space:nowrap}
+  td.ac{white-space:normal;min-width:16rem;max-width:26rem;overflow-wrap:anywhere}
   th{font-weight:600;background:#DADDD6}
 </style></head><body>
 <h1>Contactos de la calculadora</h1>

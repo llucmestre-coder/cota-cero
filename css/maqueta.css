@@ -31,7 +31,9 @@
   transition: opacity .5s, transform .5s, background-color .2s;
 }
 .maqueta-feta .maqueta-crida, .maqueta-quieta .maqueta-crida { opacity: 1; transform: translate(-50%, 0); }
-.maqueta-render:hover .maqueta-crida { background: var(--boto-hover); }
+@media (hover: hover) {
+  .maqueta-render:hover .maqueta-crida { background: var(--boto-hover); }
+}
 .maqueta-quieta { height: auto; }
 .maqueta-quieta .maqueta-fixe { position: relative; height: min(100svh, 54rem); }
 .maqueta-quieta .maqueta-render { cursor: pointer; }

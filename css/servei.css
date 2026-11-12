@@ -43,7 +43,9 @@
   mask-image: linear-gradient(to top, #000 72%, transparent 100%);
 }
 .ruta-hero .molla { color: var(--grafit-200); margin-bottom: 1rem; }
-.ruta-hero .molla a:hover { color: var(--blanc); }
+@media (hover: hover) {
+  .ruta-hero .molla a:hover { color: var(--blanc); }
+}
 .ruta-hero h1 {
   max-width: 15ch; color: var(--blanc);
   font-size: clamp(2.4rem, 1.2rem + 4.4vw, 4.9rem); line-height: 0.98; letter-spacing: -0.035em;
@@ -93,7 +95,13 @@
 .ruta-moviment .ruta-espai { display: block; height: 100svh; }
 .ruta-moviment .ruta-camera { will-change: transform; }
 /* Amb moviment, js/servei.js dona a la foto la seva mida sencera (la de cover) i la centra */
-.ruta-moviment .ruta-foto { inset: auto; max-width: none; object-fit: fill; }
+.ruta-moviment .ruta-escenari { container-type: size; }
+/* Abans que js/servei.js la mesuri, la foto ja ocupa el mateix lloc (cover, centrada): si no, salta en carregar el JS */
+.ruta-moviment .ruta-foto {
+  inset: auto; max-width: none; object-fit: fill;
+  width: max(100cqw, 100cqh * 16 / 9); height: max(100cqw * 9 / 16, 100cqh);
+  left: calc((100cqw - max(100cqw, 100cqh * 16 / 9)) / 2); top: calc((100cqh - max(100cqw * 9 / 16, 100cqh)) / 2);
+}
 
 .ruta-moviment .ruta-hero::before { content: none; }
 .ruta-moviment .ruta-hero { will-change: opacity, transform; }
@@ -170,7 +178,9 @@
 .ruta-moviment .ruta-obertura p,
 .ruta-moviment .parada p,
 .ruta-moviment .ruta-final p { color: var(--blanc); text-shadow: var(--ruta-ombra-fosc-petita); }
-.ruta-moviment .ruta-hero .molla a:hover { color: var(--accent); }
+@media (hover: hover) {
+  .ruta-moviment .ruta-hero .molla a:hover { color: var(--accent); }
+}
 .ruta-moviment .ruta-hero .btn-linia { border-color: var(--blanc); color: var(--blanc); }
 .ruta-moviment .ruta-hero :focus-visible, .ruta-moviment .ruta-parades :focus-visible { outline-color: var(--accent); }
 .ruta-moviment .ruta-obertura,

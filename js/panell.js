@@ -1008,8 +1008,16 @@ function volable(id) {
   const z = st.zones.get(id);
   return !!renderer && pinta && !QUIET && !!z && z.tipus !== 'pasillo';
 }
+/* L'inèrcia de l'òrbita (damping) que quedava d'un gest just abans de volar es descarta: durant el vol no s'actualitza i,
+   en acabar, la càmera lliscava cap on anava el gest. Es buida sense moure la càmera. */
+function descartaInercia() {
+  const p = camera.position.clone(), t = controls.target.clone(), d = controls.enableDamping;
+  controls.enableDamping = false; controls.update();
+  controls.enableDamping = d; camera.position.copy(p); controls.target.copy(t); camera.lookAt(t);
+}
 function vola(o) {
   st.vol = { ms: 0, ant: null, tall: HM + .06, ...o };
+  descartaInercia();
   controls.enabled = false; posaGir(false); radiObjectiu = null; brut = true;
 }
 /* El rellotge del vol comença al primer fotograma i avança com a molt 50 ms per fotograma: si un fotograma s'encalla
@@ -1930,6 +1938,7 @@ function dadesServidor(r, extra) {
 function envia(dades) {
   return fetch('/api/disseny', {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dades),
+    signal: AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined,   // sense resposta als 20 s: el mateix error de sempre
   }).then(async res => {
     const d = await res.json().catch(() => ({}));
     return res.ok ? d : Promise.reject({ status: res.status, error: d.error || '' });

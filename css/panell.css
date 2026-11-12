@@ -61,12 +61,17 @@
   transition: background-color .2s, color .2s;
 }
 .pn-pastilla svg { width: 1rem; height: 1rem; flex: none; }
-.pn-pastilla button:hover { background: var(--superficie-2); }
+@media (hover: hover) {
+  .pn-pastilla button:hover { background: var(--superficie-2); }
+}
 .pn-pastilla button[aria-pressed="true"] { background: var(--bloc-fosc); color: var(--blanc); }
 .pn-pastilla button:focus-visible, .pn-boto-3d:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
 .pn-pastilla .pn-ico { width: 2.4rem; padding: 0; justify-content: center; }
 .pn-pastilla .pn-abans { background: var(--boto); color: var(--text); user-select: none; -webkit-user-select: none; touch-action: none; }
-.pn-pastilla .pn-abans:hover, .pn-pastilla .pn-abans[aria-pressed="true"] { background: var(--boto-hover); color: var(--text); }
+.pn-pastilla .pn-abans[aria-pressed="true"] { background: var(--boto-hover); color: var(--text); }
+@media (hover: hover) {
+  .pn-pastilla .pn-abans:hover { background: var(--boto-hover); color: var(--text); }
+}
 .pn-pastilla[hidden], .pn-boto-3d[hidden] { display: none; }
 
 /* A baix a l'esquerra: tornar a tota la cuina (o al pis) i la pista */
@@ -76,7 +81,9 @@
   border-radius: 999px; cursor: pointer; font: 600 var(--t-s)/1 var(--f-titol); color: var(--text);
 }
 .pn-boto-3d { background: var(--boto); border: 0; }
-.pn-boto-3d:hover { background: var(--boto-hover); }
+@media (hover: hover) {
+  .pn-boto-3d:hover { background: var(--boto-hover); }
+}
 .pn-boto-3d svg { width: 1.1rem; height: 1.1rem; }
 .pn-pista {
   margin: 0; padding: .4rem .65rem; border-radius: 6px; background: rgb(249 250 252 / .82);
@@ -143,7 +150,9 @@
 .pn-accions .btn:disabled, .pn-wa-mini:disabled { opacity: .45; cursor: not-allowed; }
 .pn-accions .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .pn-wa { background: var(--whatsapp); color: var(--blanc); }
-.pn-wa:hover { background: var(--whatsapp-hover); }
+@media (hover: hover) {
+  .pn-wa:hover { background: var(--whatsapp-hover); }
+}
 .pn-wa svg { width: 1.15rem; height: 1.15rem; flex: none; }
 .pn-crida .pn-error { margin-top: .6rem; color: var(--argila-200); }
 .pn-error { margin: 0; font: 500 .8125rem/1.4 var(--f-titol); color: var(--error); }
@@ -216,7 +225,9 @@
   border: 1px solid var(--grafit-300); border-radius: 10px; background: var(--blanc); cursor: pointer;
   font: 600 .8125rem/1.2 var(--f-titol); color: var(--text); transition: border-color .2s, box-shadow .2s, transform .2s var(--entra, ease);
 }
-.pn-estil:hover { border-color: var(--text-suau); }
+@media (hover: hover) {
+  .pn-estil:hover { border-color: var(--text-suau); }
+}
 .pn-estil:active { transform: scale(.98); }
 .pn-estil[aria-pressed="true"] { border-color: var(--marca); box-shadow: inset 0 0 0 1px var(--marca); }
 .pn-estil:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
@@ -234,7 +245,9 @@
 }
 .pn-peca svg { width: 1.35rem; height: 1.35rem; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .pn-peca::after { content: ""; flex: none; width: .9rem; height: 3px; margin-top: auto; border-radius: 2px; background: var(--g, transparent); }
-.pn-peca:hover { border-color: var(--text-suau); }
+@media (hover: hover) {
+  .pn-peca:hover { border-color: var(--text-suau); }
+}
 .pn-peca[aria-pressed="true"] { border-color: var(--marca); box-shadow: inset 0 0 0 1px var(--marca); background: var(--argila-50); color: var(--marca); }
 .pn-peca:focus-visible { outline: 2px solid var(--marca); outline-offset: 2px; }
 [data-grup="mob"] { --g: var(--pn-g-mob); } [data-grup="llum"] { --g: var(--pn-g-llum); }
@@ -375,7 +388,9 @@
   background: var(--blanc); border: 1px solid var(--vora); border-radius: var(--radi);
   transition: border-color .2s, box-shadow .2s, transform .2s var(--entra, ease);
 }
-.pn-targeta:hover { border-color: var(--text-suau); }
+@media (hover: hover) {
+  .pn-targeta:hover { border-color: var(--text-suau); }
+}
 .pn-targeta:has(input:checked) { border-color: var(--marca); box-shadow: inset 0 0 0 1px var(--marca); }
 .pn-targeta:has(input:focus-visible) { outline: 2px solid var(--marca); outline-offset: 2px; }
 .pn-targeta:active { transform: scale(.98); }
@@ -399,7 +414,9 @@
   box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12);
   transition: transform .2s var(--entra, ease);
 }
-.pn-mostra:hover { transform: scale(1.06); }
+@media (hover: hover) {
+  .pn-mostra:hover { transform: scale(1.06); }
+}
 .pn-mostra:has(input:checked) { box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12), 0 0 0 3px var(--fons), 0 0 0 5px var(--marca); }
 .pn-mostra:has(input:focus-visible) { outline: 2px solid var(--marca); outline-offset: 6px; }
 .pn-mostra-fusta { background: #B7834F var(--fusta, none) center / cover; }
@@ -475,7 +492,9 @@
   position: absolute; top: .75rem; right: .75rem; width: 2.5rem; height: 2.5rem; border-radius: 50%;
   border: 0; background: transparent; font: 400 1.6rem/1 var(--f-titol); color: var(--text-suau); cursor: pointer;
 }
-.pn-tanca:hover { background: var(--superficie-2); color: var(--text); }
+@media (hover: hover) {
+  .pn-tanca:hover { background: var(--superficie-2); color: var(--text); }
+}
 .pn-tanca:focus-visible { outline: 2px solid var(--marca); }
 .pn-camp { display: grid; gap: .35rem; font: 600 .875rem/1.2 var(--f-titol); }
 .pn-camp input {

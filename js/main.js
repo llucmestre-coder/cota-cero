@@ -98,7 +98,6 @@
   if (form) {
     var estat = form.querySelector('.form-estat');
     var boto = form.querySelector('button[type="submit"]');
-    var textBoto = boto ? boto.textContent : '';
     var mostra = function (tipus, missatge) {
       estat.hidden = false;
       estat.setAttribute('data-tipus', tipus);
@@ -132,11 +131,12 @@
       }
 
       boto.disabled = true;
-      boto.textContent = I18N.t('Enviando…');
+      boto.setAttribute('aria-busy', 'true');
       fetch(form.action, {
         method: 'POST',
         body: new FormData(form),
-        headers: { Accept: 'application/json' }
+        headers: { Accept: 'application/json' },
+        signal: window.AbortSignal && AbortSignal.timeout ? AbortSignal.timeout(20000) : undefined   // sense resposta als 20 s: el mateix error de sempre
       }).then(function (r) {
         if (!r.ok) throw new Error(String(r.status));
         form.reset();
@@ -145,7 +145,7 @@
         mostra('error', I18N.t('No se ha podido enviar. Llámanos al 600 000 000 y te atendemos directamente.'));
       }).finally(function () {
         boto.disabled = false;
-        boto.textContent = textBoto;
+        boto.removeAttribute('aria-busy');
       });
     });
   }

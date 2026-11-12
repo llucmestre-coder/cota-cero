@@ -271,7 +271,9 @@ html.sala-moviment { scrollbar-gutter: stable; }
   flex: none; width: clamp(14rem, min(30vw, 32svh), 27rem); transform-origin: 50% 100%; will-change: transform, opacity;
 }
 .sala-moviment .galeria-carril .galeria figure img { aspect-ratio: 4 / 5; }
-.sala-moviment .galeria-carril .galeria button:hover img { transform: none; }
+@media (hover: hover) {
+  .sala-moviment .galeria-carril .galeria button:hover img { transform: none; }
+}
 .sala-moviment .galeria-carril .galeria figcaption { max-width: 100%; }
 
 /* El contracte, en una secció pròpia (16/10/2026): el full sobre la sala acabada */
