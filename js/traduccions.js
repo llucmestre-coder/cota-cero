@@ -1146,7 +1146,7 @@ window.TRAD = {
     "Bajo los muebles altos": "Under the upper cabinets",
     "Sin luz": "No light",
     "Tira LED cálida": "Warm LED strip",
-    "Grifo y fregadero": "Faucet and sink",
+    "Grifo y fregadero": "Faucet & sink",
     "Fregadero bajo encimera y grifo de caño alto.": "Undermount sink and high-arc faucet.",
     "Cromo": "Chrome",
     "Negro mate": "Matte black",
