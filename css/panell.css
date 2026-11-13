@@ -106,7 +106,7 @@
 }
 .pn-preu-obre:focus-visible { outline: 2px solid var(--marca); outline-offset: -3px; }
 .pn-preu-et { flex: none; font: 500 var(--t-xs)/1.2 var(--f-titol); color: var(--text-suau); }
-.pn-preu-linia { display: flex; align-items: baseline; gap: .65rem; min-width: 0; }
+.pn-preu-linia { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .65rem; min-width: 0; }   /* si l'etiqueta i el preu no caben en una línia (català a 390), el preu baixa a sota en lloc de trepitjar la fletxa */
 .pn-preu-obre svg { flex: none; width: 1.35rem; height: 1.35rem; margin-left: auto; transform: rotate(180deg); transition: transform .25s var(--entra, ease); }
 .pn-preu.obert .pn-preu-obre svg { transform: none; }
 .pn-preu-mes { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; border-top: 1px solid var(--grafit-200); }
@@ -157,6 +157,7 @@
 .pn-crida .pn-error { margin-top: .6rem; color: var(--argila-200); }
 .pn-error { margin: 0; font: 500 .8125rem/1.4 var(--f-titol); color: var(--error); }
 .pn-error a { color: inherit; }
+.pn-crida .pn-error a:focus-visible { outline-color: var(--accent); }   /* el telèfon de l'error de WhatsApp és sobre el bloc fosc */
 
 /* ── Panell: flotant a la dreta, amb scroll propi ──────────────── */
 .pn-panell {
@@ -171,6 +172,8 @@
 }
 .pn-cap .marca { font-size: 1.15rem; }
 .pn-cos { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: .75rem 1.25rem 1.5rem; scrollbar-width: thin; }
+/* Escriptori: el contingut s'esvaeix abans del peu, perquè el tall del scroll no deixi un títol a mitges */
+@media (min-width: 861px) { .pn-cos { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.25rem), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 2.25rem), transparent); } }
 .pn-cos h1 { font: 700 1.65rem/1.08 var(--f-titol); letter-spacing: -.02em; margin: .6rem 0 .3rem; text-wrap: balance; }
 .pn-intro { margin: 0 0 .75rem; font-size: var(--t-s); line-height: 1.45; color: var(--text-suau); }
 .pn-peu {
@@ -507,7 +510,7 @@
 .pn-pdf .pn-legal { font-size: .8125rem; color: var(--text-suau); }
 .pn-legal a { color: inherit; }
 .pn-baixa { width: 100%; }
-.pn-baixa[aria-busy="true"] { cursor: progress; opacity: .75; }
+.pn-baixa[aria-busy="true"], .pn-wa[aria-busy="true"] { cursor: progress; opacity: .75; }
 /* Enviat: caixa neutra amb la marca de fet, perquè no es confongui amb l'error (argila) */
 .pn-pdf .pn-fet {
   display: flex; gap: .55rem; align-items: flex-start; margin: 0; padding: .7rem .8rem; border-radius: 8px;
@@ -569,7 +572,7 @@
   }
   .pn-preu-fila { padding-right: .75rem; }
   .pn-preu-obre { padding-left: 1rem; gap: 1rem; }
-  .pn-preu-linia { gap: .5rem; }
+  .pn-preu-linia { gap: .1rem .5rem; }
   .pn-forquilla { font-size: 1.125rem; }
   .pn-preu.obert .pn-wa-mini { display: none; }   /* obert, ja hi ha el botó gran de WhatsApp */
   /* Vel darrere del full obert, per sobre de tot el que hi ha sota (capçalera, 3D, panell) */

@@ -318,9 +318,9 @@ function animaTotal(nou) {
     clearTimeout(animaTotal.t);
     animaTotal.t = setTimeout(() => elTotal.classList.remove('puja'), 700);
   }
+  cancelAnimationFrame(animaTotal.raf);   // també quan no s'anima: si no, l'animació anterior acabava després i tornava a pintar el preu vell (p. ex. sobre el «—» de zero zones)
   if (QUIET || vell === nou || !vell || !nou) { mostra(nou); return; }
   const t0 = performance.now(), dur = 420;
-  cancelAnimationFrame(animaTotal.raf);
   const pas = t => {
     const k = Math.min(1, (t - t0) / dur), e = 1 - Math.pow(1 - k, 3);
     mostra(vell + (nou - vell) * e);
@@ -1950,7 +1950,7 @@ function envia(dades) {
 const dialeg = $('[data-dialeg-pdf]'), formPdf = $('[data-form-pdf]');
 const botoPdf = $('[data-baixa-pdf]'), errPdf = $('[data-error-pdf]'), fetPdf = $('[data-fet-pdf]');
 const caixaEnllac = $('[data-enllac]'), campEnllac = $('[data-enllac-url]'), botoCopia = $('[data-copia]');
-const textBotoPdf = botoPdf.textContent, textErrPdf = errPdf.textContent, textCopia = botoCopia.textContent;
+const esperaPdf = $('[data-espera-pdf]'), textErrPdf = errPdf.textContent, textCopia = botoCopia.textContent;
 $('[data-obre-pdf]').addEventListener('click', () => {
   errPdf.hidden = true; fetPdf.hidden = true; caixaEnllac.hidden = true; formPdf.correu.removeAttribute('aria-invalid');
   dialeg.showModal(); formPdf.correu.focus();
@@ -1983,12 +1983,12 @@ formPdf.addEventListener('submit', async e => {
     errPdf.hidden = false; formPdf.correu.setAttribute('aria-invalid', 'true'); formPdf.correu.focus(); return;
   }
   errPdf.hidden = true; formPdf.correu.removeAttribute('aria-invalid');
-  botoPdf.setAttribute('aria-busy', 'true'); botoPdf.disabled = true; botoPdf.textContent = I18N.t('Preparando el PDF…');
+  botoPdf.setAttribute('aria-busy', 'true'); botoPdf.disabled = true; esperaPdf.textContent = I18N.t('Preparando el PDF…');   // .boto-doble: les dues etiquetes a la mateixa cel·la, el botó no canvia de mida
   const enllac = enllacDisseny();
   try {
     const feta = preparaPdf(correu);
     const pdf = await enBase64(feta.blob);
-    botoPdf.textContent = I18N.t('Enviando…');
+    esperaPdf.textContent = I18N.t('Enviando…');
     await envia(dadesServidor(feta.r, { accio: 'correu', correu, pdf, enllac }));
     fetPdf.textContent = I18N.t('Enviado a {correu}. Si en unos minutos no lo ves, mira en el correo no deseado.', { correu });
     fetPdf.hidden = false;
@@ -2001,7 +2001,7 @@ formPdf.addEventListener('submit', async e => {
     }
     errPdf.hidden = false;
   } finally {
-    botoPdf.removeAttribute('aria-busy'); botoPdf.disabled = false; botoPdf.textContent = textBotoPdf;
+    botoPdf.removeAttribute('aria-busy'); botoPdf.disabled = false;
   }
 });
 
@@ -2011,7 +2011,10 @@ function missatgeWhatsApp(r = resumDisseny()) {
   return I18N.t('Hola, he diseñado mi reforma en vuestra web: {obra}. {detall}. Precio orientativo: {preu}. ¿Podemos hablar?',
     { obra: r.modeNom, detall: r.files.map(f => `${f[0]}: ${f[1]}`).join('; '), preu: r.forq });
 }
+let waEnCurs = false;   // mentre el servidor respon, un segon clic no fa res (abans: dues peticions i dues finestres)
 $$('[data-whatsapp]').forEach(boto => boto.addEventListener('click', async () => {
+  if (waEnCurs) return;
+  waEnCurs = true; $$('[data-whatsapp]').forEach(b => b.setAttribute('aria-busy', 'true'));
   errWa.hidden = true;
   const r = resumDisseny();
   const missatge = missatgeWhatsApp(r);
@@ -2026,6 +2029,8 @@ $$('[data-whatsapp]').forEach(boto => boto.addEventListener('click', async () =>
   } catch {
     if (finestra) finestra.close();
     errWa.hidden = false;
+  } finally {
+    waEnCurs = false; $$('[data-whatsapp]').forEach(b => b.removeAttribute('aria-busy'));
   }
 }));
 /* La línia del preu: plegada per defecte; la fletxa (botó, Enter/Espai) obre el desglossament,
@@ -2120,7 +2125,11 @@ async function carrega3D() {
   try {
     const [t, oc] = await Promise.all([carregaThree(), import('../assets/js/three/OrbitControls.js')]);
     THREE = t; OrbitControls = oc.OrbitControls;
-  } catch (e) { return; }
+  } catch (e) {
+    // Three.js no ha baixat (xarxa): abans es quedava per sempre en «Montando la maqueta…». El mateix avís que sense WebGL.
+    elEstat.textContent = I18N.t('Tu navegador no puede mostrar la maqueta en 3D. El precio funciona igual.');
+    return;
+  }
   ray = new THREE.Raycaster(); punter = new THREE.Vector2();
   await new Promise(r => setTimeout(r));   // cedeix el fil entre carregar i muntar l'escena
   if (!iniciaWebGL()) return;
