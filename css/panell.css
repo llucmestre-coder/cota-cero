@@ -610,6 +610,12 @@
 /* Escriptori estret: els controls baixen perquè no topin amb la targeta de preu */
 @media (min-width: 861px) and (max-width: 1180px) {
   .pn-controls { top: auto; bottom: var(--pn-vora); }
+  /* Els botons de tornar no passen mai per sota dels controls (17.75rem: el que ocupen amb «Before», el més ample):
+     si no hi caben tots dos, el segon puja a sobre, i un de sol massa llarg es parteix en dues línies. Tapaven el
+     dia/nit en anglès fins a 1100 px i en català i castellà per sota d'uns 1000 (15/11/2026). */
+  .pn-baix { right: calc(var(--pn-amp) + var(--pn-vora) * 2 + 17.75rem); flex-wrap: wrap-reverse; gap: .5rem .75rem; }
+  .pn-baix .pn-boto-3d { max-width: 100%; line-height: 1.1; text-align: left; }
+  .pn-baix .pn-boto-3d svg { flex: none; }
   .pn-pista { display: none; }
   .pn-pastilla button span { display: none; }
 }
